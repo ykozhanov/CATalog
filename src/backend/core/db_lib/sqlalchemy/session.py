@@ -1,8 +1,8 @@
 from typing import Type, Any, Generator, Callable, Optional, TypeVar
 from sqlalchemy.orm import Session
 
-from ..session import DatabaseSessionInterface
-from ..exceptions import NotFoundInDBError
+from ..base.session import DatabaseSessionInterface
+from ..base.exceptions import NotFoundInDBError
 
 T = TypeVar("T")
 
