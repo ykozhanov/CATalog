@@ -1,0 +1,2 @@
+class NotFoundInDBError(Exception):
+    pass
