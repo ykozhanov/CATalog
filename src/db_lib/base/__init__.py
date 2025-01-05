@@ -1,4 +1,4 @@
-from .crud import CRUD
+from .crud import CRUDBase, CRUDMax
 from .exceptions import NotFoundInDBError
 
-__all__ = ["CRUD", "NotFoundInDBError"]
+__all__ = ["CRUDBase", "CRUDMax", "NotFoundInDBError"]

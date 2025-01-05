@@ -1,13 +1,13 @@
 from typing import Type, Any, Generator, Optional, TypeVar
 from sqlalchemy.orm import Session
 
-from ..base.session import DatabaseSessionInterface
-from ..base.exceptions import NotFoundInDBError
+from src.db_lib.base.session import WhereSessionInterface
+from src.db_lib.base.exceptions import NotFoundInDBError
 
 T = TypeVar("T")
 
 
-class SQLAlchemySession(DatabaseSessionInterface):
+class SQLAlchemySession(WhereSessionInterface):
 
     def __init__(self, session_generator: Generator[Session, None, None], autocommit: Optional[bool] = False):
         self._session_generator = session_generator
@@ -48,3 +48,8 @@ class SQLAlchemySession(DatabaseSessionInterface):
     def list_all(self, model: Type[T]) -> list[T]:
         with next(self._session_generator) as session:
             return session.query(model).all()
+
+
+    def where(self, model: Type[T], attr: str, search: Any) -> list[T]:
+        with next(self._session_generator) as session:
+            return session.query(model).filter(getattr(model, attr) == search).all()

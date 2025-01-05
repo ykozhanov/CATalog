@@ -25,3 +25,10 @@ class DatabaseSessionInterface(ABC):
     @abstractmethod
     def list_all(self, model: Type[T]) -> list[T]:
         pass
+
+
+class WhereSessionInterface(DatabaseSessionInterface):
+
+    @abstractmethod
+    def where(self, model: Type[T], attr: str, content: Any) -> list[T]:
+        pass
