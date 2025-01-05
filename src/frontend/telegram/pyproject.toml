@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "telegram"
+version = "0.1.0"
+description = ""
+authors = ["ykozhanov <ykozhanov97@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "3.13"
+pytelegrambotapi = "4.26.0"
+sqlalchemy = "2.0.36"
+pydantic = "2.10.4"
+requests = "2.32.3"
+python-dotenv = "1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

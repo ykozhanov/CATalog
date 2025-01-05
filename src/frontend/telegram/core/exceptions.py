@@ -1,0 +1,2 @@
+class ENVError(Exception):
+    pass
