@@ -1,7 +1,7 @@
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType, declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 
 from src.db_lib.sqlalchemy import SQLAlchemySession
 from src.db_lib.base import CRUDMax
@@ -25,5 +25,3 @@ def get_session() -> Generator[SessionType, None, None]:
 
 
 crud = CRUDMax(session=SQLAlchemySession(session_generator=get_session()))
-
-Base = declarative_base()
