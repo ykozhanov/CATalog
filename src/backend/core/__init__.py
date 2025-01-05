@@ -1,3 +1,3 @@
-from .settings.database import crud
+from .settings.database import crud, Base
 
-__all__ = ["crud"]
+__all__ = ["crud", "Base"]
