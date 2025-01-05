@@ -7,11 +7,11 @@ load_dotenv()
 
 from .core.settings.database import User
 from .categories.routes import categories_bp
-from .auth.routes import users_bp
+from .auth.routes import auth_bp
 from .products.routes import products_bp
 
 BPS: list[dict[str, Blueprint | Any]] = [
-    {"blueprint": users_bp, "url_prefix": "/users"},
+    {"blueprint": auth_bp, "url_prefix": "/auth"},
     {"blueprint": products_bp, "url_prefix": "/products"},
     {"categories": categories_bp, "url_prefix": "/categories"},
 ]
