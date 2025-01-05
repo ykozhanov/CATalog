@@ -5,11 +5,10 @@ from flask import Blueprint
 from dotenv import load_dotenv
 load_dotenv()
 
+from .core.settings.database import User
 from .categories.routes import categories_bp
-from .users.routes import users_bp
+from .auth.routes import users_bp
 from .products.routes import products_bp
-
-DEBUG = bool(os.getenv("DEBUG", "False"))
 
 BPS: list[dict[str, Blueprint | Any]] = [
     {"blueprint": users_bp, "url_prefix": "/users"},
@@ -24,3 +23,9 @@ DB_PATH = "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
     port=os.getenv("DB_HOST_BACKEND"),
     dbname=os.getenv("DB_PORT_BACKEND"),
 )
+
+SUB_PAYLOAD_JWT = "sub"
+
+USER_MODEL = User
+
+AUTH_HEADER = "Authorization"
