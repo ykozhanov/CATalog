@@ -3,9 +3,9 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 
+from src.db_lib.sqlalchemy import SQLAlchemySession
+from src.db_lib.base import CRUD
 from src.backend.settings import DB_PATH
-from ..db_lib.sqlalchemy import SQLAlchemySession
-from ..db_lib.base import CRUD
 
 engine = create_engine(DB_PATH)
 
