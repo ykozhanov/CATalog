@@ -1,6 +1,7 @@
 from flask import jsonify, Response
 from flask.views import MethodView
 
+from src.db_lib.base.exceptions import NotFoundInDBError
 from src.backend.core.mixins import HashPWMixin, JWTWithGetTokenMixin
 from src.backend.core.decorators import base64_login_decorator, get_jwt_token_decorator, base64_register_decorator
 from src.backend.core.utils import crud
@@ -11,7 +12,7 @@ from src.backend.core.exceptions import AuthenticationError, RegisterError
 
 from src.backend.settings import USER_MODEL
 from .schemas import TokensSchema
-from .models import JWTTokens
+from .models import Profiles
 
 
 class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
@@ -40,7 +41,8 @@ class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
                 raise AuthenticationError(MESSAGE_AUTHENTICATION_ERROR_401)
             refresh_token = self._get_jwt_token(sub=str(user.id))
             access_token = self._get_jwt_token(refresh_token=refresh_token)
-        except AuthenticationError as e:
+            crud.update(model=Profiles, pk=user.profile.id, obj_data={"refresh_token": refresh_token})
+        except (AuthenticationError, NotFoundInDBError) as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 401
         else:
             return jsonify(TokensSchema(access_token=access_token, refresh_token=refresh_token).model_dump()), 200
@@ -73,7 +75,7 @@ class RegisterMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
             new_user = USER_MODEL(register_data.model_dump())
             new_user_with_id = crud.create(obj=new_user)
             refresh_token = self._get_jwt_token(sub=str(new_user_with_id.id))
-            jwt_token_model = JWTTokens(refresh_token=refresh_token, user_id=new_user_with_id.id)
+            jwt_token_model = Profiles(refresh_token=refresh_token, user_id=new_user_with_id.id)
             crud.create(obj=jwt_token_model)
             access_token = self._get_jwt_token(refresh_token=refresh_token, exc=RegisterError, message=MESSAGE_REGISTER_ERROR_401)
             return jsonify(TokensSchema(access_token=access_token, refresh_token=refresh_token).model_dump()), 201

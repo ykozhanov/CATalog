@@ -5,11 +5,11 @@ from src.backend.core.database.models import Base
 from src.backend.settings import USER_MODEL
 
 
-class JWTTokens(Base):
+class Profiles(Base):
     __tablename__ = 'jwt_tokens'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     refresh_token: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
 
-    user: Mapped[USER_MODEL] = relationship(USER_MODEL, backref="jwt_token", lazy="joined", cascade="all, delete-orphan")
+    user: Mapped[USER_MODEL] = relationship(USER_MODEL, backref="profile", lazy="joined", cascade="all, delete-orphan")
