@@ -14,7 +14,7 @@ from .schemas import ProductInSchema, ProductOutSchema, ProductListOutSchema
 from .models import Product
 
 
-class CategoriesMethodView(MethodView):
+class ProductsMethodView(MethodView):
     model = Product
     element_in_schema = ProductInSchema
     element_out_schema = ProductOutSchema
@@ -41,7 +41,7 @@ class CategoriesMethodView(MethodView):
             return jsonify(self.element_out_schema.model_validate(new_element)), 201
 
 
-class CategoriesByIDMethodView(MethodView):
+class ProductsByIDMethodView(MethodView):
     model = Product
     element_in_schema = ProductInSchema
     element_out_schema = ProductOutSchema
