@@ -5,15 +5,16 @@ from flask import Blueprint
 from dotenv import load_dotenv
 load_dotenv()
 
-from .core.settings.database import User
-from .categories.routes import categories_bp
-from .auth.routes import auth_bp
-from .products.routes import products_bp
+from .core.database.models import User
+from .api.api_v1 import categories_bp, auth_bp, products_bp
+
+COMMON_PREFIX = "/api"
+
 
 BPS: list[dict[str, Blueprint | Any]] = [
-    {"blueprint": auth_bp, "url_prefix": "/auth"},
-    {"blueprint": products_bp, "url_prefix": "/products"},
-    {"categories": categories_bp, "url_prefix": "/categories"},
+    {"blueprint": auth_bp, "url_prefix": f"{COMMON_PREFIX}/auth"},
+    {"blueprint": products_bp, "url_prefix": f"{COMMON_PREFIX}/products"},
+    {"categories": categories_bp, "url_prefix": f"{COMMON_PREFIX}/categories"},
 ]
 
 DB_PATH = "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
@@ -24,8 +25,7 @@ DB_PATH = "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
     dbname=os.getenv("DB_PORT_BACKEND"),
 )
 
-SUB_PAYLOAD_JWT = "sub"
+#TODO Удалить если не надо
+    # SUB_PAYLOAD_JWT = "sub"
 
 USER_MODEL = User
-
-AUTH_HEADER = "Authorization"

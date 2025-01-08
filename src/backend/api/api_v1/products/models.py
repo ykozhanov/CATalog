@@ -1,0 +1,1 @@
+from src.backend.core.database.models import Base

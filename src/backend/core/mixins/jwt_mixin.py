@@ -1,11 +1,16 @@
-from typing import Any, Type
+import uuid
+from datetime import datetime, timedelta, UTC
+from typing import Any, Type, Optional
 
 import jwt
 
-from ..settings.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORITHM
+from src.backend.core.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from src.backend.core.request import JWTPayloadSchema, TYPE_ACCESS_JWT, TYPE_REFRESH_JWT
+from src.backend.core.response.messages import MESSAGE_TOKEN_INVALID_401
+from src.backend.core.exceptions import AuthenticationError
 
 '''
-Для генерации ключей используйте команды:
+Для генерации RSA ключей используйте команды:
 
 `openssl genrsa -out jwt-private.pem 2048`
 Эта команда генерирует закрытый ключ RSA длиной 2048 бит и сохраняет его в файл jwt-private.pem.
@@ -16,14 +21,96 @@ from ..settings.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORIT
 
 
 class JWTMixin:
+    """Mixin для работы с JSON Web Tokens (JWT).
+
+    Этот класс предоставляет методы для кодирования и декодирования JWT.
+    Использует RSA ключи для подписи и проверки токенов.
+
+    Attributes:
+        None
+    """
 
     @staticmethod
     def _encode_jwt(payload: dict[str, Any]) -> str:
+        """Кодирует данные в JWT.
+
+        Args:
+            payload (dict[str, Any]): Данные, которые будут закодированы в токен.
+
+        Returns:
+            str: Закодированный JWT.
+        """
         return jwt.encode(payload=payload, key=JWT_PRIVATE_KEY, algorithm=JWT_ALGORITHM)
 
     @staticmethod
-    def _decode_jwt(token: str | bytes, exc: Type[Exception]) -> dict[str, Any]:
+    def _decode_jwt(token: str | bytes, exc: Type[Exception], message: str) -> dict[str, Any]:
+        """Декодирует JWT и проверяет его валидность.
+
+        Args:
+            token (str | bytes): JWT для декодирования.
+            exc (Type[Exception]): Исключение, которое будет вызвано в случае ошибки.
+            message (str): Сообщение об ошибке.
+
+        Returns:
+            dict[str, Any]: Декодированные данные из токена.
+
+        Raises:
+            exc: Если токен недействителен.
+        """
         try:
             return jwt.decode(jwt=token, key=JWT_PUBLIC_KEY, algorithms=[JWT_ALGORITHM])
         except jwt.InvalidTokenError:
-            raise exc()
+            raise exc(message)
+
+
+class JWTWithGetTokenMixin(JWTMixin):
+    """Mixin для получения JWT токенов.
+
+    Этот класс расширяет функциональность JWTMixin, добавляя метод для получения
+    access и refresh JWT токенов.
+
+    Attributes:
+        None
+    """
+
+    def _get_jwt_token(
+            self,
+            sub: str | None = None,
+            refresh_token: str | bytes | None = None,
+            exc: Type[Exception] = AuthenticationError,
+            message: str = MESSAGE_TOKEN_INVALID_401,
+    ):
+        """Получает JWT токен, создавая новый или извлекая из refresh токена:
+            - для получения access токена нужно обязательно передать аргумент **refresh_token**. При необходимости можно передать `exc` и `message`;
+            - для получения refresh токена нужно передать аргумент **sub**.
+
+        Args:
+            sub (str | None): Подписчик (subject) токена. Если None, будет извлечен из refresh токена.
+            refresh_token (str | bytes | None): Refresh токен для извлечения данных.
+            exc (Type[Exception]): Исключение, которое будет вызвано в случае ошибки, возникшей при декодировании refresh токена. Значение по умолчанию `AuthenticationError`.
+            message (str): Сообщение об ошибке, возникшей при декодировании refresh токена. Значение по умолчанию `MESSAGE_TOKEN_INVALID_401`.
+
+        Returns:
+            str: Закодированный JWT токен.
+
+        Raises:
+            exc: Если refresh токен недействителен.
+        """
+        if refresh_token:
+            payload_data = self._decode_jwt(token=refresh_token, exc=exc, message=message)
+            payload_from_refresh: JWTPayloadSchema = JWTPayloadSchema(**payload_data)
+            sub = payload_from_refresh.sub
+            td = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        else:
+            if not sub:
+                raise AuthenticationError(MESSAGE_TOKEN_INVALID_401)
+            td = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
+        payload = JWTPayloadSchema(
+            sub=sub,
+            iat=datetime.now(UTC),
+            exp=datetime.now() + td,
+            jti=uuid.uuid4().hex,
+            type=TYPE_ACCESS_JWT if refresh_token else TYPE_REFRESH_JWT,
+        )
+        return self._encode_jwt(payload=payload.model_dump())

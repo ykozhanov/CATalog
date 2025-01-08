@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 T = TypeVar("T")
 
 
-class DatabaseSessionInterface(ABC):
+class DBSessionCRUDInterface(ABC):
 
     @abstractmethod
     def create(self, obj: T) -> T:
@@ -23,12 +23,27 @@ class DatabaseSessionInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self, model: Type[T]) -> list[T]:
+    def read_all(self, model: Type[T]) -> list[T]:
+        pass
+
+    @abstractmethod
+    def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
         pass
 
 
-class WhereSessionInterface(DatabaseSessionInterface):
+class DBSessionWhereInterface(ABC):
 
     @abstractmethod
     def where(self, model: Type[T], attr: str, content: Any) -> list[T]:
         pass
+
+
+class DBSessionREInterface(ABC):
+
+    @abstractmethod
+    def re(self, model: Type[T], attr: str, pattern: str) -> list[T]:
+        pass
+
+
+# class DBSessionCRUDWhereInterface(DBSessionCRUDInterface, DBSessionWhereInterface, ABC):
+#     pass

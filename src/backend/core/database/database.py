@@ -3,8 +3,6 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 
-from src.db_lib.sqlalchemy import SQLAlchemySession
-from src.db_lib.base import CRUDMax
 from src.backend.settings import DB_PATH
 
 engine = create_engine(DB_PATH)
@@ -24,4 +22,4 @@ def get_session() -> Generator[SessionType, None, None]:
         session.close()
 
 
-crud = CRUDMax(session=SQLAlchemySession(session_generator=get_session()))
+

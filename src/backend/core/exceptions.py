@@ -4,3 +4,7 @@ class ENVError(Exception):
 
 class AuthenticationError(Exception):
     pass
+
+
+class RegisterError(Exception):
+    pass

@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Type, TypeVar, Any
 
-from .session import DatabaseSessionInterface, WhereSessionInterface
+from .session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
 
 T = TypeVar("T")
 
 
-class CRUDInterface(ABC):
+class DBControllerCRUDInterface(ABC):
 
     @abstractmethod
     def create(self, obj: T) -> T:
@@ -29,40 +29,66 @@ class CRUDInterface(ABC):
         pass
 
 
-class CRUDWhereInterface(CRUDInterface):
+class DBControllerWhereInterface(ABC):
 
     @abstractmethod
     def where(self, model: Type[T], attr: str, content: Any) -> list[T]:
         pass
 
 
-class CRUDBase(CRUDInterface):
+class DBControllerREInterface(ABC):
 
-    def __init__(self, session: DatabaseSessionInterface):
-        self._session = session
+    @abstractmethod
+    def re(self, model: Type[T], attr: str, pattern: str) -> list[T]:
+        pass
+
+
+class DBControllerCRUD(DBControllerCRUDInterface):
+
+    def __init__(self, session_crud: DBSessionCRUDInterface):
+        self._session_crud = session_crud
 
     def create(self, obj: T) -> T:
-        new_obj = self._session.create(obj=obj)
+        new_obj = self._session_crud.create(obj=obj)
         return new_obj
 
     def read(self, model: Type[T], pk: int) -> T | None:
-        return self._session.read(model=model, pk=pk)
+        return self._session_crud.read(model=model, pk=pk)
 
     def update(self, model: Type[T], pk: int, obj_data: dict) -> T:
-        return self._session.update(model=model, obj_data=obj_data, pk=pk)
+        return self._session_crud.update(model=model, obj_data=obj_data, pk=pk)
 
     def delete(self, model: Type[T], pk: int) -> None:
-        self._session.delete(model=model, pk=pk)
+        self._session_crud.delete(model=model, pk=pk)
 
     def read_all(self, model: Type[T]) -> list[T]:
-        return self._session.list_all(model=model)
+        return self._session_crud.read_all(model=model)
+
+    def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
+        self._session_crud.delete_all(model=model, attr=attr, for_delete=for_delete)
 
 
-class CRUDMax(CRUDBase, CRUDWhereInterface):
+class DBControllerWhere(DBControllerWhereInterface):
 
-    def __init__(self, session: WhereSessionInterface):
-        super().__init__(session=session)
-        self._where_session = session
+    def __init__(self, session_where: DBSessionWhereInterface):
+        self._session_where = session_where
 
     def where(self, model: Type[T], attr: str, content: Any) -> list[T]:
-        return self._where_session.where(model=model, attr=attr, content=content)
+        return self._session_where.where(model=model, attr=attr, content=content)
+
+
+class DBControllerRE(DBControllerREInterface):
+
+    def __init__(self, session_re: DBSessionREInterface):
+        self._session_re = session_re
+
+    def re(self, model: Type[T], attr: str, pattern: str) -> list[T]:
+        return self._session_re.re(model=model, attr=attr, pattern=pattern)
+
+
+class DBControllerMax(DBControllerWhere, DBControllerCRUD, DBControllerRE):
+
+    def __init__(self, session_crud: DBSessionCRUDInterface, session_where: DBSessionWhereInterface, session_re: DBSessionREInterface):
+        DBControllerCRUD.__init__(self, session_crud)
+        DBControllerWhere.__init__(self, session_where)
+        DBControllerRE.__init__(self, session_re)

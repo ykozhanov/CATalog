@@ -1,4 +1,4 @@
-from .jwt_mixin import JWTMixin
+from .jwt_mixin import JWTMixin, JWTWithGetTokenMixin
 from .hashpw_mixin import HashPWMixin
 
-__all__ = ["JWTMixin", "HashPWMixin"]
+__all__ = ["JWTMixin", "HashPWMixin", "JWTWithGetTokenMixin"]

@@ -1,4 +1,10 @@
-from .crud import CRUDBase, CRUDMax
+from .crud import DBControllerCRUD, DBControllerWhere, DBControllerRE, DBControllerMax
 from .exceptions import NotFoundInDBError
 
-__all__ = ["CRUDBase", "CRUDMax", "NotFoundInDBError"]
+__all__ = [
+    "DBControllerCRUD",
+    "DBControllerWhere",
+    "DBControllerRE",
+    "DBControllerMax",
+    "NotFoundInDBError",
+]

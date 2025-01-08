@@ -1,13 +1,13 @@
 from typing import Type, Any, Generator, Optional, TypeVar
 from sqlalchemy.orm import Session
 
-from src.db_lib.base.session import WhereSessionInterface
+from src.db_lib.base.session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
 from src.db_lib.base.exceptions import NotFoundInDBError
 
 T = TypeVar("T")
 
 
-class SQLAlchemySession(WhereSessionInterface):
+class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface):
 
     def __init__(self, session_generator: Generator[Session, None, None], autocommit: Optional[bool] = False):
         self._session_generator = session_generator
@@ -45,11 +45,20 @@ class SQLAlchemySession(WhereSessionInterface):
             if not self._autocommit:
                 session.commit()
 
-    def list_all(self, model: Type[T]) -> list[T]:
+    def read_all(self, model: Type[T]) -> list[T]:
         with next(self._session_generator) as session:
             return session.query(model).all()
 
+    def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
+        with next(self._session_generator) as session:
+            session.query(model).filter(getattr(model, attr) == for_delete).delete(synchronize_session='fetch')
+            if not self._autocommit:
+                session.commit()
 
     def where(self, model: Type[T], attr: str, search: Any) -> list[T]:
         with next(self._session_generator) as session:
             return session.query(model).filter(getattr(model, attr) == search).all()
+
+    def re(self, model: Type[T], attr: str, pattern: str) -> list[T]:
+        with next(self._session_generator) as session:
+            return session.query(model).filter(getattr(model, attr).op("REGEXP")(pattern)).all()
