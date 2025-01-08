@@ -2,6 +2,7 @@ from typing import TypeVar, Type, Any
 from abc import ABC, abstractmethod
 
 T = TypeVar("T")
+OB = TypeVar("OB")
 
 
 class DBSessionCRUDInterface(ABC):
@@ -23,7 +24,7 @@ class DBSessionCRUDInterface(ABC):
         pass
 
     @abstractmethod
-    def read_all(self, model: Type[T]) -> list[T]:
+    def read_all(self, model: Type[T], order_by: OB | None) -> list[T]:
         pass
 
     @abstractmethod

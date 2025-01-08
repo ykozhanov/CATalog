@@ -5,6 +5,7 @@ from src.db_lib.base.session import DBSessionCRUDInterface, DBSessionWhereInterf
 from src.db_lib.base.exceptions import NotFoundInDBError
 
 T = TypeVar("T")
+OB = TypeVar("OB")
 
 
 class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface):
@@ -45,9 +46,12 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             if not self._autocommit:
                 session.commit()
 
-    def read_all(self, model: Type[T]) -> list[T]:
+    def read_all(self, model: Type[T], order_by: OB | None) -> list[T]:
         with next(self._session_generator) as session:
-            return session.query(model).all()
+            if order_by is None:
+                return session.query(model).all()
+            return session.query(model).order_by(order_by).all()
+
 
     def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
         with next(self._session_generator) as session:
