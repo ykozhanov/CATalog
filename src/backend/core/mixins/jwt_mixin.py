@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, UTC
-from typing import Any, Type, Optional
+from typing import Any
 
 import jwt
 
@@ -25,9 +25,6 @@ class JWTMixin:
 
     Этот класс предоставляет методы для кодирования и декодирования JWT.
     Использует RSA ключи для подписи и проверки токенов.
-
-    Attributes:
-        None
     """
 
     @staticmethod
@@ -43,7 +40,7 @@ class JWTMixin:
         return jwt.encode(payload=payload, key=JWT_PRIVATE_KEY, algorithm=JWT_ALGORITHM)
 
     @staticmethod
-    def _decode_jwt(token: str | bytes, exc: Type[Exception], message: str) -> dict[str, Any]:
+    def _decode_jwt(token: str | bytes, exc: type[Exception], message: str) -> dict[str, Any]:
         """Декодирует JWT и проверяет его валидность.
 
         Args:
@@ -68,16 +65,13 @@ class JWTWithGetTokenMixin(JWTMixin):
 
     Этот класс расширяет функциональность JWTMixin, добавляя метод для получения
     access и refresh JWT токенов.
-
-    Attributes:
-        None
     """
 
     def _get_jwt_token(
             self,
             sub: str | int | None = None,
             refresh_token: str | bytes | None = None,
-            exc: Type[Exception] = AuthenticationError,
+            exc: type[Exception] = AuthenticationError,
             message: str = MESSAGE_TOKEN_INVALID_401,
     ):
         """Получает JWT токен, создавая новый или извлекая из refresh токена:
