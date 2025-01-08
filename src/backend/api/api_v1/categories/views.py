@@ -51,6 +51,8 @@ class CategoriesByIDMethodView(MethodView):
     def get(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
         try:
             element = crud.read(model=self.model, pk=category_id)
+            if element is None:
+                raise NotFoundInDBError()
             if element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
         except ForbiddenError as e:
@@ -64,6 +66,8 @@ class CategoriesByIDMethodView(MethodView):
     def put(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
         try:
             old_element = crud.read(self.model, pk=category_id)
+            if old_element is None:
+                raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
             update_element_data = request.get_json()
@@ -86,6 +90,8 @@ class CategoriesByIDMethodView(MethodView):
     def delete(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
         try:
             old_element = crud.read(self.model, pk=category_id)
+            if old_element is None:
+                raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
             crud.delete(self.model, pk=old_element.id)

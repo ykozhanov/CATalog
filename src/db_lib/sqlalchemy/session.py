@@ -5,7 +5,6 @@ from src.db_lib.base.session import DBSessionCRUDInterface, DBSessionWhereInterf
 from src.db_lib.base.exceptions import NotFoundInDBError
 
 T = TypeVar("T")
-OB = TypeVar("OB")
 
 
 class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface):
@@ -22,11 +21,11 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             session.refresh(obj)
             return obj
 
-    def read(self, model: type[T], pk: int) -> T | None:
+    def read(self, model: type[T], pk: int | str) -> T | None:
         with next(self._session_generator) as session:
             return session.query(model).get(pk)
 
-    def update(self, model: type[T], obj_data: dict[str, Any], pk: int) -> T:
+    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str) -> T:
         with next(self._session_generator) as session:
             obj = session.query(model).get(pk)
             if obj is None:
@@ -37,7 +36,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 session.commit()
             return obj
 
-    def delete(self, model: type[T], pk: int) -> None:
+    def delete(self, model: type[T], pk: int | str) -> None:
         with next(self._session_generator) as session:
             obj = self.read(model=model, pk=pk)
             if obj is None:
@@ -46,7 +45,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             if not self._autocommit:
                 session.commit()
 
-    def read_all(self, model: type[T], order_by: OB | None) -> list[T]:
+    def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
         with next(self._session_generator) as session:
             if order_by is None:
                 return session.query(model).all()
@@ -54,7 +53,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
 
     def delete_all(self, model: type[T], attr: str, for_delete: Any) -> None:
         with next(self._session_generator) as session:
-            session.query(model).filter(getattr(model, attr) == for_delete).delete(synchronize_session='fetch')
+            session.query(model).filter(getattr(model, attr) == for_delete).delete(synchronize_session="fetch")
             if not self._autocommit:
                 session.commit()
 

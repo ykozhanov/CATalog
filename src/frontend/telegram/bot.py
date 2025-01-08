@@ -1,4 +1,4 @@
-from telebot import TeleBot
+from telebot import TeleBot    # type: ignore
 
 from .settings import BOT_TOKEN
 

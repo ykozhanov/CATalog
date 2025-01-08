@@ -12,7 +12,7 @@ TYPE_REFRESH_JWT: Type_JWT = "refresh"
 
 
 class JWTPayloadSchema(BaseModel):
-    sub: str
+    sub: str | int
     iat: datetime
     exp: datetime
     jti: str
@@ -22,8 +22,7 @@ class JWTPayloadSchema(BaseModel):
     @field_validator("sub", mode="before")
     def parse_sub(cls, value):
         if isinstance(value, int):
-            try:
-                return str(value)
-            except TypeError:
-                raise TypeError("Атрибут 'sub' должен быть str или int")
+            return str(value)
+        elif not isinstance(value, str):
+            raise TypeError("Атрибут 'sub' должен быть str или int")
         return value

@@ -4,7 +4,6 @@ from typing import TypeVar, Any
 from .session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
 
 T = TypeVar("T")
-OB = TypeVar("OB")
 
 
 class DBControllerCRUDInterface(ABC):
@@ -14,19 +13,19 @@ class DBControllerCRUDInterface(ABC):
         pass
 
     @abstractmethod
-    def read(self, model: type[T], pk: int) -> T | None:
+    def read(self, model: type[T], pk: int | str) -> T | None:
         pass
 
     @abstractmethod
-    def update(self, model: type[T], pk: int, obj_data: dict) -> T:
+    def update(self, model: type[T], pk: int | str, obj_data: dict) -> T:
         pass
 
     @abstractmethod
-    def delete(self, model: type[T], pk: int) -> None:
+    def delete(self, model: type[T], pk: int | str) -> None:
         pass
 
     @abstractmethod
-    def read_all(self, model: type[T], order_by: OB | None) -> list[T]:
+    def read_all(self, model: type[T], order_by: str | None) -> list[T]:
         pass
 
 
@@ -53,16 +52,16 @@ class DBControllerCRUD(DBControllerCRUDInterface):
         new_obj = self._session_crud.create(obj=obj)
         return new_obj
 
-    def read(self, model: type[T], pk: int) -> T | None:
+    def read(self, model: type[T], pk: int | str) -> T | None:
         return self._session_crud.read(model=model, pk=pk)
 
-    def update(self, model: type[T], pk: int, obj_data: dict) -> T:
+    def update(self, model: type[T], pk: int | str, obj_data: dict) -> T:
         return self._session_crud.update(model=model, obj_data=obj_data, pk=pk)
 
-    def delete(self, model: type[T], pk: int) -> None:
+    def delete(self, model: type[T], pk: int | str) -> None:
         self._session_crud.delete(model=model, pk=pk)
 
-    def read_all(self, model: type[T], order_by: OB | None) -> list[T]:
+    def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
         return self._session_crud.read_all(model=model, order_by=order_by)
 
     def delete_all(self, model: type[T], attr: str, for_delete: Any) -> None:

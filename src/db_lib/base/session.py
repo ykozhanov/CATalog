@@ -2,7 +2,6 @@ from typing import TypeVar, Any
 from abc import ABC, abstractmethod
 
 T = TypeVar("T")
-OB = TypeVar("OB")
 
 
 class DBSessionCRUDInterface(ABC):
@@ -12,19 +11,19 @@ class DBSessionCRUDInterface(ABC):
         pass
 
     @abstractmethod
-    def read(self, model: type[T], pk: int) -> T | None:
+    def read(self, model: type[T], pk: int | str) -> T | None:
         pass
 
     @abstractmethod
-    def update(self, model: type[T], obj_data: dict[str, Any], pk: int) -> T:
+    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str) -> T:
         pass
 
     @abstractmethod
-    def delete(self, model: type, pk: int) -> None:
+    def delete(self, model: type, pk: int | str) -> None:
         pass
 
     @abstractmethod
-    def read_all(self, model: type[T], order_by: OB | None) -> list[T]:
+    def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
         pass
 
     @abstractmethod
