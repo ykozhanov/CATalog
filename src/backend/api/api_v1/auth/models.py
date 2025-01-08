@@ -1,15 +1,12 @@
-from sqlalchemy import Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, Mapped, mapped_column, mapped_collection
+from sqlalchemy.orm import relationship, Mapped
 
-from src.backend.core.database.models import Base
-from src.backend.settings import USER_MODEL
+from src.backend.core.database.models import Profile as BaseProfile
+
+from src.backend.api.api_v1.categories.models import Category
+from src.backend.api.api_v1.products.models import Product
 
 
-class Profiles(Base):
-    __tablename__ = 'jwt_tokens'
+class Profile(BaseProfile):
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    refresh_token: Mapped[str] = mapped_column(String, nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
-
-    user: Mapped[USER_MODEL] = relationship(USER_MODEL, backref="profile", lazy="joined", cascade="all, delete-orphan")
+    products: Mapped[list[Product]] = relationship(Product, back_populates="profile", lazy="subquery")
+    categories: Mapped[list[Category]] = relationship(Category, back_populates="profile", lazy="subquery")

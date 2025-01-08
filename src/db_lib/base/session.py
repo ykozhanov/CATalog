@@ -44,7 +44,3 @@ class DBSessionREInterface(ABC):
     @abstractmethod
     def re(self, model: Type[T], attr: str, pattern: str) -> list[T]:
         pass
-
-
-# class DBSessionCRUDWhereInterface(DBSessionCRUDInterface, DBSessionWhereInterface, ABC):
-#     pass

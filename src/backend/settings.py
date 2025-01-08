@@ -5,8 +5,9 @@ from flask import Blueprint
 from dotenv import load_dotenv
 load_dotenv()
 
-from .core.database.models import User
-from .api.api_v1 import categories_bp, auth_bp, products_bp
+from src.backend.core.database.models import User
+from src.backend.api.api_v1.auth.models import Profile
+from src.backend.api.api_v1 import categories_bp, auth_bp, products_bp
 
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
@@ -28,3 +29,4 @@ BPS: list[dict[str, Blueprint | Any]] = [
 ]
 
 USER_MODEL = User
+PROFILE_MODEL = Profile

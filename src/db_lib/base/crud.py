@@ -4,6 +4,7 @@ from typing import Type, TypeVar, Any
 from .session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
 
 T = TypeVar("T")
+OB = TypeVar("OB")
 
 
 class DBControllerCRUDInterface(ABC):
@@ -25,7 +26,7 @@ class DBControllerCRUDInterface(ABC):
         pass
 
     @abstractmethod
-    def read_all(self, model: Type[T]) -> list[T]:
+    def read_all(self, model: Type[T], order_by: OB | None) -> list[T]:
         pass
 
 
@@ -61,8 +62,8 @@ class DBControllerCRUD(DBControllerCRUDInterface):
     def delete(self, model: Type[T], pk: int) -> None:
         self._session_crud.delete(model=model, pk=pk)
 
-    def read_all(self, model: Type[T]) -> list[T]:
-        return self._session_crud.read_all(model=model)
+    def read_all(self, model: Type[T], order_by: OB | None) -> list[T]:
+        return self._session_crud.read_all(model=model, order_by=order_by)
 
     def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
         self._session_crud.delete_all(model=model, attr=attr, for_delete=for_delete)

@@ -7,10 +7,11 @@ from flask.typing import Response
 from pydantic import ValidationError
 
 from src.backend.core.settings_app import AUTH_HEADER
-from src.backend.core.response import MESSAGE_TOKEN_INVALID_401, ErrorMessageSchema, MESSAGE_AUTHENTICATION_ERROR_401
+from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import TOKEN_STARTSWITH_BASIC
 from src.backend.core.database.schemas import LoginSchema
 from src.backend.core.exceptions import AuthenticationError
+from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
 
 R = TypeVar("R")
 
@@ -41,7 +42,7 @@ def base64_login_decorator(func: Callable[..., R]) -> Callable[..., tuple[Respon
         try:
             auth_header = request.headers.get(AUTH_HEADER)
             if not auth_header:
-                raise AuthenticationError(MESSAGE_AUTHENTICATION_ERROR_401)
+                raise AuthenticationError()
             if not auth_header.startswith(TOKEN_STARTSWITH_BASIC):
                 raise AuthenticationError(MESSAGE_TOKEN_INVALID_401)
             login_get_data = base64.b64decode(auth_header.split()[1]).decode("utf-8").split(":")

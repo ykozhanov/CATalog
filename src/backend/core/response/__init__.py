@@ -1,4 +1,3 @@
-from .messages import MESSAGE_TOKEN_INVALID_401, MESSAGE_AUTHENTICATION_ERROR_401, MESSAGE_REGISTER_ERROR_401
 from .schemas import ErrorMessageSchema
 
-__all__ = ["MESSAGE_TOKEN_INVALID_401", "MESSAGE_AUTHENTICATION_ERROR_401", "ErrorMessageSchema", "MESSAGE_REGISTER_ERROR_401"]
+__all__ = ["ErrorMessageSchema"]

@@ -52,7 +52,6 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 return session.query(model).all()
             return session.query(model).order_by(order_by).all()
 
-
     def delete_all(self, model: Type[T], attr: str, for_delete: Any) -> None:
         with next(self._session_generator) as session:
             session.query(model).filter(getattr(model, attr) == for_delete).delete(synchronize_session='fetch')

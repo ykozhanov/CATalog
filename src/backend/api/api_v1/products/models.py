@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.backend.core.database.models import Base
 
+from src.backend.settings import PROFILE_MODEL
 from src.backend.api.api_v1.categories.models import Category
 
 
@@ -19,5 +20,7 @@ class Product(Base):
     note: Mapped[str] = mapped_column(Text(length=500))
     created_at: Mapped[date] = mapped_column(Date, default=func.current_date)
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))
+    profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
-    category: Mapped[Category] = relationship(Category, back_populates="products")
+    category: Mapped[Category] = relationship(Category, back_populates="products", lazy="joined")
+    profile: Mapped[PROFILE_MODEL] = relationship(PROFILE_MODEL, back_populates="products", lazy="joined", cascade="all, delete-orphan")

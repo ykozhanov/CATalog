@@ -6,8 +6,8 @@ import jwt
 
 from src.backend.core.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 from src.backend.core.request import JWTPayloadSchema, TYPE_ACCESS_JWT, TYPE_REFRESH_JWT
-from src.backend.core.response.messages import MESSAGE_TOKEN_INVALID_401
 from src.backend.core.exceptions import AuthenticationError
+from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
 
 '''
 Для генерации RSA ключей используйте команды:

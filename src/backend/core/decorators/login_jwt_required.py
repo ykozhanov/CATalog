@@ -7,9 +7,10 @@ from pydantic import ValidationError
 from src.backend.settings import USER_MODEL
 from src.backend.core.mixins import JWTMixin
 from src.backend.core.exceptions import AuthenticationError
+from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
 from src.backend.core.settings_app import AUTH_HEADER
 from src.backend.core.utils import crud
-from src.backend.core.response import MESSAGE_TOKEN_INVALID_401, MESSAGE_AUTHENTICATION_ERROR_401, ErrorMessageSchema
+from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import TOKEN_STARTSWITH_BEARER, JWTPayloadSchema, TYPE_ACCESS_JWT
 
 R = TypeVar("R")
@@ -43,7 +44,7 @@ def login_jwt_required_decorator(func: Callable[..., R]) -> Callable[..., tuple[
         try:
             auth_header = request.headers.get(AUTH_HEADER)
             if not auth_header:
-                raise AuthenticationError(MESSAGE_AUTHENTICATION_ERROR_401)
+                raise AuthenticationError()
             if not auth_header.startswith(TOKEN_STARTSWITH_BEARER):
                 raise AuthenticationError(MESSAGE_TOKEN_INVALID_401)
             payload_data = self._decode_jwt(token=auth_header.split()[1], exc=AuthenticationError, message=MESSAGE_TOKEN_INVALID_401)
@@ -53,7 +54,7 @@ def login_jwt_required_decorator(func: Callable[..., R]) -> Callable[..., tuple[
             user_id = int(payload.sub)
             current_user = crud.read(USER_MODEL, user_id)   # type: ignore
             if not current_user:
-                raise AuthenticationError(MESSAGE_AUTHENTICATION_ERROR_401)
+                raise AuthenticationError()
         except (ValidationError, AuthenticationError) as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 401
         else:
