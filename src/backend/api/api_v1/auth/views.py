@@ -40,7 +40,7 @@ class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
             user = crud.where(model=USER_MODEL, attr="username", content=login_data.username)[0]
             if not user or not self._check_hashpw(password=login_data.password, hashed_password=user.password):
                 raise AuthenticationError()
-            refresh_token = self._get_jwt_token(sub=str(user.id))
+            refresh_token = self._get_jwt_token(sub=user.id)
             access_token = self._get_jwt_token(refresh_token=refresh_token)
             crud.update(model=Profile, pk=user.profile.id, obj_data={"refresh_token": refresh_token})
         except (AuthenticationError, NotFoundInDBError) as e:
@@ -75,7 +75,7 @@ class RegisterMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
                 raise AuthenticationError(f"{MESSAGE_REGISTER_ERROR_401}: Пользователь с таким username уже существует")
             new_user = USER_MODEL(register_data.model_dump())
             new_user_with_id = crud.create(obj=new_user)
-            refresh_token = self._get_jwt_token(sub=str(new_user_with_id.id))
+            refresh_token = self._get_jwt_token(sub=new_user_with_id.id)
             jwt_token_model = Profile(refresh_token=refresh_token, user_id=new_user_with_id.id)
             crud.create(obj=jwt_token_model)
             access_token = self._get_jwt_token(refresh_token=refresh_token, message=MESSAGE_REGISTER_ERROR_401)

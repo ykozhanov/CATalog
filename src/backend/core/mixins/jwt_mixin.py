@@ -75,7 +75,7 @@ class JWTWithGetTokenMixin(JWTMixin):
 
     def _get_jwt_token(
             self,
-            sub: str | None = None,
+            sub: str | int | None = None,
             refresh_token: str | bytes | None = None,
             exc: Type[Exception] = AuthenticationError,
             message: str = MESSAGE_TOKEN_INVALID_401,
@@ -85,7 +85,7 @@ class JWTWithGetTokenMixin(JWTMixin):
             - для получения refresh токена нужно передать аргумент **sub**.
 
         Args:
-            sub (str | None): Подписчик (subject) токена. Если None, будет извлечен из refresh токена.
+            sub (str | int | None): Подписчик (subject) токена. Если None, будет извлечен из refresh токена.
             refresh_token (str | bytes | None): Refresh токен для извлечения данных.
             exc (Type[Exception]): Исключение, которое будет вызвано в случае ошибки, возникшей при декодировании refresh токена. Значение по умолчанию `AuthenticationError`.
             message (str): Сообщение об ошибке, возникшей при декодировании refresh токена. Значение по умолчанию `MESSAGE_TOKEN_INVALID_401`.
