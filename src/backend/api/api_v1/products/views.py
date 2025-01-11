@@ -9,7 +9,7 @@ from src.db_lib.base.exceptions import NotFoundInDBError
 from src.backend.core.utils import crud
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
-from src.backend.settings import USER_MODEL
+from src.backend.settings import USER_MODEL, PROFILE_MODEL
 from src.backend.core.exceptions import ForbiddenError
 
 from .schemas import ProductInSchema, ProductOutSchema, ProductListOutSchema
@@ -30,11 +30,13 @@ class ProductsMethodView(MethodView):
         if name:= request.args.get(QUERY_STRING_SEARCH_BY_NAME):
             pattern = rf"(?i).*{re.escape(name)}.*"
             filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
-            data_for_list_out_schema = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
+            result = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
         else:
-            attr_for_list_out_schema = list(self.element_list_out_schema.model_json_schema().keys())[0]
-            profile = {attr_for_list_out_schema: getattr(current_user, "profile")}
-            data_for_list_out_schema = {attr_for_list_out_schema: getattr(profile, self.attr_for_list_out_schema)}
+            profile: PROFILE_MODEL = getattr(current_user, "profile")
+            result = getattr(profile, self.attr_for_list_out_schema)
+        data_for_list_out_schema = {
+            self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result],
+        }
         return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
 
     @login_jwt_required_decorator
