@@ -39,7 +39,7 @@ class DBControllerWhereInterface(ABC):
 class DBControllerREInterface(ABC):
 
     @abstractmethod
-    def re(self, model: type[T], attr: str, pattern: str) -> list[T]:
+    def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
         pass
 
 
@@ -64,9 +64,6 @@ class DBControllerCRUD(DBControllerCRUDInterface):
     def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
         return self._session_crud.read_all(model=model, order_by=order_by)
 
-    def delete_all(self, model: type[T], attr: str, for_delete: Any) -> None:
-        self._session_crud.delete_all(model=model, attr=attr, for_delete=for_delete)
-
 
 class DBControllerWhere(DBControllerWhereInterface):
 
@@ -82,8 +79,8 @@ class DBControllerRE(DBControllerREInterface):
     def __init__(self, session_re: DBSessionREInterface):
         self._session_re = session_re
 
-    def re(self, model: type[T], attr: str, pattern: str) -> list[T]:
-        return self._session_re.re(model=model, attr=attr, pattern=pattern)
+    def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
+        return self._session_re.re(model=model, main_attr=main_attr, filters=filters, pattern=pattern)
 
 
 class DBControllerMax(DBControllerWhere, DBControllerCRUD, DBControllerRE):

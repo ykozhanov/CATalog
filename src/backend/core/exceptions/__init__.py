@@ -1,3 +1,3 @@
-from .base_exceptions import ENVError, AuthenticationError, ForbiddenError
+from .base_exceptions import ENVError, AuthenticationError, ForbiddenError, BadRequestError
 
-__all__ = ["ENVError", "AuthenticationError", "ForbiddenError"]
+__all__ = ["ENVError", "AuthenticationError", "ForbiddenError", "BadRequestError"]

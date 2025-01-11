@@ -4,14 +4,16 @@ from pydantic import ValidationError
 
 from src.db_lib.base.exceptions import NotFoundInDBError
 
-from src.backend.core.utils import crud
+from src.backend.core.utils import crud, session
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
 from src.backend.settings import USER_MODEL
-from src.backend.core.exceptions import ForbiddenError
+from src.backend.core.exceptions import ForbiddenError, BadRequestError
 
 from .schemas import CategoryInSchema, CategoryOutSchema, CategoryListOutSchema
 from .models import Category
+
+QUERY_STRING_DELETE_ALL_PRODUCTS = "delete_all_products"
 
 
 class CategoriesMethodView(MethodView):
@@ -89,12 +91,21 @@ class CategoriesByIDMethodView(MethodView):
     @login_jwt_required_decorator
     def delete(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
         try:
+            delete_all_products = request.args.get(QUERY_STRING_DELETE_ALL_PRODUCTS, "false").lower() == "true"
             old_element = crud.read(self.model, pk=category_id)
             if old_element is None:
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
-            crud.delete(self.model, pk=old_element.id)
+            db_session = session.session()
+            with db_session as s:
+                if delete_all_products:
+                    for product in old_element.products:
+                        s.delete(product)
+                s.delete(old_element)
+                s.commit()
+        except BadRequestError as e:
+            return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 400
         except ForbiddenError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 403
         except NotFoundInDBError as e:

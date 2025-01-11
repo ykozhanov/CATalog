@@ -16,7 +16,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
     def create(self, obj: T) -> T:
         with next(self._session_generator) as session:
             session.add(obj)
-            if not self._autocommit:
+            if self._autocommit:
                 session.commit()
             session.refresh(obj)
             return obj
@@ -32,7 +32,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 raise NotFoundInDBError()
             for key, value in obj_data.items():
                 setattr(obj, key, value)
-            if not self._autocommit:
+            if self._autocommit:
                 session.commit()
             return obj
 
@@ -42,7 +42,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             if obj is None:
                 raise NotFoundInDBError()
             session.delete(obj)
-            if not self._autocommit:
+            if self._autocommit:
                 session.commit()
 
     def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
@@ -51,16 +51,18 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 return session.query(model).all()
             return session.query(model).order_by(order_by).all()
 
-    def delete_all(self, model: type[T], attr: str, for_delete: Any) -> None:
-        with next(self._session_generator) as session:
-            session.query(model).filter(getattr(model, attr) == for_delete).delete(synchronize_session="fetch")
-            if not self._autocommit:
-                session.commit()
-
     def where(self, model: type[T], attr: str, search: Any) -> list[T]:
         with next(self._session_generator) as session:
             return session.query(model).filter(getattr(model, attr) == search).all()
 
-    def re(self, model: type[T], attr: str, pattern: str) -> list[T]:
+    def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
         with next(self._session_generator) as session:
-            return session.query(model).filter(getattr(model, attr).op("REGEXP")(pattern)).all()
+            query = session.query(model).filter(getattr(model, filters.get(main_attr)).op("REGEXP")(pattern))
+            for attr, value in filters.items():
+                if attr != main_attr:
+                    query.filter(getattr(model, attr) == value)
+            return query.all()
+
+    def session(self) -> Session:
+        with next(self._session_generator) as session:
+            return session

@@ -8,7 +8,7 @@ from src.backend.settings import BPS
 from src.backend.core.exceptions import ENVError
 from src.backend.core.exceptions.messages import MESSAGE_ENV_ERROR
 
-DEBUG = bool(os.getenv("DEBUG", "False"))
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 for bp in BPS:
     app.register_blueprint(**bp)

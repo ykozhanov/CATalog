@@ -26,10 +26,6 @@ class DBSessionCRUDInterface(ABC):
     def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:
         pass
 
-    @abstractmethod
-    def delete_all(self, model: type[T], attr: str, for_delete: Any) -> None:
-        pass
-
 
 class DBSessionWhereInterface(ABC):
 
@@ -41,5 +37,5 @@ class DBSessionWhereInterface(ABC):
 class DBSessionREInterface(ABC):
 
     @abstractmethod
-    def re(self, model: type[T], attr: str, pattern: str) -> list[T]:
+    def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
         pass

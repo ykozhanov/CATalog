@@ -1,3 +1,5 @@
+import re
+
 from flask import jsonify, request, Response
 from flask.views import MethodView
 from pydantic import ValidationError
@@ -13,6 +15,8 @@ from src.backend.core.exceptions import ForbiddenError
 from .schemas import ProductInSchema, ProductOutSchema, ProductListOutSchema
 from .models import Product
 
+QUERY_STRING_SEARCH_BY_NAME = "name"
+
 
 class ProductsMethodView(MethodView):
     model = Product
@@ -23,9 +27,14 @@ class ProductsMethodView(MethodView):
 
     @login_jwt_required_decorator
     def get(self, current_user: USER_MODEL) -> tuple[Response, int]:
-        attr_for_list_out_schema = list(self.element_list_out_schema.model_json_schema().keys())[0]
-        profile = {attr_for_list_out_schema: getattr(current_user, "profile")}
-        data_for_list_out_schema = {attr_for_list_out_schema: getattr(profile, self.attr_for_list_out_schema)}
+        if name:= request.args.get(QUERY_STRING_SEARCH_BY_NAME):
+            pattern = rf"(?i).*{re.escape(name)}.*"
+            filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
+            data_for_list_out_schema = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
+        else:
+            attr_for_list_out_schema = list(self.element_list_out_schema.model_json_schema().keys())[0]
+            profile = {attr_for_list_out_schema: getattr(current_user, "profile")}
+            data_for_list_out_schema = {attr_for_list_out_schema: getattr(profile, self.attr_for_list_out_schema)}
         return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
 
     @login_jwt_required_decorator
