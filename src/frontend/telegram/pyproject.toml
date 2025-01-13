@@ -11,6 +11,7 @@ sqlalchemy = "2.0.36"
 pydantic = "2.10.4"
 requests = "2.32.3"
 python-dotenv = "1.0.1"
+python-telegram-bot-pagination = "^0.0.3"
 
 
 [build-system]

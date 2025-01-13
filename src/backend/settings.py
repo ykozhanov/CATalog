@@ -20,7 +20,7 @@ def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
     )
 
 
-COMMON_PREFIX = "/api"
+COMMON_PREFIX = "/api/v1"
 
 BPS: list[dict[str, Blueprint | Any]] = [
     {"blueprint": auth_bp, "url_prefix": f"{COMMON_PREFIX}/auth"},

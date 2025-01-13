@@ -11,7 +11,7 @@ class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(length=100), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(length=100), nullable=False, index=True, unique=True)
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
     products: Mapped[list[Product]] = relationship(

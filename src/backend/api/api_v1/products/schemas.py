@@ -10,15 +10,15 @@ class ProductInSchema(BaseModel):
     exp_date: date | None = None
     note: str | None = None
 
-    @classmethod
-    @field_validator("exp_date", mode="before")
-    def parse_date(cls, value):
-        if isinstance(value, str):
-            try:
-                return datetime.strptime(value, '%Y-%m-%d').date()
-            except ValueError:
-                raise ValueError("Дата должна быть в формате YYYY-MM-DD")
-        return value
+    # @classmethod
+    # @field_validator("exp_date", mode="before")
+    # def parse_date(cls, value):
+    #     if isinstance(value, str):
+    #         try:
+    #             return datetime.strptime(value, '%Y-%m-%d').date()
+    #         except ValueError:
+    #             raise ValueError("Дата должна быть в формате YYYY-MM-DD")
+    #     return value
 
 
 class ProductOutSchema(BaseModel):

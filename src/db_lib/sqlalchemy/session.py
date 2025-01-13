@@ -2,7 +2,8 @@ from typing import Any, Generator, TypeVar
 from sqlalchemy.orm import Session
 
 from src.db_lib.base.session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
-from src.db_lib.base.exceptions import NotFoundInDBError
+from src.db_lib.base.exceptions import NotFoundInDBError, BadRequestDBError
+from src.db_lib.base.exceptions.messages import MESSAGE_BAD_REQUEST_DB
 
 T = TypeVar("T")
 
@@ -57,7 +58,10 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
 
     def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
         with next(self._session_generator) as session:
-            query = session.query(model).filter(getattr(model, filters.get(main_attr)).op("REGEXP")(pattern))
+            main_attr_data = filters.get(main_attr)
+            if not isinstance(main_attr_data, str):
+                raise BadRequestDBError(f"{MESSAGE_BAD_REQUEST_DB}: значение 'main_attr' в 'filters' должно быть str")
+            query = session.query(model).filter(getattr(model, main_attr_data).op("REGEXP")(pattern))
             for attr, value in filters.items():
                 if attr != main_attr:
                     query.filter(getattr(model, attr) == value)
