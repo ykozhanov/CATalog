@@ -26,6 +26,6 @@ if not BOT_TOKEN:
 
 BOT = bot
 
-# AUTH_HEADER = "Authorization"
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/api")
+
+APP_NAME = os.getenv("APP_NAME", "CATalog")

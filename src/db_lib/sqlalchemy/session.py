@@ -1,8 +1,10 @@
 from typing import Any, Generator, TypeVar
+
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from src.db_lib.base.session import DBSessionCRUDInterface, DBSessionWhereInterface, DBSessionREInterface
-from src.db_lib.base.exceptions import NotFoundInDBError, BadRequestDBError
+from src.db_lib.base.exceptions import NotFoundInDBError, BadRequestDBError, IntegrityDBError
 from src.db_lib.base.exceptions.messages import MESSAGE_BAD_REQUEST_DB
 
 T = TypeVar("T")
@@ -16,11 +18,15 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
 
     def create(self, obj: T) -> T:
         with next(self._session_generator) as session:
-            session.add(obj)
-            if self._autocommit:
-                session.commit()
-            session.refresh(obj)
-            return obj
+            try:
+                session.add(obj)
+                if self._autocommit:
+                    session.commit()
+                session.refresh(obj)
+            except IntegrityError:
+                raise IntegrityDBError()
+            else:
+                return obj
 
     def read(self, model: type[T], pk: int | str) -> T | None:
         with next(self._session_generator) as session:

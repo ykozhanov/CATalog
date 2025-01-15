@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from src.db_lib.base.exceptions import NotFoundInDBError
 
-from src.backend.core.utils import crud
+from src.backend.core.utils import crud, session as S
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
 from src.backend.settings import USER_MODEL, PROFILE_MODEL
@@ -16,7 +16,7 @@ from .schemas import ProductInSchema, ProductOutSchema, ProductListOutSchema
 from .models import Product
 
 QUERY_STRING_SEARCH_BY_NAME = "name"
-
+QUERY_STRING_SEARCH_BY_CATEGORY_ID = "category_id"
 
 class ProductsMethodView(MethodView):
     model = Product
@@ -27,17 +27,30 @@ class ProductsMethodView(MethodView):
 
     @login_jwt_required_decorator
     def get(self, current_user: USER_MODEL) -> tuple[Response, int]:
-        if name:= request.args.get(QUERY_STRING_SEARCH_BY_NAME):
-            pattern = rf"(?i).*{re.escape(name)}.*"
-            filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
-            result = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
+        try:
+            if name := request.args.get(QUERY_STRING_SEARCH_BY_NAME):
+                pattern = rf"(?i).*{re.escape(name)}.*"
+                filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
+                result = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
+            elif category_id := request.args.get(QUERY_STRING_SEARCH_BY_CATEGORY_ID):
+                if category_id not in (c for c in current_user.profile.categories):
+                    raise ForbiddenError()
+                session = S.session()
+                with session as s:
+                    result = s.query(self.model).filter(
+                        self.model.category_id == category_id,
+                        self.model.profile_id == current_user.profile.id,
+                    ).scalars()
+            else:
+                profile: PROFILE_MODEL = getattr(current_user, "profile")
+                result = getattr(profile, self.attr_for_list_out_schema)
+            data_for_list_out_schema = {
+                self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result],
+            }
+        except ForbiddenError as e:
+            return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 403
         else:
-            profile: PROFILE_MODEL = getattr(current_user, "profile")
-            result = getattr(profile, self.attr_for_list_out_schema)
-        data_for_list_out_schema = {
-            self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result],
-        }
-        return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
+            return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
 
     @login_jwt_required_decorator
     def post(self, current_user: USER_MODEL) -> tuple[Response, int]:

@@ -1,3 +1,3 @@
-from .base_exceptions import NotFoundInDBError, BadRequestDBError
+from .base_exceptions import NotFoundInDBError, BadRequestDBError, IntegrityDBError
 
-__all__ = ["NotFoundInDBError", "BadRequestDBError"]
+__all__ = ["NotFoundInDBError", "BadRequestDBError", "IntegrityDBError"]
