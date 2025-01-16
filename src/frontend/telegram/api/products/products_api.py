@@ -11,11 +11,12 @@ from src.frontend.telegram.core.exceptions.messages import (
 )
 from src.frontend.telegram.core.exceptions import AuthenticationError, ProductError
 from src.frontend.telegram.core.request import BearerAuth
-from src.frontend.telegram.settings import BACKEND_URL
+from src.frontend.telegram.settings import BACKEND_URL, EXP_DAYS
 from .schemas import ProductInSchema, ProductInListSchema, ProductOutSchema
 
 QUERY_STRING_SEARCH_BY_NAME = "name"
 QUERY_STRING_SEARCH_BY_CATEGORY_ID = "category_id"
+QUERY_STRING_SEARCH_BY_EXP_DAYS = "exp_days"
 
 
 class ProductsAPI:
@@ -59,24 +60,14 @@ class ProductsAPI:
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))
 
-    def get_by_name(self, name: str) -> _element_in_list_schema:
-        params = {QUERY_STRING_SEARCH_BY_NAME: name}
-        response = requests.get(self._url, auth=BearerAuth(self._access_token), params=params)
-        try:
-            if response.ok:
-                data_for_list = {
-                    self._attr_for_list_out_schema: [self._element_in_schema(**e) for e in response.json()],
-                }
-                return self._element_in_list_schema(**data_for_list)
-            if response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
-            else:
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {response.text}")
-        except (ValidationError, self._main_exc) as e:
-            raise self._main_exc(str(e))
+    def get_by(self, name: str, category_id: int, exp_days: int = EXP_DAYS) -> _element_in_list_schema:
+        if name:
+            params = {QUERY_STRING_SEARCH_BY_NAME: name}
+        elif category_id:
+            params = {QUERY_STRING_SEARCH_BY_CATEGORY_ID: category_id}
+        else:
+            params = {QUERY_STRING_SEARCH_BY_EXP_DAYS: exp_days}
 
-    def get_by_category_id(self, category_id: int) -> _element_in_list_schema:
-        params = {QUERY_STRING_SEARCH_BY_CATEGORY_ID: category_id}
         response = requests.get(self._url, auth=BearerAuth(self._access_token), params=params)
         try:
             if response.ok:

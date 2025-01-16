@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, UTC
 
 from flask import jsonify, request, Response
 from flask.views import MethodView
@@ -17,6 +18,8 @@ from .models import Product
 
 QUERY_STRING_SEARCH_BY_NAME = "name"
 QUERY_STRING_SEARCH_BY_CATEGORY_ID = "category_id"
+QUERY_STRING_SEARCH_BY_EXP_DAYS = "exp_days"
+
 
 class ProductsMethodView(MethodView):
     model = Product
@@ -25,22 +28,39 @@ class ProductsMethodView(MethodView):
     element_list_out_schema = ProductListOutSchema
     attr_for_list_out_schema = "products"
 
+    def _get_products_by_name(self, name: str, current_user: USER_MODEL) -> list[model]:
+        pattern = rf"(?i).*{re.escape(name)}.*"
+        filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
+        return crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME, filters=filters, pattern=pattern)
+
+    def _get_products_by_category_id(self, category_id: int, current_user: USER_MODEL) -> list[model]:
+        session = S.session()
+        with session as s:
+            return s.query(self.model).filter(
+                self.model.category_id == category_id,
+                self.model.profile_id == current_user.profile.id,
+            ).all()
+
+    def _get_products_by_exp_days(self, exp_days: int, current_user: USER_MODEL) -> list[model]:
+        now = datetime.now(UTC).date()
+        session = S.session()
+        with session as s:
+            return s.query(self.model).filter(
+                self.model.exp_date - now <= exp_days,
+                self.model.profile_id == current_user.profile.id,
+            ).all()
+
     @login_jwt_required_decorator
     def get(self, current_user: USER_MODEL) -> tuple[Response, int]:
         try:
             if name := request.args.get(QUERY_STRING_SEARCH_BY_NAME):
-                pattern = rf"(?i).*{re.escape(name)}.*"
-                filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
-                result = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME , filters=filters, pattern=pattern)
-            elif category_id := request.args.get(QUERY_STRING_SEARCH_BY_CATEGORY_ID):
+                result = self._get_products_by_name(name, current_user)
+            elif category_id := request.args.get(QUERY_STRING_SEARCH_BY_CATEGORY_ID, type=int):
                 if category_id not in (c for c in current_user.profile.categories):
                     raise ForbiddenError()
-                session = S.session()
-                with session as s:
-                    result = s.query(self.model).filter(
-                        self.model.category_id == category_id,
-                        self.model.profile_id == current_user.profile.id,
-                    ).scalars()
+                result = self._get_products_by_category_id(category_id, current_user)
+            elif exp_days := request.args.get(QUERY_STRING_SEARCH_BY_EXP_DAYS, type=int):
+                result = self._get_products_by_exp_days(exp_days, current_user)
             else:
                 profile: PROFILE_MODEL = getattr(current_user, "profile")
                 result = getattr(profile, self.attr_for_list_out_schema)
