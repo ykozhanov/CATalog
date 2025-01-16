@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Literal
 
 from telebot.states import State
 from telebot.types import (
@@ -17,10 +16,12 @@ from src.frontend.telegram.core.exceptions import CreateMessageError
 from src.frontend.telegram.core.exceptions.messages import MESSAGE_CREATE_MESSAGE_ERROR
 from src.frontend.telegram.settings import BOT
 
-KeyboardType = Literal["inline", "reply", "paginator"]
-KEYBOARD_INLINE: KeyboardType = "inline"
-KEYBOARD_REPLY: KeyboardType = "reply"
-KEYBOARD_PAGINATOR: KeyboardType = "paginator"
+
+# from typing import Literal
+# KeyboardType = Literal["inline", "reply", "paginator"]
+# KEYBOARD_INLINE: KeyboardType = "inline"
+# KEYBOARD_REPLY: KeyboardType = "reply"
+# KEYBOARD_PAGINATOR: KeyboardType = "paginator"
 
 
 @dataclass
@@ -53,21 +54,6 @@ class GetMessageData:
 
 
 class SendMessage(GetMessageData):
-    """
-    Класс для отправки сообщений в Telegram с различными типами клавиатур.
-
-    Args:
-        text (str): Текст сообщения.
-        message (Message | CallbackQuery): Сообщение или обратный вызов, к которому относится отправляемое сообщение.
-        parse_mode (str | None): Режим парсинга текста (например, 'Markdown' или 'HTML').
-        state (State | None): Состояние бота.
-        keyboard_type (KeyboardType | None): Тип клавиатуры ('inline', 'reply', 'paginator').
-        inline_keyboard (list[tuple[str, str]] | None): Данные для инлайн-клавиатуры.
-        reply_keyboard (list[str] | None): Данные для reply клавиатуры.
-        paginator_keyboard (InlineKeyboardPaginator | None): Пагинатор.
-        delete_message (bool): Удалить ли сообщение.
-        delete_reply_keyboard (bool): Удалить ли reply клавиатуру.
-    """
 
     def __init__(
             self,
@@ -86,9 +72,11 @@ class SendMessage(GetMessageData):
         return keyboard
 
     @staticmethod
-    def _get_inline_keyboard(inline_keyboard_data: list[tuple[str, str]]) -> InlineKeyboardMarkup:
+    def _get_inline_keyboard(inline_keyboard_data: list[tuple[str, str]] | InlineKeyboardMarkup) -> InlineKeyboardMarkup:
         if inline_keyboard_data is None:
             raise CreateMessageError(f"{MESSAGE_CREATE_MESSAGE_ERROR}: не передан аргумент 'inline_keyboard_data'")
+        if isinstance(inline_keyboard_data, InlineKeyboardMarkup):
+            return inline_keyboard_data
         keyboard = InlineKeyboardMarkup()
         for text, callback_data in inline_keyboard_data:
             keyboard.add(InlineKeyboardButton(text=text, callback_data=callback_data))
@@ -97,16 +85,13 @@ class SendMessage(GetMessageData):
     def _get_reply_markup(
             self,
             reply_keyboard: list[str] | None,
-            inline_keyboard: list[tuple[str, str]] | None,
-            paginator_keyboard: InlineKeyboardPaginator | None,
+            inline_keyboard: list[tuple[str, str]] | InlineKeyboardMarkup | None,
             delete_reply_keyboard: bool | None,
     ) -> ReplyKeyboardMarkup | InlineKeyboardMarkup | InlineKeyboardPaginator | ReplyKeyboardRemove | None:
         if reply_keyboard:
             return self._get_reply_keyboard(reply_keyboard)
-        if inline_keyboard == KEYBOARD_INLINE:
+        if inline_keyboard:
             return self._get_inline_keyboard(inline_keyboard)
-        if paginator_keyboard == KEYBOARD_PAGINATOR:
-            return paginator_keyboard.markup
         if delete_reply_keyboard:
             return ReplyKeyboardRemove()
         return None
@@ -134,15 +119,13 @@ class SendMessage(GetMessageData):
             parse_mode: str | None = None,
             state: State | None = None,
             finish_state: bool = False,
-            inline_keyboard: list[tuple[str, str]] | None = None,
+            inline_keyboard: list[tuple[str, str]] | InlineKeyboardMarkup = None,
             reply_keyboard: list[str] | None = None,
-            paginator_keyboard: InlineKeyboardPaginator | None = None,
             delete_reply_keyboard: bool = False,
     ) -> None:
         reply_markup = self._get_reply_markup(
             inline_keyboard=inline_keyboard,
             reply_keyboard=reply_keyboard,
-            paginator_keyboard=paginator_keyboard,
             delete_reply_keyboard=delete_reply_keyboard,
         )
         if state or finish_state:

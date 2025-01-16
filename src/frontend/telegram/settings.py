@@ -33,3 +33,5 @@ APP_NAME = os.getenv("APP_NAME", "CATalog")
 DISPLAY_DATE_FORMATE = "%Y.%m.%d"
 
 EXP_DAYS = int(os.getenv("EXP_DAYS", "3"))
+
+ITEMS_PER_PAGE = 5

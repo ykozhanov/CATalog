@@ -60,7 +60,12 @@ class ProductsAPI:
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))
 
-    def get_by(self, name: str, category_id: int, exp_days: int = EXP_DAYS) -> _element_in_list_schema:
+    def get_by(
+            self,
+            name: str | None = None,
+            category_id: int | None = None,
+            exp_days: int = EXP_DAYS,
+    ) -> _element_in_list_schema:
         if name:
             params = {QUERY_STRING_SEARCH_BY_NAME: name}
         elif category_id:
