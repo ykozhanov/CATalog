@@ -1,0 +1,4 @@
+from .messages_action_all_products import MESSAGES_ACTION_GET_ALL_PRODUCTS
+from .messages_action_all_categories import MESSAGES_ACTION_GET_ALL_CATEGORIES
+
+__all__ = ["MESSAGES_ACTION_GET_ALL_PRODUCTS", "MESSAGES_ACTION_GET_ALL_CATEGORIES"]
