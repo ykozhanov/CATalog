@@ -29,3 +29,5 @@ BOT = bot
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/api")
 
 APP_NAME = os.getenv("APP_NAME", "CATalog")
+
+DISPLAY_DATE_FORMATE = "%Y.%m.%d"
