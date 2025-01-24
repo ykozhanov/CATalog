@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey
+from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.backend.core.database.models import Base
@@ -15,7 +15,7 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(length=100), nullable=False, index=True)
     unit: Mapped[str] = mapped_column(String(length=10), nullable=False, default="шт.")
-    quantity: Mapped[int] = mapped_column(Integer, CheckConstraint("quantity >= 0"), nullable=False, default=0)
+    quantity: Mapped[float] = mapped_column(Float, CheckConstraint("quantity > 0"), nullable=False, default=0)
     exp_date: Mapped[date] = mapped_column(Date)
     note: Mapped[str] = mapped_column(Text(length=500))
     created_at: Mapped[date] = mapped_column(Date, default=func.current_date)

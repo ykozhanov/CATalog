@@ -11,7 +11,7 @@ class PaginatorHelper:
     CALLBACK_CREATE = "create"
     CALLBACK_PAGE = "page"
 
-    def __init__(self, elements: list[T], prefix_element: str, items_per_page: int):
+    def __init__(self, elements: list[T], prefix_element: str, items_per_page: int = 5):
         self.prefix_element = prefix_element
         self._elements = elements
         self._items_per_page = items_per_page
@@ -48,7 +48,7 @@ class PaginatorHelper:
                 for_template[attr] = getattr(elem, attr)
             text = template.format(**for_template)
             index = self._elements.index(elem)
-            buttons.append(InlineKeyboardButton(text=text, callback_data=f"{self.prefix_element}#{index}"))
+            buttons.append(InlineKeyboardButton(text=text, callback_data=f"{self.prefix_element}#{index}#{page}"))
         del for_template
         return buttons
 
@@ -57,7 +57,5 @@ class PaginatorHelper:
         for b in page_data:
             keyboard.add(b)
         keyboard.add(self._get_paginator_keys(page))
-        keyboard.add(
-            InlineKeyboardButton(text="Создать", callback_data=f"{self.CALLBACK_CREATE}#{self.prefix_element}"),
-        )
+        keyboard.add(InlineKeyboardButton(text="Создать", callback_data=self.CALLBACK_CREATE))
         return keyboard

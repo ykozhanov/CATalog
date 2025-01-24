@@ -7,9 +7,10 @@ class ProductInSchema(BaseModel):
     id: int
     name: str
     unit: str
-    quantity: int
+    quantity: float
     exp_date: date | None = None
     note: str | None = None
+    category_id: int | None = None
 
     # @classmethod
     # @field_validator("exp_date", mode="before")
@@ -29,6 +30,7 @@ class ProductInListSchema(BaseModel):
 class ProductOutSchema(BaseModel):
     name: str
     unit: str | None = None
-    quantity: int | None = None
+    quantity: float | None = None
     exp_date: date | None = None
     note: str | None = None
+    category_id: int | None = None

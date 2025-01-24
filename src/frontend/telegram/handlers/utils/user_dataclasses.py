@@ -11,12 +11,14 @@ from src.frontend.telegram.api.categories.schemas import CategoryInSchema
 class ProductDataclass:
     name: str | None = None
     unit: str | None = None
-    quantity: int | None = None
+    quantity: float | None = None
     exp_date: date | None = None
     exp_date_year: int | None = None
     exp_date_month: int | None = None
     exp_date_day: int | None = None
     note: str | None = None
+    category_id: int | None = None
+    category_name: str | None = None
 
     def dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from src.frontend.telegram.settings import ITEMS_PER_PAGE
 from src.frontend.telegram.core.utils import SendMessage, PaginatorHelper
-from src.frontend.telegram.keyboards import KEYBOARD_YES_OR_NO
+from src.frontend.telegram.bot.keyboards import KEYBOARD_YES_OR_NO
 
 
 T = TypeVar("T", bound=BaseModel)
@@ -36,7 +36,6 @@ def handle_action_get_all_elements(
             inline_keyboard=ph.get_inline_keyboard(page_data=buttons),
         )
     else:
-        #TODO Добавить обработку в создание
         sm.send_message(
             text=text_for_paginator_empty,
             state=state_add_new_element,

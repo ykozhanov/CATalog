@@ -5,7 +5,7 @@ load_dotenv()
 
 from src.frontend.telegram.core.exceptions import ENVError
 from src.frontend.telegram.core.exceptions.messages import MESSAGE_ENV_ERROR
-from src.frontend.telegram.bot import bot
+from src.frontend.telegram.bot import telegram_bot
 
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
@@ -24,7 +24,7 @@ BOT_TOKEN=os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise ENVError(f"{MESSAGE_ENV_ERROR}: не установлено значение 'BOT_TOKEN'")
 
-BOT = bot
+BOT = telegram_bot
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/api")
 

@@ -4,10 +4,10 @@ from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.settings import BOT
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
-from src.frontend.telegram.handlers.messages_helper import MESSAGES_MAIN, MESSAGES_COMMAND_LOGIN
+from src.frontend.telegram.handlers.utils.messages import MESSAGES_MAIN, MESSAGES_COMMAND_LOGIN
 from src.frontend.telegram.core.utils import SendMessage
-from src.frontend.telegram.keyboards import KEYBOARD_YES_OR_NO
-from src.frontend.telegram.states import UsersStatesGroup
+from src.frontend.telegram.bot.keyboards import KEYBOARD_YES_OR_NO
+from src.frontend.telegram.bot.states import UsersStatesGroup
 from src.frontend.telegram.api import UsersAPI, UserController
 from src.frontend.telegram.core.exceptions import CreateUserError
 
