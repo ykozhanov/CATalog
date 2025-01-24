@@ -5,6 +5,7 @@ from telebot.types import Message, CallbackQuery
 from src.frontend.telegram.settings import BOT
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
 from src.frontend.telegram.handlers.utils.messages import MESSAGES_MAIN, MESSAGES_COMMAND_LOGIN
+from src.frontend.telegram.handlers.utils.md_dataclasses import LoginDataclass
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.bot.keyboards import KEYBOARD_YES_OR_NO
 from src.frontend.telegram.bot.states import UsersStatesGroup
@@ -63,6 +64,7 @@ def handle_callback_login(message: CallbackQuery) -> None:
         text = MESSAGES_COMMAND_LOGIN.message_input_username
     elif message.data == KEYBOARD_YES_OR_NO.callback_answer_no:
         with MainDataContextmanager(message) as md:
+            md.login = LoginDataclass()
             md.login.register = True
         text = MESSAGES_COMMAND_LOGIN.message_input_register_username
     else:

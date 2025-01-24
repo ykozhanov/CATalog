@@ -8,6 +8,7 @@ from .actions import (
 )
 from .product_actions import (
     MESSAGES_ACTION_PRODUCT_CREATE,
+    MESSAGES_ACTION_PRODUCT_UPDATE,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "MESSAGES_ACTION_GET_PRODUCTS_BY_NAME",
     "MESSAGES_ACTION_GET_PRODUCTS_BY_EXP_DATE",
     "MESSAGES_ACTION_PRODUCT_CREATE",
+    "MESSAGES_ACTION_PRODUCT_UPDATE"
 ]

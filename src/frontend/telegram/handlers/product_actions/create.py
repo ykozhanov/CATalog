@@ -9,6 +9,7 @@ from src.frontend.telegram.handlers.utils import (
     check_authentication_decorator,
 )
 from src.frontend.telegram.handlers.utils.messages import MESSAGES_ACTION_PRODUCT_CREATE, MESSAGES_MAIN
+from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KEYBOARD_YES_OR_NO
 from src.frontend.telegram.bot.states import ProductsStatesGroup, ProductCreateStatesGroup
 from src.frontend.telegram.api import ProductsAPI
@@ -28,6 +29,8 @@ def get_inline_categories(message: Message | CallbackQuery) -> list[tuple[str, s
     state=ProductsStatesGroup.products,
 )
 def handle_paginator_create_new_product(message: CallbackQuery):
+    with MainDataContextmanager(message) as md:
+        md.product = ProductDataclass()
     sm = SendMessage(message)
     sm.delete_message()
     sm.send_message(
@@ -41,6 +44,8 @@ def handle_ask_add_new_product(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == KEYBOARD_YES_OR_NO.callback_answer_yes:
+        with MainDataContextmanager(message) as md:
+            md.product = ProductDataclass()
         sm.send_message(
             text=MESSAGES_ACTION_PRODUCT_CREATE.message_input_name,
             state=ProductCreateStatesGroup.waiting_input_name,
@@ -84,7 +89,7 @@ def handle_product_create_waiting_input_quantity(message: Message):
         with MainDataContextmanager(message) as md:
             md.product.quantity = quantity
         sm.send_message(
-            text=MESSAGES_ACTION_PRODUCT_CREATE.message_input_quantity,
+            text=MESSAGES_ACTION_PRODUCT_CREATE.message_ask_input_exp_date,
             state=ProductCreateStatesGroup.ask_input_exp_date,
             inline_keyboard=KEYBOARD_YES_OR_NO.get_inline_keyboard(),
         )
@@ -156,7 +161,7 @@ def handle_product_create_waiting_input_year(message: Message):
             exp_date = datetime(year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
             md.product.exp_date = exp_date
         sm.send_message(
-            text=MESSAGES_ACTION_PRODUCT_CREATE.message_ask_note,
+            text=MESSAGES_ACTION_PRODUCT_CREATE.message_ask_input_note,
             state=ProductCreateStatesGroup.ask_input_note,
             inline_keyboard=KEYBOARD_YES_OR_NO.get_inline_keyboard(),
         )
@@ -180,7 +185,7 @@ def handle_product_create_ask_input_note(message: CallbackQuery):
         else:
             sm.send_message(
                 text=MESSAGES_ACTION_PRODUCT_CREATE.message_choice_category,
-                state=ProductCreateStatesGroup.waiting_category,
+                state=ProductCreateStatesGroup.waiting_choice_category,
                 inline_keyboard=inline_keyboard,
             )
     else:
@@ -200,19 +205,20 @@ def handle_product_create_waiting_input_note(message: Message):
     else:
         sm.send_message(
             text=MESSAGES_ACTION_PRODUCT_CREATE.message_choice_category,
-            state=ProductCreateStatesGroup.waiting_category,
+            state=ProductCreateStatesGroup.waiting_choice_category,
             inline_keyboard=inline_keyboard,
         )
 
 
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.waiting_category)
+@BOT.callback_query_handler(state=ProductCreateStatesGroup.waiting_choice_category)
 def handle_product_create_waiting_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data.split("#")[0] == PREFIX_CATEGORY_ELEMENT_PAGINATOR:
+        category_id, category_name = message.data.split("#")[1:]
         with MainDataContextmanager(message) as md:
-            md.product.category_id = int(message.data.split("#")[1])
-            md.product.category_name = message.data.split("#")[2]
+            md.product.category_id = category_id
+            md.product.category_name = category_name
             name = md.product.name
             unit = md.product.unit
             quantity = md.product.quantity
@@ -246,6 +252,8 @@ def handle_product_create_check_new_product(message: CallbackQuery):
                 md.product = None
             sm.send_message(text=MESSAGES_ACTION_PRODUCT_CREATE.message_success_create, finish_state=True)
     elif message.data == KEYBOARD_YES_OR_NO.callback_answer_no:
+        with MainDataContextmanager(message) as md:
+            md.product = None
         sm.send_message(
             text=MESSAGES_ACTION_PRODUCT_CREATE.message_try_again,
             state=ProductCreateStatesGroup.ask_add_new_product,

@@ -95,5 +95,5 @@ def handle_category_element(message: CallbackQuery):
         categories = md.categories
     category = categories[category_index]
     text = MESSAGES_ACTION_GET_ALL_CATEGORIES.template_message_get_list_all_categories_md(name=category.name)
-    inline_keyboard = KeyboardActionsByElement(page).get_inline_keyboard_category()
+    inline_keyboard = KeyboardActionsByElement(page, category.id).get_inline_keyboard_category()
     sm.send_message(text, inline_keyboard=inline_keyboard)

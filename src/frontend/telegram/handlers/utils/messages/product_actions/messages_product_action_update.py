@@ -5,15 +5,27 @@ from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
 
 
 @dataclass
-class MessagesActionProductCreate:
+class MessagesActionProductUpdate:
+
+    @property
+    def message_ask_input_name(self) -> str:
+        return "Хотите изменить название товара?"
 
     @property
     def message_input_name(self) -> str:
         return "Введите название товара:"
 
     @property
+    def message_ask_input_unit(self) -> str:
+        return "Хотите изменить единицу измерения?"
+
+    @property
     def message_input_unit(self) -> str:
         return "Введите единицу измерения:"
+
+    @property
+    def message_ask_input_quantity(self) -> str:
+        return "Хотите изменить количество?"
 
     @property
     def message_input_quantity(self) -> str:
@@ -25,7 +37,7 @@ class MessagesActionProductCreate:
 
     @property
     def message_ask_input_exp_date(self) -> str:
-        return "Хотите установить срок годности?"
+        return "Хотите изменить срок годности?"
 
     @property
     def message_input_day(self) -> str:
@@ -53,11 +65,15 @@ class MessagesActionProductCreate:
 
     @property
     def message_ask_input_note(self) -> str:
-        return "Хотите добавить примечание?"
+        return "Хотите изменить примечание?"
 
     @property
     def message_input_note(self) -> str:
         return "Введите примечание:"
+
+    @property
+    def message_ask_choice_category(self) -> str:
+        return "Хотите изменить категорию?"
 
     @property
     def message_choice_category(self) -> str:
@@ -68,8 +84,8 @@ class MessagesActionProductCreate:
         return "Попробовать снова?"
 
     @property
-    def message_success_create(self) -> str:
-        return "Новый товар успешно создан!\nВернуться к списку действий /help"
+    def message_success_update(self) -> str:
+        return "Товар успешно обновлен!\nВернуться к списку действий /help"
 
     @staticmethod
     def template_message_check(
@@ -80,7 +96,7 @@ class MessagesActionProductCreate:
             note: str,
             category: str,
     ) -> str:
-        return f"""Новый товар:
+        return f"""Обновленный товар:
             **Имя**: {name};
             **Количество**: {quantity};
             **Единица измерения**: {unit};
@@ -92,4 +108,4 @@ class MessagesActionProductCreate:
         """
 
 
-MESSAGES_ACTION_PRODUCT_CREATE = MessagesActionProductCreate()
+MESSAGES_ACTION_PRODUCT_UPDATE = MessagesActionProductUpdate()

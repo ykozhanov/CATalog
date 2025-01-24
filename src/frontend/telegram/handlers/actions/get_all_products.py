@@ -110,7 +110,7 @@ def handle_product_element(message: CallbackQuery):
             note=product.note,
             category=category_name,
         )
-        inline_keyboard = KeyboardActionsByElement(page).get_inline_keyboard_product()
+        inline_keyboard = KeyboardActionsByElement(page, product.id).get_inline_keyboard_product()
         sm.send_message(text=text, inline_keyboard=inline_keyboard)
     else:
         sm.send_message(MESSAGES_MAIN.message_something_went_wrong, finish_state=True)

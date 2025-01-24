@@ -3,10 +3,10 @@ from telebot.types import Message
 from src.frontend.telegram.settings import BOT
 from src.frontend.telegram.core.database.models import User
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
-from src.frontend.telegram.handlers.messages_helper import MESSAGES_COMMAND_LOGIN, MESSAGES_MAIN
+from src.frontend.telegram.handlers.utils.messages import MESSAGES_COMMAND_LOGIN, MESSAGES_MAIN
 from src.frontend.telegram.core.utils import SendMessage, crud
-from src.frontend.telegram.keyboards import KEYBOARD_YES_OR_NO
-from src.frontend.telegram.states import UsersStatesGroup
+from src.frontend.telegram.bot.keyboards import KEYBOARD_YES_OR_NO
+from src.frontend.telegram.bot.states import UsersStatesGroup
 from . import COMMANDS
 
 

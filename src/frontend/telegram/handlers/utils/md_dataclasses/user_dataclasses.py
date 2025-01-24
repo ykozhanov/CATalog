@@ -48,7 +48,9 @@ class MainDataclass:
     user: User | None = None
     login: LoginDataclass | None = None
     product: ProductDataclass | None = None
+    old_product: ProductInSchema | None = None
     category: CategoryDataclass | None = None
+    old_category: CategoryInSchema | None = None
     products: list[ProductInSchema] | None = None
     categories: list[CategoryInSchema] | None = None
 

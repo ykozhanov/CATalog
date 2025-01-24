@@ -4,6 +4,13 @@ from dataclasses import dataclass
 @dataclass
 class KeyboardActionsByElement:
     page: int
+    element_id: int
+
+    UPDATE_PREFIX = "update"
+    DELETE_PREFIX = "delete"
+    USE_PREFIX = "use"
+    LIST_PREFIX = "list"
+    BACK_PREFIX = "back"
 
     @property
     def answer_update(self) -> str:
@@ -18,23 +25,32 @@ class KeyboardActionsByElement:
         return "Использовать"
 
     @property
+    def answer_list(self) -> str:
+        return "Товары"
+
+    @property
     def answer_back(self) -> str:
-        return "Использовать"
+        return "Назад"
 
     @property
     def callback_answer_update(self) -> str:
-        return "update"
+        return f"{self.UPDATE_PREFIX}#{self.element_id}"
 
     @property
     def callback_answer_delete(self) -> str:
-        return "delete"
+        return f"{self.DELETE_PREFIX}#{self.element_id}"
 
     @property
     def callback_answer_use(self) -> str:
-        return "use"
+        return f"{self.USE_PREFIX}#{self.element_id}"
 
+    @property
+    def callback_answer_list(self) -> str:
+        return f"{self.LIST_PREFIX}#{self.element_id}"
+
+    @property
     def callback_answer_back(self) -> str:
-        return f"back#{self.page}"
+        return f"{self.BACK_PREFIX}#{self.page}"
 
     def get_inline_keyboard_product(self) -> list[tuple[str, str]]:
         return [
