@@ -1,18 +1,18 @@
 import requests
 from pydantic import ValidationError
 
-from src.frontend.telegram.core.exceptions.messages import (
-    MESSAGE_AUTHENTICATION_ERROR,
-    MESSAGE_CATEGORY_ERROR,
+from src.frontend.telegram.core.exceptions.messages import MESSAGE_AUTHENTICATION_ERROR
+from src.frontend.telegram.core.exceptions import AuthenticationError
+from src.frontend.telegram.core.request import BearerAuth
+from src.frontend.telegram.settings import BACKEND_URL
+from src.frontend.telegram.api.exc_crud_messages import (
     MESSAGE_POST_ERROR,
     MESSAGE_GET_ERROR,
     MESSAGE_DELETE_ERROR,
     MESSAGE_PUT_ERROR,
 )
-from src.frontend.telegram.core.exceptions import AuthenticationError, CategoryError
-from src.frontend.telegram.core.request import BearerAuth
-from src.frontend.telegram.settings import BACKEND_URL
 from .schemas import CategoryInSchema, CategoryInListSchema, CategoryOutSchema
+from .exceptions import CategoryError, MESSAGE_CATEGORY_ERROR
 
 QUERY_STRING_DELETE_ALL_PRODUCTS = "delete_all_products"
 

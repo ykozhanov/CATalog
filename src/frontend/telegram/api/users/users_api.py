@@ -1,15 +1,13 @@
 import requests
 from pydantic import ValidationError
 
-from src.frontend.telegram.core.exceptions.messages import (
-    MESSAGE_CREATE_USER_ERROR,
-    MESSAGE_GET_TOKEN_ERROR,
-    MESSAGE_AUTHENTICATION_ERROR,
-)
-from src.frontend.telegram.core.exceptions import CreateUserError, AuthenticationError, GetTokenError
+from src.frontend.telegram.core.exceptions import AuthenticationError
+from src.frontend.telegram.core.exceptions.messages import MESSAGE_AUTHENTICATION_ERROR
 from src.frontend.telegram.core.request import BearerAuth
 from src.frontend.telegram.settings import BACKEND_URL
+
 from .schemas import UserInSchema
+from .exceptions import CreateUserError, MESSAGE_CREATE_USER_ERROR, MESSAGE_GET_TOKEN_ERROR
 
 
 class UsersAPI:
@@ -34,7 +32,7 @@ class UsersAPI:
                 return UserInSchema(**response.json())
             else:
                 raise CreateUserError(f"{MESSAGE_CREATE_USER_ERROR}: {response.text}")
-        except (ValidationError, CreateUserError) as e:
+        except ValidationError as e:
             raise CreateUserError(str(e))
 
     @classmethod
@@ -50,5 +48,5 @@ class UsersAPI:
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
             else:
                 raise CreateUserError(f"{MESSAGE_GET_TOKEN_ERROR}: {response.text}")
-        except (ValidationError, AuthenticationError, GetTokenError) as e:
+        except ValidationError as e:
             raise CreateUserError(str(e))

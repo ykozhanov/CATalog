@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-
-
-@dataclass
 class KeyboardYesOrNo:
 
     @property
@@ -25,6 +21,3 @@ class KeyboardYesOrNo:
             (self.answer_yes, self.callback_answer_yes),
             (self.answer_no, self.callback_answer_no),
         ]
-
-
-KEYBOARD_YES_OR_NO = KeyboardYesOrNo()

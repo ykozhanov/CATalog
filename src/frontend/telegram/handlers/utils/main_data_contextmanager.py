@@ -2,7 +2,7 @@ from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.core.utils import GetMessageData
 from src.frontend.telegram.settings import BOT
-from src.frontend.telegram.handlers.utils import MainDataclass
+from src.frontend.telegram.handlers.utils.md_dataclasses import MainDataclass
 
 KEY_MAIN_DATA_IN_RETRIEVE_DATA = "main_data"
 

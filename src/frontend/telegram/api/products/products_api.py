@@ -1,18 +1,18 @@
 import requests
 from pydantic import ValidationError
 
-from src.frontend.telegram.core.exceptions.messages import (
-    MESSAGE_AUTHENTICATION_ERROR,
-    MESSAGE_PRODUCT_ERROR,
+from src.frontend.telegram.core.exceptions.messages import MESSAGE_AUTHENTICATION_ERROR
+from src.frontend.telegram.core.exceptions import AuthenticationError
+from src.frontend.telegram.core.request import BearerAuth
+from src.frontend.telegram.settings import BACKEND_URL, EXP_DAYS
+from src.frontend.telegram.api.exc_crud_messages import (
     MESSAGE_POST_ERROR,
     MESSAGE_GET_ERROR,
     MESSAGE_DELETE_ERROR,
     MESSAGE_PUT_ERROR,
 )
-from src.frontend.telegram.core.exceptions import AuthenticationError, ProductError
-from src.frontend.telegram.core.request import BearerAuth
-from src.frontend.telegram.settings import BACKEND_URL, EXP_DAYS
 from .schemas import ProductInSchema, ProductInListSchema, ProductOutSchema
+from .exceptions import ProductError, MESSAGE_PRODUCT_ERROR
 
 QUERY_STRING_SEARCH_BY_NAME = "name"
 QUERY_STRING_SEARCH_BY_CATEGORY_ID = "category_id"
@@ -98,7 +98,11 @@ class ProductsAPI:
             raise self._main_exc(str(e))
 
     def put(self, element_id: int, put_element: _element_out_schema) -> None:
-        response = requests.put(f"{self._url}{element_id}", auth=BearerAuth(self._access_token), json=put_element.model_dump_json())
+        response = requests.put(
+            f"{self._url}{element_id}",
+            auth=BearerAuth(self._access_token),
+            json=put_element.model_dump_json(),
+        )
         try:
             if response.status_code == 401:
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")

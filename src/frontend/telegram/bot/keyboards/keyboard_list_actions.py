@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-
-
-@dataclass
 class KeyboardListActions:
 
     @property
@@ -27,6 +23,3 @@ class KeyboardListActions:
             self.action_get_product_by_name,
             self.action_get_products_by_exp_date
         ]
-
-
-KEYBOARD_LIST_ACTIONS= KeyboardListActions()

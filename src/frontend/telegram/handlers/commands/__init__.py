@@ -1,13 +1,9 @@
-from dataclasses import dataclass
-
 from telebot.types import BotCommand
 
 from src.frontend.telegram.settings import APP_NAME, BOT
 
 
-@dataclass
 class Commands:
-    app_name: str
 
     @property
     def start(self) -> tuple[str, str]:
@@ -15,7 +11,7 @@ class Commands:
 
     @property
     def login(self) -> tuple[str, str]:
-        return "login", f"Войти в аккаунт {self.app_name} или зарегистрироваться"
+        return "login", f"Войти в аккаунт {APP_NAME} или зарегистрироваться"
 
     @property
     def help(self) -> tuple[str, str]:
@@ -23,10 +19,10 @@ class Commands:
 
     @property
     def logout(self) -> tuple[str, str]:
-        return "logout", f"Выйти из аккаунта {self.app_name}"
+        return "logout", f"Выйти из аккаунта {APP_NAME}"
 
 
-COMMANDS = Commands(app_name=APP_NAME)
+COMMANDS = Commands()
 
 BOT.set_my_commands(
     [

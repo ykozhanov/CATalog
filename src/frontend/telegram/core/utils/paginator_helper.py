@@ -7,7 +7,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 T = TypeVar("T", bound=BaseModel)
 
 
-class PaginatorHelper:
+class PaginatorListHelper:
     CALLBACK_CREATE = "create"
     CALLBACK_PAGE = "page"
 

@@ -6,7 +6,7 @@ from telebot.types import Message, CallbackQuery
 from src.frontend.telegram.core.exceptions import AuthenticationError
 from src.frontend.telegram.api import UsersAPI, UserController
 from src.frontend.telegram.core.utils import SendMessage
-from src.frontend.telegram.handlers.messages_helper import MESSAGES_MAIN
+from src.frontend.telegram.handlers.utils import MainMessages
 from .main_data_contextmanager import MainDataContextmanager
 
 
@@ -25,13 +25,14 @@ def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., N
             return func(*args, **kwargs)
         sm = SendMessage(message)
         msg_data = sm.get_message_data()
+        main_m = MainMessages()
         try:
             result = func(*args, **kwargs)
         except AuthenticationError:
             try:
                 with MainDataContextmanager(message) as md:
                     if md.user is None:
-                        sm.send_message(text=MESSAGES_MAIN.message_to_login, finish_state=True)
+                        sm.send_message(text=main_m.to_login, finish_state=True)
                         return
                 user_in_schema = UsersAPI.token(refresh_jwt_token=md.user.refresh_jtw_token)
                 uc = UserController(telegram_user_id=msg_data.user_id)
@@ -40,7 +41,7 @@ def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., N
                 with MainDataContextmanager(message) as md:
                     md.user = user
             except AuthenticationError:
-                sm.send_message(text=MESSAGES_MAIN.message_to_login, finish_state=True)
+                sm.send_message(text=main_m.to_login, finish_state=True)
             else:
                 return func(*args, **kwargs)
         else:
