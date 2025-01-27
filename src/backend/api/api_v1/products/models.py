@@ -23,4 +23,9 @@ class Product(Base):
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
     category: Mapped[Category] = relationship(Category, back_populates="products", lazy="joined")
-    profile: Mapped[PROFILE_MODEL] = relationship(PROFILE_MODEL, back_populates="products", lazy="joined", cascade="all, delete-orphan")
+    profile: Mapped[PROFILE_MODEL] = relationship(
+        PROFILE_MODEL,
+        back_populates="products",
+        lazy="joined",
+        cascade="all, delete-orphan",
+    )
