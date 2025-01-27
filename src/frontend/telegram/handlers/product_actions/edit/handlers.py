@@ -32,16 +32,16 @@ y_or_n = KeyboardYesOrNo()
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=ProductsStatesGroup.products,
 )
-def handle_action_update_product(message: Message) -> None:
+def handle_action_update_product(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
-    product_id = int(message.text.split("#")[1])
+    product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         md.product = ProductDataclass()
-        if products := md.products:
-            md.old_product = products[product_id]
-        else:
-            sm.send_message(main_m.something_went_wrong, finish_state=True)
+        if products := md.products is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
+        md.old_product = products[product_index]
+
     sm.send_message(
         text=messages.ask_input_name,
         state=ProductUpdateStatesGroup.ask_input_name,
@@ -331,8 +331,11 @@ def handle_product_update_check_update_product(message: CallbackQuery):
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             product_id = md.old_product.id
-            p_api = ProductsAPI(md.user.access_jtw_token)
-            product = ProductOutSchema(**md.product.dict())
+            product_data = md.product
+            if a_token := md.user.access_jtw_token is None:
+                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+        p_api = ProductsAPI(a_token)
+        product = ProductOutSchema(**product_data.dict())
         p_api.put(product_id, product)
         with MainDataContextmanager(message) as md:
             md.product = None
@@ -348,7 +351,6 @@ def handle_product_update_check_update_product(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@check_authentication_decorator
 @BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_try_again)
 def handle_product_update_ask_try_again(message: CallbackQuery):
     sm = SendMessage(message)

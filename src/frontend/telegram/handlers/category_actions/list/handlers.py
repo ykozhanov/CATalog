@@ -26,7 +26,6 @@ templates = ProductUseActionTemplates()
 )
 def handler_product_use_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
-    sm.delete_message()
     product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         if products := md.products is None:

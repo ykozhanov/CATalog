@@ -6,7 +6,7 @@ from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
 class ProductCreateActionMessages:
     @property
     def input_name(self) -> str:
-        return "Введите название товара:"
+        return "Введите название нового товара:"
 
     @property
     def input_unit(self) -> str:

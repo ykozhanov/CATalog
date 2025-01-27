@@ -26,6 +26,7 @@ y_or_n = KeyboardYesOrNo()
 )
 def handler_product_delete_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         if products := md.products is None:
@@ -44,9 +45,11 @@ def handler_product_delete_action(message: CallbackQuery) -> None:
 @BOT.callback_query_handler(state=ProductDeleteStatesGroup.confirm_delete)
 def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     with MainDataContextmanager(message) as md:
         old_product = md.old_product
         a_token = md.user.access_jtw_token
+        md.old_product = None
     if message.data == y_or_n.callback_answer_yes:
         if old_product is None or a_token is None:
             return sm.send_message(main_m.something_went_wrong)
@@ -57,4 +60,3 @@ def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
         sm.send_message(templates.answer_no_md(old_product.name), parse_mode="Markdown", finish_state=True)
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
-        

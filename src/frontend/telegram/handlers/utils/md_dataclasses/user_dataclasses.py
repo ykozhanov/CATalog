@@ -27,6 +27,7 @@ class ProductDataclass:
 @dataclass
 class CategoryDataclass:
     name: str | None = None
+    delete_all_products: bool | None = None
 
     def dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -41,7 +41,7 @@ def handle_paginator_create_new_product(message: CallbackQuery):
     )
 
 
-@BOT.callback_query_handler(state=ProductsStatesGroup.ask_add_new_product)
+@BOT.callback_query_handler(state=ProductCreateStatesGroup.ask_add_new)
 def handle_ask_add_new_product(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
@@ -217,7 +217,7 @@ def handle_product_create_waiting_category(message: CallbackQuery):
             category = md.product.category_name
         sm.send_message(
             templates.check_md(name, unit, quantity, exp_date, note, category),
-            state=ProductCreateStatesGroup.check_new_product,
+            state=ProductCreateStatesGroup.check_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",
         )
@@ -227,14 +227,17 @@ def handle_product_create_waiting_category(message: CallbackQuery):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.check_new_product)
+@BOT.callback_query_handler(state=ProductCreateStatesGroup.check_new)
 def handle_product_create_check_new_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
-            p_api = ProductsAPI(md.user.access_jtw_token)
-            product = ProductOutSchema(**md.product.dict())
+            product_data = md.product
+            if a_token := md.user.access_jtw_token is None:
+                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+        p_api = ProductsAPI(a_token)
+        product = ProductOutSchema(**product_data.dict())
         p_api.post(product)
         with MainDataContextmanager(message) as md:
             md.product = None
@@ -244,7 +247,7 @@ def handle_product_create_check_new_product(message: CallbackQuery):
             md.product = None
         sm.send_message(
             messages.try_again,
-            state=ProductCreateStatesGroup.ask_add_new_product,
+            state=ProductCreateStatesGroup.ask_add_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
