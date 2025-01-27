@@ -1,7 +1,8 @@
 from datetime import date
 
-from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey, Float
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey, Float, event
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Mapper
+from sqlalchemy.engine import Connection
 
 from src.backend.core.database.models import Base
 
@@ -15,7 +16,7 @@ class Product(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(length=100), nullable=False, index=True)
     unit: Mapped[str] = mapped_column(String(length=10), nullable=False, default="шт.")
-    quantity: Mapped[float] = mapped_column(Float, CheckConstraint("quantity > 0"), nullable=False, default=0)
+    quantity: Mapped[float] = mapped_column(Float, CheckConstraint("quantity >= 0"), nullable=False, default=1)
     exp_date: Mapped[date] = mapped_column(Date)
     note: Mapped[str] = mapped_column(Text(length=500))
     created_at: Mapped[date] = mapped_column(Date, default=func.current_date)
@@ -29,3 +30,10 @@ class Product(Base):
         lazy="joined",
         cascade="all, delete-orphan",
     )
+
+
+def delete_product_if_quantity_zero(mapper: Mapper, connection: Connection, target: Product):
+    if target.quantity <= 0:
+        connection.execute(Product.__table__.delete().where(Product.id == target.id))
+
+event.listen(Product, "after_update", delete_product_if_quantity_zero)

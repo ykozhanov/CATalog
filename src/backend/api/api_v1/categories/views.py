@@ -52,9 +52,9 @@ class CategoriesByIDMethodView(MethodView):
     element_list_out_schema = CategoryListOutSchema
 
     @login_jwt_required_decorator
-    def get(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
+    def get(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
         try:
-            element = crud.read(model=self.model, pk=category_id)
+            element = crud.read(model=self.model, pk=element_id)
             if element is None:
                 raise NotFoundInDBError()
             if element.profile_id != current_user.profile.id:
@@ -67,9 +67,9 @@ class CategoriesByIDMethodView(MethodView):
             return jsonify(self.element_out_schema.model_validate(element)), 200
 
     @login_jwt_required_decorator
-    def put(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
+    def put(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
         try:
-            old_element = crud.read(self.model, pk=category_id)
+            old_element = crud.read(self.model, pk=element_id)
             if old_element is None:
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
@@ -91,10 +91,10 @@ class CategoriesByIDMethodView(MethodView):
             return jsonify(self.element_out_schema.model_validate(update_element)), 200
 
     @login_jwt_required_decorator
-    def delete(self, current_user: USER_MODEL, category_id: int) -> tuple[Response, int]:
+    def delete(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
         try:
             delete_all_products = request.args.get(QUERY_STRING_DELETE_ALL_PRODUCTS, "false").lower() == "true"
-            old_element = crud.read(self.model, pk=category_id)
+            old_element = crud.read(self.model, pk=element_id)
             if old_element is None:
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:

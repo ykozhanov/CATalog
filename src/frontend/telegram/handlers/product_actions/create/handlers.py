@@ -12,12 +12,13 @@ from src.frontend.telegram.handlers.utils import (
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
-from src.frontend.telegram.bot.states import ProductsStatesGroup, ProductCreateStatesGroup
+from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
 from .messages import ProductCreateActionMessages, ProductCreateActionTemplates
 from .utils import get_inline_categories
+from .states import ProductCreateStatesGroup
 
 main_m = MainMessages()
 messages = ProductCreateActionMessages()

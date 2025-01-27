@@ -44,6 +44,18 @@ class ProductsAPI:
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))
 
+    def get(self, element_id: int) -> _element_in_schema:
+        response = requests.get(url=f"{self._url}{element_id}", auth=BearerAuth(self._access_token))
+        try:
+            if response.status_code == 401:
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+            elif not response.ok:
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_POST_ERROR}: {response.text}")
+            data = response.json()
+            return self._element_in_schema(**data)
+        except (ValidationError, self._main_exc) as e:
+            raise self._main_exc(str(e))
+
     def get_all(self) -> list[_element_in_schema]:
         response = requests.get(self._url, auth=BearerAuth(self._access_token))
         try:
