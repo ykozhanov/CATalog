@@ -7,9 +7,11 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     exc_handler_decorator,
     check_authentication_decorator,
+    get_inline_paginator_list,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardListActions, KeyboardYesOrNo, KeyboardActionsByElement
 from src.frontend.telegram.bot.states import ActionsStatesGroup, ProductsStatesGroup
+from src.frontend.telegram.handlers.product_actions.create.states import ProductCreateStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import get_all_categories
 
@@ -45,21 +47,17 @@ def handle_action_get_all_products(message: Message) -> None:
             return
         products = md.products = p_api.get_all()
     if products:
-        ph = PaginatorListHelper(
+        inline_keyboard = get_inline_paginator_list(
             elements=products,
             prefix_element=PREFIX_PRODUCT_ELEMENT_PAGINATOR,
-            items_per_page=ITEMS_PER_PAGE,
+            attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
+            template=TEMPLATE_BUTTON_PRODUCT,
         )
-        buttons = ph.get_buttons_for_page(attrs=ATTRS_FOR_TEMPLATE_PRODUCT, template=TEMPLATE_BUTTON_PRODUCT)
-        sm.send_message(
-            text=messages.for_paginator,
-            state=ProductsStatesGroup.products,
-            inline_keyboard=ph.get_inline_keyboard(page_data=buttons),
-        )
+        sm.send_message(messages.for_paginator, state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
     else:
         sm.send_message(
             text=messages.empty,
-            state=ProductsStatesGroup.ask_add_new_product,
+            state=ProductCreateStatesGroup.ask_add_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             delete_reply_keyboard=True,
         )
@@ -67,7 +65,7 @@ def handle_action_get_all_products(message: Message) -> None:
 
 @BOT.callback_query_handler(
     func=lambda m: m.data == y_or_n.callback_answer_no,
-    state=ProductsStatesGroup.ask_add_new_product,
+    state=ProductCreateStatesGroup.ask_add_new,
 )
 def handle_state_ask_add_new_product_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
@@ -82,18 +80,15 @@ def handle_state_ask_add_new_product_no(message: CallbackQuery) -> None:
 def handle_products_paginator(message: CallbackQuery):
     with MainDataContextmanager(message) as md:
         products = md.products
-    ph = PaginatorListHelper(
+    sm = SendMessage(message)
+    inline_keyboard = get_inline_paginator_list(
         elements=products,
         prefix_element=PREFIX_PRODUCT_ELEMENT_PAGINATOR,
-        items_per_page=ITEMS_PER_PAGE,
+        attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
+        template=TEMPLATE_BUTTON_PRODUCT,
+        page=int(message.data.split("#")[1]),
     )
-    sm = SendMessage(message)
-    page = int(message.data.split("#")[1])
-    buttons = ph.get_buttons_for_page(attrs=ATTRS_FOR_TEMPLATE_PRODUCT, template=TEMPLATE_BUTTON_PRODUCT, page=page)
-    sm.send_message(
-        text=messages.for_paginator,
-        inline_keyboard=ph.get_inline_keyboard(page_data=buttons),
-    )
+    sm.send_message(messages.for_paginator, inline_keyboard=inline_keyboard)
 
 
 @BOT.callback_query_handler(

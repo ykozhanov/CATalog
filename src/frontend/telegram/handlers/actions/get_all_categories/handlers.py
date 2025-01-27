@@ -1,15 +1,17 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT, ITEMS_PER_PAGE
+from src.frontend.telegram.settings import BOT
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
     MainMessages,
     exc_handler_decorator,
     check_authentication_decorator,
+    get_inline_paginator_list,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardListActions, KeyboardYesOrNo, KeyboardActionsByElement
 from src.frontend.telegram.bot.states import ActionsStatesGroup, CategoriesStatesGroup
+from src.frontend.telegram.handlers.category_actions.create.states import CategoryCreateStatesGroup
 
 from .messages import GetAllCategoriesActionMessages, GetAllCategoriesActionTemplates
 from .utils import (
@@ -40,21 +42,17 @@ def handle_action_get_all_categories(message: Message) -> None:
         return
 
     if categories:
-        ph = PaginatorListHelper(
+        inline_keyboard = get_inline_paginator_list(
             elements=categories,
             prefix_element=PREFIX_CATEGORY_ELEMENT_PAGINATOR,
-            items_per_page=ITEMS_PER_PAGE,
+            attrs_for_template=ATTRS_FOR_TEMPLATE_CATEGORY,
+            template=TEMPLATE_BUTTON_CATEGORY,
         )
-        buttons = ph.get_buttons_for_page(attrs=ATTRS_FOR_TEMPLATE_CATEGORY, template=TEMPLATE_BUTTON_CATEGORY)
-        sm.send_message(
-            text=messages.for_paginator,
-            state=CategoriesStatesGroup.categories,
-            inline_keyboard=ph.get_inline_keyboard(page_data=buttons),
-        )
+        sm.send_message(messages.for_paginator, state=CategoriesStatesGroup.categories, inline_keyboard=inline_keyboard)
     else:
         sm.send_message(
             text=messages.empty,
-            state=CategoriesStatesGroup.ask_add_new_category,
+            state=CategoryCreateStatesGroup.ask_add_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             delete_reply_keyboard=True,
         )
@@ -62,7 +60,7 @@ def handle_action_get_all_categories(message: Message) -> None:
 
 @BOT.callback_query_handler(
     func=lambda m: m.data == y_or_n.callback_answer_no,
-    state=CategoriesStatesGroup.ask_add_new_category,
+    state=CategoryCreateStatesGroup.ask_add_new,
 )
 def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
@@ -77,15 +75,15 @@ def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
 def handle_categories_paginator(message: CallbackQuery):
     with MainDataContextmanager(message) as md:
         categories = md.categories
-    ph = PaginatorListHelper(
+    sm = SendMessage(message)
+    inline_keyboard = get_inline_paginator_list(
         elements=categories,
         prefix_element=PREFIX_CATEGORY_ELEMENT_PAGINATOR,
-        items_per_page=ITEMS_PER_PAGE,
+        attrs_for_template=ATTRS_FOR_TEMPLATE_CATEGORY,
+        template=TEMPLATE_BUTTON_CATEGORY,
+        page=int(message.data.split("#")[1]),
     )
-    sm = SendMessage(message)
-    page = int(message.data.split("#")[1])
-    buttons = ph.get_buttons_for_page(attrs=ATTRS_FOR_TEMPLATE_CATEGORY, template=TEMPLATE_BUTTON_CATEGORY, page=page)
-    sm.send_message(messages.for_paginator, inline_keyboard=ph.get_inline_keyboard(page_data=buttons))
+    sm.send_message(messages.for_paginator, inline_keyboard=inline_keyboard)
 
 
 @BOT.callback_query_handler(
