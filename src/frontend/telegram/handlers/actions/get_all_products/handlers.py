@@ -9,7 +9,7 @@ from src.frontend.telegram.handlers.utils import (
     check_authentication_decorator,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardListActions, KeyboardYesOrNo, KeyboardActionsByElement
-from src.frontend.telegram.bot.states import ProductsStatesGroup, ActionsStatesGroup
+from src.frontend.telegram.bot.states import ActionsStatesGroup, ProductsStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import get_all_categories
 

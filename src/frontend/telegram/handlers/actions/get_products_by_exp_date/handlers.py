@@ -9,8 +9,8 @@ from src.frontend.telegram.handlers.utils import (
     exc_handler_decorator
 )
 
-from src.frontend.telegram.bot.keyboards import KeyboardListActions
 from src.frontend.telegram.bot.states import ProductsStatesGroup, ActionsStatesGroup
+from src.frontend.telegram.bot.keyboards import KeyboardListActions
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.core.utils import PaginatorListHelper
 from src.frontend.telegram.handlers.actions.get_all_products.utils import (
