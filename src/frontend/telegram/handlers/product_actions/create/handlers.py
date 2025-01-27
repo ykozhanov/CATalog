@@ -192,12 +192,29 @@ def handle_product_create_waiting_input_note(message: Message):
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
         md.product.note = message.text
+        category_id = md.product.category_id
+        category_name = md.product.category_name
     inline_keyboard = get_inline_categories(message)
-    sm.send_message(
-        text=messages.choice_category,
-        state=ProductCreateStatesGroup.waiting_choice_category,
-        inline_keyboard=inline_keyboard,
-    )
+    if category_id is None or category_name is None:
+        sm.send_message(
+            messages.choice_category,
+            state=ProductCreateStatesGroup.waiting_choice_category,
+            inline_keyboard=inline_keyboard,
+        )
+    else:
+        with MainDataContextmanager(message) as md:
+            name = md.product.name
+            unit = md.product.unit
+            quantity = md.product.quantity
+            exp_date = md.product.exp_date
+            note = md.product.note
+            category = md.product.category_name
+        sm.send_message(
+            templates.check_md(name, unit, quantity, exp_date, note, category),
+            state=ProductCreateStatesGroup.check_new,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
+            parse_mode="Markdown",
+        )
 
 
 @BOT.callback_query_handler(state=ProductCreateStatesGroup.waiting_choice_category)

@@ -1,36 +1,7 @@
-# from datetime import datetime
-#
-# from telebot.types import Message, CallbackQuery
-#
-# from src.frontend.telegram.settings import BOT
-# from src.frontend.telegram.core.utils import SendMessage
-# from src.frontend.telegram.handlers.utils import (
-#     MainDataContextmanager,
-#     MainMessages,
-#     check_authentication_decorator,
-#     exc_handler_decorator,
-# )
-# from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
-# from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement
-# from src.frontend.telegram.bot.states import ProductsStatesGroup
-# from src.frontend.telegram.api import ProductsAPI
-# from src.frontend.telegram.api.products.schemas import ProductOutSchema
-# from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
-# from src.frontend.telegram.handlers.actions.get_all_products.utils import get_category
-#
-# from .utils import get_inline_categories
-# from .messages import ProductUpdateActionMessages, ProductUpdateActionTemplates
-# from .states import ProductUpdateStatesGroup
-#
-# main_m = MainMessages()
-# messages = ProductUpdateActionMessages()
-# templates = ProductUpdateActionTemplates()
-# y_or_n = KeyboardYesOrNo()
-
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.settings import BOT
-from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
+from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
     MainMessages,

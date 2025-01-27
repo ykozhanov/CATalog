@@ -1,73 +1,64 @@
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery
 
 from src.frontend.telegram.settings import BOT
-from src.frontend.telegram.bot.states import ProductsStatesGroup
-from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement
-from src.frontend.telegram.handlers.utils import (
-    MainMessages,
-    MainDataContextmanager,
-    exc_handler_decorator,
-    check_authentication_decorator,
-)
 from src.frontend.telegram.core.utils import SendMessage
+from src.frontend.telegram.handlers.utils import (
+    MainDataContextmanager,
+    MainMessages,
+    check_authentication_decorator,
+    exc_handler_decorator,
+    get_inline_paginator_list,
+)
+from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement, KeyboardYesOrNo
+from src.frontend.telegram.bot.states import CategoriesStatesGroup, ProductsStatesGroup
+from src.frontend.telegram.handlers.product_actions.create.states import ProductCreateStatesGroup
+from src.frontend.telegram.handlers.actions.get_all_products.utils import (
+    PREFIX_PRODUCT_ELEMENT_PAGINATOR,
+    TEMPLATE_BUTTON_PRODUCT,
+    ATTRS_FOR_TEMPLATE_PRODUCT,
+)
 from src.frontend.telegram.api import ProductsAPI
 
-from .messages import ProductUseActionTemplates, ProductUseActionMessages
-from .states import ProductUseStatesGroup
+from .messages import CategoryListActionTemplates
 
 main_m = MainMessages()
-messages = ProductUseActionMessages()
-templates = ProductUseActionTemplates()
-
-
-@BOT.callback_query_handler(
-    func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.USE_PREFIX,
-    state=ProductsStatesGroup.products,
-)
-def handler_product_use_action(message: CallbackQuery) -> None:
-    sm = SendMessage(message)
-    product_index = int(message.data.split("#")[1])
-    with MainDataContextmanager(message) as md:
-        if products := md.products is None:
-            return sm.send_message(main_m.something_went_wrong, finish_state=True)
-        md.old_product = old_product = products[product_index]
-    sm.send_message(
-        templates.old_md(name=old_product.name, unit=old_product.unit, quantity=old_product.quantity),
-        parse_mode="Markdown",
-        state=ProductUseStatesGroup.input_diff,
-    )
+templates = CategoryListActionTemplates()
+y_or_n = KeyboardYesOrNo()
 
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(state=ProductUseStatesGroup.input_diff)
-def handle_product_use_input_diff(message: Message) -> None:
+@BOT.callback_query_handler(
+    func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.LIST_PREFIX,
+    state=CategoriesStatesGroup.categories,
+)
+def handle_category_list_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
+    category_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
-        old_product = md.old_product
         a_token = md.user.access_jtw_token
-        md.old_product = None
-    if old_product is None or a_token is None:
-        return sm.send_message(main_m.something_went_wrong)
-    try:
-        diff = float(message.text)
-    except ValueError:
-        return sm.send_message(messages.error_diff)
-    if diff > old_product.quantity:
-        return sm.send_message(templates.error_diff(old_product.quantity))
-
-    new_quantity = old_product.quantity - diff
-    new_product = old_product
-    new_product.quantity = new_quantity
+        categories = md.categories
+        if categories is None or a_token is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
+        category = categories[category_index]
+        md.product.category_id = category_id = category.id
+        md.product.category_name = name = category.name
 
     p_api = ProductsAPI(a_token)
-    p_api.put(old_product.id, new_product)
-
-    if new_quantity <= 0:
-        return sm.send_message(templates.delete_md(new_product.name), parse_mode="Markdown", finish_state=True)
-
-    sm.send_message(
-        templates.new_md(new_product.name, new_product.unit, new_product.quantity),
-        parse_mode="Markdown",
-        finish_state=True,
-    )
+    products = p_api.get_by(category_id=category_id)
+    if products:
+        inline_keyboard = get_inline_paginator_list(
+            elements=products,
+            prefix_element=PREFIX_PRODUCT_ELEMENT_PAGINATOR,
+            attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
+            template=TEMPLATE_BUTTON_PRODUCT,
+        )
+        sm.send_message(templates.list_md(name), state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
+    else:
+        sm.send_message(
+            text=templates.empty_md(name),
+            state=ProductCreateStatesGroup.ask_add_new,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
+            delete_reply_keyboard=True,
+        )
