@@ -1,7 +1,7 @@
 from src.frontend.telegram.handlers.commands import COMMANDS
 
 
-class ProductUpdateActionMessages:
+class ProductUseActionMessages:
     @property
     def error_diff(self) -> str:
         return "Использованное количество должно быть положительным числом!\nПопробуйте еще раз:"
@@ -35,6 +35,7 @@ class ProductUseActionTemplates:
 
     @staticmethod
     def delete_md(name: str) -> str:
-        return f"""Товар **{name}** закончился и успешно удалён!:
+        return f"""Товар **{name}** закончился и успешно удалён!
+        
                 Вернуться к списку действий /{COMMANDS.help[0]}
                 """

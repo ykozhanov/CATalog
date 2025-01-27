@@ -6,9 +6,9 @@ class KeyboardActionsByElement:
     USE_PREFIX = "use"
     LIST_PREFIX = "list"
 
-    def __init__(self, page: int, element_id: int):
+    def __init__(self, page: int, element_index: int):
         self._page = page
-        self._element_id = element_id
+        self._element_index = element_index
 
 
     @property
@@ -33,19 +33,19 @@ class KeyboardActionsByElement:
 
     @property
     def callback_answer_edit(self) -> str:
-        return f"{self.EDIT_PREFIX}#{self._element_id}"
+        return f"{self.EDIT_PREFIX}#{self._element_index}"
 
     @property
     def callback_answer_delete(self) -> str:
-        return f"{self.DELETE_PREFIX}#{self._element_id}"
+        return f"{self.DELETE_PREFIX}#{self._element_index}"
 
     @property
     def callback_answer_use(self) -> str:
-        return f"{self.USE_PREFIX}#{self._element_id}"
+        return f"{self.USE_PREFIX}#{self._element_index}"
 
     @property
     def callback_answer_list(self) -> str:
-        return f"{self.LIST_PREFIX}#{self._element_id}"
+        return f"{self.LIST_PREFIX}#{self._element_index}"
 
     @property
     def callback_answer_back(self) -> str:

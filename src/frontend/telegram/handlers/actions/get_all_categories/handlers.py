@@ -99,5 +99,5 @@ def handle_category_element(message: CallbackQuery):
         categories = md.categories
     category = categories[category_index]
     text = templates.detail_md(category.name)
-    inline_keyboard = KeyboardActionsByElement(page, category.id).get_inline_keyboard_category()
+    inline_keyboard = KeyboardActionsByElement(page, category_index).get_inline_keyboard_category()
     sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")

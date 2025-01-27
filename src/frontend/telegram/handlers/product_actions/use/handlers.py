@@ -12,30 +12,27 @@ from src.frontend.telegram.handlers.utils import (
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.api import ProductsAPI
 
-from .messages import ProductUseActionTemplates, ProductUpdateActionMessages
+from .messages import ProductUseActionTemplates, ProductUseActionMessages
 from .states import ProductUseStatesGroup
 
 main_m = MainMessages()
-messages = ProductUpdateActionMessages()
+messages = ProductUseActionMessages()
 templates = ProductUseActionTemplates()
 
 
-@exc_handler_decorator
-@check_authentication_decorator
 @BOT.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.USE_PREFIX,
     state=ProductsStatesGroup.products,
 )
 def handler_product_use_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
-    product_id = int(message.data.split("#")[1])
+    product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
-        if a_token := md.user.access_jtw_token is None:
+        if products := md.products is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
-        p_api = ProductsAPI(a_token)
-        md.old_product = product = p_api.get(product_id)
+        md.old_product = old_product = products[product_index]
     sm.send_message(
-        templates.old_md(name=product.name, unit=product.unit, quantity=product.quantity),
+        templates.old_md(name=old_product.name, unit=old_product.unit, quantity=old_product.quantity),
         parse_mode="Markdown",
         state=ProductUseStatesGroup.input_diff,
     )
