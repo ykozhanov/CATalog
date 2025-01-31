@@ -25,6 +25,7 @@ main_m = MainMessages()
 messages = GetAllCategoriesActionMessages()
 templates = GetAllCategoriesActionTemplates()
 y_or_n = KeyboardYesOrNo()
+paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByElement.BACK_PREFIX)
 
 
 @exc_handler_decorator
@@ -69,7 +70,7 @@ def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
 
 @check_authentication_decorator
 @BOT.callback_query_handler(
-    func=lambda m: m.split("#")[0] == PaginatorListHelper.CALLBACK_PAGE,
+    func=lambda m: m.split("#")[0] in paginator_callbacks,
     state=CategoriesStatesGroup.categories,
 )
 def handle_categories_paginator(message: CallbackQuery):

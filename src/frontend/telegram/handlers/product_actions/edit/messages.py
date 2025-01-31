@@ -1,6 +1,7 @@
 from datetime import date
 
 from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
+from src.frontend.telegram.handlers.product_actions.create.messages import MAX_LEN_NAME, MAX_LEN_UNIT, MAX_LEN_NOTE
 
 
 class ProductUpdateActionMessages:
@@ -10,7 +11,7 @@ class ProductUpdateActionMessages:
 
     @property
     def input_name(self) -> str:
-        return "Введите название товара:"
+        return f"Введите название товара (не более {MAX_LEN_NAME} символов):"
 
     @property
     def ask_input_unit(self) -> str:
@@ -18,7 +19,7 @@ class ProductUpdateActionMessages:
 
     @property
     def input_unit(self) -> str:
-        return "Введите единицу измерения:"
+        return f"Введите единицу измерения (не более {MAX_LEN_UNIT} символов):"
 
     @property
     def ask_input_quantity(self) -> str:
@@ -66,7 +67,7 @@ class ProductUpdateActionMessages:
 
     @property
     def input_note(self) -> str:
-        return "Введите примечание:"
+        return f"Введите примечание (не более {MAX_LEN_NOTE} символов):"
 
     @property
     def ask_choice_category(self) -> str:
@@ -105,3 +106,7 @@ class ProductUpdateActionTemplates:
         
         Всё верно?
         """
+
+    @staticmethod
+    def error_max_len(max_len: int) -> str:
+        return f"Длина превышает {max_len} символов!\nПопробуйте еще раз:"

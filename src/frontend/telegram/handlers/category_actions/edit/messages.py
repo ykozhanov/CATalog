@@ -1,12 +1,10 @@
-from datetime import date
-
-from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
+from src.frontend.telegram.handlers.category_actions.create.messages import MAX_LEN_NAME
 
 
 class CategoryUpdateActionMessages:
     @property
     def input_name(self) -> str:
-        return "Введите новое название товара:"
+        return f"Введите новое название товара (не более {MAX_LEN_NAME} символов):"
 
     @property
     def try_again(self) -> str:
@@ -25,3 +23,8 @@ class CategoryUpdateActionTemplates:
         
         Всё верно?
         """
+
+    @staticmethod
+    def error_max_len(max_len: int) -> str:
+        return f"Длина превышает {max_len} символов!\nПопробуйте еще раз:"
+

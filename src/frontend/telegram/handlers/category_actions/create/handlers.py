@@ -13,7 +13,7 @@ from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
 from src.frontend.telegram.bot.states import CategoriesStatesGroup
 from src.frontend.telegram.api import CategoriesAPI
 from src.frontend.telegram.api.categories.schemas import CategoryOutSchema
-from .messages import CategoryCreateActionTemplates, CategoryCreateActionMessages
+from .messages import CategoryCreateActionTemplates, CategoryCreateActionMessages, MAX_LEN_NAME
 from .states import CategoryCreateStatesGroup
 
 main_m = MainMessages()
@@ -57,6 +57,8 @@ def handle_category_create_ask_add_new(message: CallbackQuery) -> None:
 @BOT.message_handler(state=CategoryCreateStatesGroup.waiting_input_name)
 def handle_category_create_waiting_input_name(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NAME:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
         md.category.name = name = message.text
     sm.send_message(

@@ -1,7 +1,10 @@
+MAX_LEN_NAME = 100
+
+
 class CategoryCreateActionMessages:
     @property
     def input_name(self) -> str:
-        return "Введите название новой категории:"
+        return f"Введите название новой категории (не более {MAX_LEN_NAME} символов):"
 
 
     @property
@@ -23,3 +26,7 @@ class CategoryCreateActionTemplates:
         
         Всё верно?
         """
+
+    @staticmethod
+    def error_max_len(max_len: int) -> str:
+        return f"Длина превышает {max_len} символов!\nПопробуйте еще раз:"

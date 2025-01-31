@@ -16,7 +16,13 @@ from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
-from .messages import ProductCreateActionMessages, ProductCreateActionTemplates
+from .messages import (
+    ProductCreateActionMessages,
+    ProductCreateActionTemplates,
+    MAX_LEN_NOTE,
+    MAX_LEN_UNIT,
+    MAX_LEN_NAME,
+)
 from .utils import get_inline_categories
 from .states import ProductCreateStatesGroup
 
@@ -61,6 +67,8 @@ def handle_ask_add_new_product(message: CallbackQuery) -> None:
 @BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_name)
 def handle_product_create_waiting_input_name(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NAME:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
         md.product.name = message.text
     sm.send_message(
@@ -72,6 +80,8 @@ def handle_product_create_waiting_input_name(message: Message):
 @BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_unit)
 def handle_product_create_waiting_input_unit(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_UNIT:
+        return sm.send_message(templates.error_max_len(MAX_LEN_UNIT))
     with MainDataContextmanager(message) as md:
         md.product.unit = message.text
     sm.send_message(
@@ -84,9 +94,10 @@ def handle_product_create_waiting_input_unit(message: Message):
 def handle_product_create_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
-        quantity = float(message.text.replace(",", "."))
+        if quantity := float(message.text.replace(",", ".")) < 0:
+            raise ValueError()
     except ValueError:
-        sm.send_message(messages.error_quantity)
+        return sm.send_message(messages.error_quantity)
     else:
         with MainDataContextmanager(message) as md:
             md.product.quantity = quantity
@@ -190,6 +201,8 @@ def handle_product_create_ask_input_note(message: CallbackQuery):
 @BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
 def handle_product_create_waiting_input_note(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NOTE:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NOTE))
     with MainDataContextmanager(message) as md:
         md.product.note = message.text
         category_id = md.product.category_id

@@ -13,7 +13,7 @@ from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActions
 from src.frontend.telegram.bot.states import CategoriesStatesGroup
 from src.frontend.telegram.api import CategoriesAPI
 from src.frontend.telegram.api.categories.schemas import CategoryOutSchema
-from .messages import CategoryUpdateActionMessages, CategoryUpdateActionTemplates
+from .messages import CategoryUpdateActionMessages, CategoryUpdateActionTemplates, MAX_LEN_NAME
 from .states import CategoryUpdateStatesGroup
 
 main_m = MainMessages()
@@ -26,12 +26,12 @@ y_or_n = KeyboardYesOrNo()
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=CategoriesStatesGroup.categories,
 )
-def handle_action_update_product(message: CallbackQuery) -> None:
+def handle_action_update_category(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
     category_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
-        md.product = CategoryDataclass()
+        md.category = CategoryDataclass()
         if categories := md.categories is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_category = categories[category_index]
@@ -44,8 +44,10 @@ def handle_action_update_product(message: CallbackQuery) -> None:
 @BOT.message_handler(state=CategoryUpdateStatesGroup.waiting_input_name)
 def handle_category_update_waiting_input_name(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NAME:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
-        md.product.name = name = message.text
+        md.category.name = name = message.text
     sm.send_message(
         templates.check_md(name),
         state=CategoryUpdateStatesGroup.check_update,
@@ -88,7 +90,7 @@ def handle_category_update_ask_try_again(message: CallbackQuery):
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
-            md.product = CategoryDataclass()
+            md.category = CategoryDataclass()
         sm.send_message(
             text=messages.input_name,
             state=CategoryUpdateStatesGroup.waiting_input_name,

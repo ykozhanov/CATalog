@@ -19,7 +19,13 @@ from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREF
 from src.frontend.telegram.handlers.actions.get_all_products.utils import get_category
 
 from .utils import get_inline_categories
-from .messages import ProductUpdateActionMessages, ProductUpdateActionTemplates
+from .messages import (
+    ProductUpdateActionMessages,
+    ProductUpdateActionTemplates,
+    MAX_LEN_UNIT,
+    MAX_LEN_NAME,
+    MAX_LEN_NOTE,
+)
 from .states import ProductUpdateStatesGroup
 
 main_m = MainMessages()
@@ -70,6 +76,8 @@ def handle_product_update_message_ask_input_name(message: CallbackQuery):
 @BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_name)
 def handle_product_update_waiting_input_name(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NAME:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
         md.product.name = message.text
     sm.send_message(
@@ -103,6 +111,8 @@ def handle_product_update_message_ask_input_unit(message: CallbackQuery):
 @BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_unit)
 def handle_product_update_waiting_input_unit(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_UNIT:
+        return sm.send_message(templates.error_max_len(MAX_LEN_UNIT))
     with MainDataContextmanager(message) as md:
         md.product.unit = message.text
     sm.send_message(
@@ -250,6 +260,8 @@ def handle_product_update_ask_input_note(message: CallbackQuery):
 @BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_note)
 def handle_product_update_waiting_input_note(message: Message):
     sm = SendMessage(message)
+    if len(message.text) > MAX_LEN_NOTE:
+        return sm.send_message(templates.error_max_len(MAX_LEN_NOTE))
     with MainDataContextmanager(message) as md:
         md.product.note = message.text
     sm.send_message(
