@@ -137,7 +137,7 @@ def handle_product_update_message_ask_input_quantity(message: CallbackQuery):
 def handle_product_update_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
-        quantity = float(message.text)
+        quantity = float(message.text.replace(",", "."))
     except ValueError:
         sm.send_message(messages.error_quantity)
     else:
