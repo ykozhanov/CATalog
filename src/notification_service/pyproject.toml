@@ -8,6 +8,8 @@ authors = ["ykozhanov <ykozhanov97@gmail.com>"]
 python = "3.13"
 celery = {extras = ["redis"], version = "5.4.0"}
 pytelegrambotapi = "4.26.0"
+pydantic = "2.10.4"
+pydantic-settings = "2.7.1"
 
 
 [build-system]
