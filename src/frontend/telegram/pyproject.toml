@@ -1,19 +1,14 @@
-[tool.poetry]
-name = "telegram"
+[project]
+name = "telegram-catalog"
 version = "0.1.0"
 description = ""
+requires-python = "==3.13.0"
 authors = ["ykozhanov <ykozhanov97@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "3.13"
-pytelegrambotapi = "4.26.0"
-sqlalchemy = "2.0.36"
-pydantic = "2.10.4"
-requests = "2.32.3"
-python-dotenv = "1.0.1"
-python-telegram-bot-pagination = "^0.0.3"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "sqlalchemy==2.0.36",
+    "pytelegrambotapi==4.26.0",
+    "sqlalchemy==2.0.36",
+    "pydantic==2.10.4",
+    "requests==2.32.3",
+    "python-dotenv==1.0.1",
+]

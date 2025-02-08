@@ -1,17 +1,12 @@
-[tool.poetry]
-name = "notification-service"
+[project]
+name = "telegram-catalog"
 version = "0.1.0"
 description = ""
+requires-python = "==3.13.0"
 authors = ["ykozhanov <ykozhanov97@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "3.13"
-celery = {extras = ["redis"], version = "5.4.0"}
-pytelegrambotapi = "4.26.0"
-pydantic = "2.10.4"
-pydantic-settings = "2.7.1"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "pytelegrambotapi==4.26.0",
+    "pydantic==2.10.4",
+    "pydantic-settings==2.7.1",
+    "celery[redis]==5.4.0",
+]
