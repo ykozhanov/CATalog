@@ -20,7 +20,6 @@ QUERY_STRING_SEARCH_BY_EXP_DAYS = "exp_days"
 
 
 class ProductsAPI:
-    _token_bearer = "Bearer"
     _api_prefix = "/products/"
     _url = f"{BACKEND_URL}{_api_prefix}"
 
@@ -77,7 +76,7 @@ class ProductsAPI:
             name: str | None = None,
             category_id: int | None = None,
             exp_days: int = EXP_DAYS,
-    ) -> _element_in_list_schema:
+    ) -> list[_element_in_schema]:
         if name:
             params = {QUERY_STRING_SEARCH_BY_NAME: name}
         elif category_id:
@@ -91,7 +90,7 @@ class ProductsAPI:
                 data_for_list = {
                     self._attr_for_list_out_schema: [self._element_in_schema(**e) for e in response.json()],
                 }
-                return self._element_in_list_schema(**data_for_list)
+                return getattr(self._element_in_list_schema(**data_for_list), self._attr_for_list_out_schema)
             if response.status_code == 401:
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
             else:

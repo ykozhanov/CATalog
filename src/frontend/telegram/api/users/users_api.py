@@ -7,13 +7,10 @@ from src.frontend.telegram.core.request import BearerAuth
 from src.frontend.telegram.settings import BACKEND_URL
 
 from .schemas import UserInSchema
-from .exceptions import CreateUserError, MESSAGE_CREATE_USER_ERROR, MESSAGE_GET_TOKEN_ERROR
+from .exceptions import CreateOrGetUserError, MESSAGE_CREATE_USER_ERROR, MESSAGE_GET_TOKEN_ERROR
 
 
 class UsersAPI:
-    _token_bearer = "Bearer"
-    _token_basic = "Basic"
-
     _api_prefix_login = "/users/login/"
     _api_prefix_register = "/users/register/"
     _api_prefix_token = "/users/token/"
@@ -31,9 +28,9 @@ class UsersAPI:
             if response.ok:
                 return UserInSchema(**response.json())
             else:
-                raise CreateUserError(f"{MESSAGE_CREATE_USER_ERROR}: {response.text}")
+                raise CreateOrGetUserError(f"{MESSAGE_CREATE_USER_ERROR}: {response.text}")
         except ValidationError as e:
-            raise CreateUserError(str(e))
+            raise CreateOrGetUserError(str(e))
 
     @classmethod
     def token(cls, refresh_jwt_token: str) -> UserInSchema:
@@ -47,6 +44,6 @@ class UsersAPI:
             elif response.status_code == 401:
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
             else:
-                raise CreateUserError(f"{MESSAGE_GET_TOKEN_ERROR}: {response.text}")
+                raise CreateOrGetUserError(f"{MESSAGE_GET_TOKEN_ERROR}: {response.text}")
         except ValidationError as e:
-            raise CreateUserError(str(e))
+            raise CreateOrGetUserError(str(e))

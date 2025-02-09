@@ -18,7 +18,6 @@ QUERY_STRING_DELETE_ALL_PRODUCTS = "delete_all_products"
 
 
 class CategoriesAPI:
-    _token_bearer = "Bearer"
     _api_prefix = "/categories/"
     _url = f"{BACKEND_URL}{_api_prefix}"
 

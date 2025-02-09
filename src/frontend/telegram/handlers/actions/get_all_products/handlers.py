@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT, ITEMS_PER_PAGE
+from src.frontend.telegram.settings import BOT
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,

@@ -1,12 +1,12 @@
-from datetime import timedelta
+from typing import Callable
 
 from pydantic import BaseModel
-from celery import Task
+from celery.schedules import crontab
 
 
 class PeriodicTask(BaseModel):
-    interval: timedelta
-    task: Task
+    schedule: crontab
+    task: Callable
     name: str
     args: list = []
     kwargs: dict = {}

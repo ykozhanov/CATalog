@@ -18,7 +18,7 @@ all_beats: list[PeriodicTask] = [
 def setup_periodic_tasks(sender: Celery, **kwargs):
     for b in all_beats:
         sender.add_periodic_task(
-            b.interval,
+            b.schedule,
             b.task(*b.args, **b.kwargs),
             name=b.name,
             expires=b.expires,

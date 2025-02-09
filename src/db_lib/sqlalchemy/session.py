@@ -28,11 +28,11 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             else:
                 return obj
 
-    def read(self, model: type[T], pk: int | str) -> T | None:
+    def read(self, model: type[T], pk: int | str | tuple) -> T | None:
         with next(self._session_generator) as session:
             return session.query(model).get(pk)
 
-    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str) -> T:
+    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str | tuple) -> T:
         with next(self._session_generator) as session:
             obj = session.query(model).get(pk)
             if obj is None:
@@ -43,7 +43,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 session.commit()
             return obj
 
-    def delete(self, model: type[T], pk: int | str) -> None:
+    def delete(self, model: type[T], pk: int | str | tuple) -> None:
         with next(self._session_generator) as session:
             obj = self.read(model=model, pk=pk)
             if obj is None:

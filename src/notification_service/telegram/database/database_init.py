@@ -3,7 +3,7 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 
-from src.frontend.telegram.settings import get_db_path
+from src.notification_service.telegram.settings import get_db_path
 
 engine = create_engine(get_db_path())
 

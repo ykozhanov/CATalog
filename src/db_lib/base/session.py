@@ -11,15 +11,15 @@ class DBSessionCRUDInterface(ABC):
         pass
 
     @abstractmethod
-    def read(self, model: type[T], pk: int | str) -> T | None:
+    def read(self, model: type[T], pk: int | str | tuple) -> T | None:
         pass
 
     @abstractmethod
-    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str) -> T:
+    def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str | tuple) -> T:
         pass
 
     @abstractmethod
-    def delete(self, model: type, pk: int | str) -> None:
+    def delete(self, model: type, pk: int | str | tuple) -> None:
         pass
 
     @abstractmethod

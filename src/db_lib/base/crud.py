@@ -52,13 +52,13 @@ class DBControllerCRUD(DBControllerCRUDInterface):
         new_obj = self._session_crud.create(obj=obj)
         return new_obj
 
-    def read(self, model: type[T], pk: int | str) -> T | None:
+    def read(self, model: type[T], pk: int | str | tuple) -> T | None:
         return self._session_crud.read(model=model, pk=pk)
 
-    def update(self, model: type[T], pk: int | str, obj_data: dict) -> T:
+    def update(self, model: type[T], pk: int | str | tuple, obj_data: dict) -> T:
         return self._session_crud.update(model=model, obj_data=obj_data, pk=pk)
 
-    def delete(self, model: type[T], pk: int | str) -> None:
+    def delete(self, model: type[T], pk: int | str | tuple) -> None:
         self._session_crud.delete(model=model, pk=pk)
 
     def read_all(self, model: type[T], order_by: str | None = None) -> list[T]:

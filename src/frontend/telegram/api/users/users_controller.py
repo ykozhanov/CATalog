@@ -2,9 +2,8 @@ from src.db_lib.base.exceptions import IntegrityDBError
 
 from src.frontend.telegram.core.utils import crud
 from src.frontend.telegram.core.database.models import User
-from src.frontend.telegram.core.exceptions import CreateUserError
-from src.frontend.telegram.core.exceptions.messages import MESSAGE_CREATE_USER_ERROR
 
+from .exceptions import CreateOrGetUserError, MESSAGE_CREATE_USER_ERROR
 from .schemas import UserInSchema
 
 
@@ -17,7 +16,7 @@ class UserController:
         try:
             new_user = User(telegram_user_id=self._telegram_user_id, **user_in_schema.model_dump())
         except IntegrityDBError as e:
-            raise CreateUserError(f"{MESSAGE_CREATE_USER_ERROR}: {str(e)}")
+            raise CreateOrGetUserError(f"{MESSAGE_CREATE_USER_ERROR}: {str(e)}")
         else:
             return crud.create(new_user)
 
