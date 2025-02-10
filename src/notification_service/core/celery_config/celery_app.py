@@ -1,5 +1,7 @@
 from celery import Celery
 
+from pytz import timezone
+
 from src.notification_service.core.settings import Settings
 from src.notification_service.core.celery_config.schemas import PeriodicTask
 
@@ -23,3 +25,5 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
             name=b.name,
             expires=b.expires,
         )
+
+app.conf.timezone = "UTC"
