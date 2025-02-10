@@ -7,6 +7,8 @@ from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
 from src.frontend.telegram.bot.states import UsersStatesGroup
 from src.frontend.telegram.api import UserController
 from src.frontend.telegram.handlers.commands import COMMANDS
+from src.frontend.telegram.broker_kafka import UserSubject
+
 from .messages import LogoutCommandMessages
 
 main_m = MainMessages()
@@ -36,6 +38,7 @@ def handle_ask_logout(message: CallbackQuery) -> None:
         with MainDataContextmanager(message) as md:
             md.user = None
         UserController(telegram_user_id=msg_data.user_id).delete_user()
+        UserSubject(user_id=msg_data.user_id, chat_id=msg_data.chat_id).delete_user()
         sm.send_message(messages.callback_yes, finish_state=True)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(messages.callback_no, finish_state=True)

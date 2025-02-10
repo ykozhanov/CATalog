@@ -6,6 +6,11 @@ from src.frontend.telegram.api.users.users_api import UsersAPI
 from src.frontend.telegram.api.users.users_controller import UserController
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
 from src.frontend.telegram.core.utils import SendMessage
+from src.frontend.telegram.broker_kafka import UserSubject
+
+from .messages import LoginCommandTemplates
+
+templates = LoginCommandTemplates()
 
 
 def is_valid_email(email: str) -> bool:
@@ -27,8 +32,13 @@ def login_user(message: Message | CallbackQuery) -> None:
         uc.delete_user()
         user = uc.add_user(user_in_schema)
         md.user = user
+        UserSubject(
+            user_id=msg_data.user_id,
+            chat_id=msg_data.chat_id,
+            refresh_token=user.refresh_jtw_token,
+        ).create_user()
         sm.send_message(
-            text=MESSAGES_COMMAND_LOGIN.template_message_after_login(md.login.username),
+            text=templates.after_login(md.login.username),
             finish_state=True,
         )
         md.login = None

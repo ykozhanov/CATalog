@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
+class KafkaSettings(BaseSettings):
+    topic_name_new_telegram_user = "new_telegram_user"
+    topic_name_delete_telegram_user = "delete_telegram_user"
+    bootstrap_servers = "kafka:9092"
+
+
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
     return "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
         username=Settings.db_username_notification_service,

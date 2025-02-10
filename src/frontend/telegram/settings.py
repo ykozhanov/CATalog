@@ -35,3 +35,7 @@ DISPLAY_DATE_FORMATE = "%Y.%m.%d"
 EXP_DAYS = int(os.getenv("EXP_DAYS", "3"))
 
 ITEMS_PER_PAGE = 5
+
+KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
+KAFKA_TOPIC_ADD_NEW_USER = "new_telegram_user"
+KAFKA_TOPIC_DELETE_USER = "delete_telegram_user"
