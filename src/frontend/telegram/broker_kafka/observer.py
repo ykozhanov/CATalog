@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 from pydantic import BaseModel
 
 from src.frontend.telegram.broker_kafka.schemas import TelegramUserSchema
-from src.frontend.telegram.broker_kafka.broker import producer
+from src.frontend.telegram.broker_kafka.broker import producer_kafka
 from src.frontend.telegram.settings import KAFKA_TOPIC_ADD_NEW_USER, KAFKA_TOPIC_DELETE_USER, TOKEN_CRYPT_KEY
 
 
@@ -38,8 +38,9 @@ class KafkaUserObserver(Observer):
         self._topic = topic
 
     def update(self, v: TelegramUserSchema):
-        producer.send(self._topic, dict(v))
-        producer.flush()
+        with producer_kafka() as p:
+            p.send(topic=self._topic, value=dict(v), key=v.telegram_chat_id)
+            p.flush()
 
 
 class UserSubject(Subject):
