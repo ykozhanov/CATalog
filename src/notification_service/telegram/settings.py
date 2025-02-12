@@ -28,3 +28,6 @@ def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
         port=port if port else Settings.db_port_notification_service,
         dbname=Settings.db_name_notification_service,
     )
+
+
+settings = Settings()

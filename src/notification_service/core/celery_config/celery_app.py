@@ -1,13 +1,11 @@
 from celery import Celery
 
-from pytz import timezone
-
-from src.notification_service.core.settings import Settings
+from src.notification_service.core.settings import settings
 from src.notification_service.core.celery_config.schemas import PeriodicTask
 
 from src.notification_service.telegram.beats import beats_telegram
 
-app = Celery("celery", broker=Settings.redis_url_notification_service)
+app = Celery("celery", broker=settings.redis_url())
 
 app.autodiscover_tasks(["src.notification_service.telegram.tasks"])
 

@@ -1,5 +1,5 @@
 from telebot import TeleBot    # type: ignore
 
-from src.notification_service.telegram.settings import Settings
+from src.notification_service.telegram.settings import settings
 
-bot = TeleBot(Settings.bot_token)
+bot = TeleBot(settings.bot_token)

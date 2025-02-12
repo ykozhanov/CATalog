@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from src.notification_service.telegram.api.users.exceptions import AuthenticationError, MESSAGE_AUTHENTICATION_ERROR
 from src.notification_service.telegram.api.utils.bearer_util import BearerAuth
-from src.notification_service.telegram.settings import Settings
+from src.notification_service.telegram.settings import settings
 
 from .schemas import ProductInSchema, ProductInListSchema, ProductOutSchema
 from .exceptions import ProductError, MESSAGE_PRODUCT_ERROR, MESSAGE_GET_ERROR
@@ -13,7 +13,7 @@ QUERY_STRING_SEARCH_BY_EXP_DAYS = "exp_days"
 
 class ProductsAPI:
     _api_prefix = "/products/"
-    _url = f"{Settings.backend_url}{_api_prefix}"
+    _url = f"{settings.backend_url}{_api_prefix}"
 
     _main_exc = ProductError
     _main_message_error = MESSAGE_PRODUCT_ERROR
@@ -25,7 +25,7 @@ class ProductsAPI:
     def __init__(self, access_token: str):
         self._access_token = access_token
 
-    def get_by(self, exp_days: int = Settings.exp_days) -> list[_element_in_schema]:
+    def get_by(self, exp_days: int = settings.exp_days) -> list[_element_in_schema]:
         params = {QUERY_STRING_SEARCH_BY_EXP_DAYS: exp_days}
 
         response = requests.get(self._url, auth=BearerAuth(self._access_token), params=params)
