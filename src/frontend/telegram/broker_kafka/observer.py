@@ -41,7 +41,7 @@ class KafkaUserObserver(Observer):
         with producer_kafka() as p:
             p.send(topic=self._topic, value=dict(v), key=v.telegram_chat_id)
             p.flush()
-
+            
 
 class UserSubject(Subject):
     def __init__(self, user_id: int, chat_id: int, refresh_token: str | None = None):
