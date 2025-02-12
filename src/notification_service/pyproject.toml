@@ -13,4 +13,5 @@ dependencies = [
     "requests==2.32.3",
     "kafka-python==2.0.2",
     "pytz==2025.1",
+    "cryptography==44.0.1",
 ]
