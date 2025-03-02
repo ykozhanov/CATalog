@@ -40,4 +40,7 @@ KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 KAFKA_TOPIC_ADD_NEW_USER = "new_telegram_user"
 KAFKA_TOPIC_DELETE_USER = "delete_telegram_user"
 
+KAFKA_USERNAME = os.getenv("KAFKA_USERNAME")
+KAFKA_PASSWORD = os.getenv("KAFKA_PASSWORD")
+
 TOKEN_CRYPT_KEY=os.getenv("TOKEN_CRYPT_KEY", "mUkruC7uY382ZKIgYZZC6NAwyhDzgTDblnyIrrP6rrQ").encode("utf-8")

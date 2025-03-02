@@ -10,7 +10,11 @@ with KafkaConsumer(
     *topics,
     bootstrap_servers=KafkaSettings.bootstrap_servers,
     auto_offset_reset="earliest",
-    value_deserializer=lambda data: TelegramUserSchema.model_validate_json(data).model_dump()
+    value_deserializer=lambda data: TelegramUserSchema.model_validate_json(data).model_dump(),
+    sasl_mechanism="PLAIN",
+    sasl_plain_username=KafkaSettings.kafka_username,
+    sasl_plain_password=KafkaSettings.kafka_password,
+    security_protocol='SASL_PLAINTEXT',
 ) as consumer:
     for message in consumer:
         try:

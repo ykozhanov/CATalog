@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +21,8 @@ class KafkaSettings(BaseSettings):
     topic_name_new_telegram_user = "new_telegram_user"
     topic_name_delete_telegram_user = "delete_telegram_user"
     bootstrap_servers = "kafka:9092"
+    kafka_username = os.getenv("KAFKA_USERNAME")
+    kafka_password = os.getenv("KAFKA_PASSWORD")
 
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
