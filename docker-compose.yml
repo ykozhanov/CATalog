@@ -1,58 +1,88 @@
 services:
   server:
     build:
-      context: src
+      context: src/
       dockerfile: backend/Dockerfile
-
-  client:
-    build:
-      context: src
-      dockerfile: frontend/telegram/Dockerfile
-
-  notification_service:
-    build:
-      context: src
-      dockerfile: notification_service/Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - network
 
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:latest # Изменить версию
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"  # Для тестовой среды
-    ports:
-      - "2181:2181"
+#    ports:
+#      - "2181:2181"
     networks:
-      - kafka-net
+      - network
 
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:latest # Изменить версию
     environment:
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CFG_LISTENERS: SASL_PLAINTEXT://:9092
       KAFKA_CFG_ADVERTISED_LISTENERS: SASL_PLAINTEXT://kafka:9092
       KAFKA_CLIENT_ENABLE_AUTHENTICATION: "true"
       KAFKA_CLIENT_USER: ${KAFKA_USERNAME}
-      KAFKA_CLIENT_PASSWORD: ${KAFKA_PASSWORD}"
+      KAFKA_CLIENT_PASSWORD: ${KAFKA_PASSWORD}
       KAFKA_CFG_SASL_ENABLED_MECHANISMS: PLAIN
       KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
       KAFKA_CFG_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
-    ports:
-      - "9092:9092"
+#    ports:
+#      - "9092:9092"
     depends_on:
       - zookeeper
     networks:
-      - kafka-net
+      - network
 
-  notification-service:
-    build: ./notification-service  # Путь к Dockerfile вашего микросервиса
+  telegram:
+    build:
+      context: src/
+      dockerfile: frontend/telegram/Dockerfile
     env_file:
       - .env
-    environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - kafka
     networks:
-      - kafka-net
+      - network
+
+  notification-service:
+    build:
+      context: src/
+      dockerfile: notification_service/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+      - db
+    networks:
+      - network
+
+  redis:
+    image: redis:7.4.2
+#    ports:
+#      - "6379:6379"
+    networks:
+      - network
+
+  db:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - network
 
 networks:
-  kafka-net:
+#  kafka-net:
+#    driver: bridge
+  network:
     driver: bridge
+
+volumes:
+  db:

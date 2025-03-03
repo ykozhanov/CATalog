@@ -10,11 +10,11 @@ from src.frontend.telegram.bot import telegram_bot
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
     return "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
-        username=os.getenv("DB_USERNAME_FRONTEND_TELEGRAM"),
-        password=os.getenv("DB_PASSWORD_FRONTEND_TELEGRAM"),
-        host=host if host else os.getenv("DB_NAME_FRONTEND_TELEGRAM"),
-        port=port if port else os.getenv("DB_HOST_FRONTEND_TELEGRAM"),
-        dbname=os.getenv("DB_PORT_FRONTEND_TELEGRAM"),
+        username=os.getenv("DB_USERNAME"),
+        password=os.getenv("DB_PASSWORD"),
+        host=host if host else os.getenv("DB_HOST"),
+        port=port if port else os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME_FRONTEND_TELEGRAM"),
     )
 
 
