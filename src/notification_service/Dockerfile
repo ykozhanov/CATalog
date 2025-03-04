@@ -1,27 +1,27 @@
-FROM python:3.13
+FROM python:3.12.9
 
 WORKDIR /notification
 
 RUN apt-get update && apt-get install -y supervisor \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY notification_service/pyproject.toml notification_service/
-COPY notification_service/uv.lock notification_service/
+COPY notification_service/pyproject.toml src/notification_service/
+COPY notification_service/uv.lock src/notification_service/
 
-COPY db_lib/pyproject.toml db_lib/
-COPY db_lib/uv.lock db_lib/
+COPY db_lib/pyproject.toml src/db_lib/
+COPY db_lib/uv.lock src/db_lib/
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
-RUN uv sync --directory notification_service/ --active
-RUN uv sync --directory db_lib/ --active
+RUN uv pip install src/notification_service/ --system
+RUN uv pip install src/db_lib/ --system
 
-ENV PYTHONPATH=/notification_service/:/notification_service/core/celery_config/
 ENV KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+ENV PYTHONPATH=/notification/
 
-COPY supervisord.ini /etc/supervisor/conf.d/supervisord.ini
-COPY notification_service/ notification_service/
-COPY db_lib/ db_lib/
+COPY notification_service/supervisord.ini /etc/supervisor/conf.d/supervisord.ini
+COPY notification_service/ src/notification_service/
+COPY db_lib/ src/db_lib/
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.ini"]

@@ -11,3 +11,7 @@ class PeriodicTask(BaseModel):
     args: list = []
     kwargs: dict = {}
     expires: int | None = None
+
+    class Config:
+        arbitrary_types_allowed = True
+

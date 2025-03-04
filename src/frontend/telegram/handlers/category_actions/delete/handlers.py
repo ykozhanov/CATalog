@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.bot.states import CategoriesStatesGroup
 from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement, KeyboardYesOrNo
 from src.frontend.telegram.handlers.utils import (
@@ -21,7 +21,7 @@ templates = CategoryDeleteActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.DELETE_PREFIX,
     state=CategoriesStatesGroup.categories,
 )
@@ -39,7 +39,7 @@ def handler_category_delete_action(message: CallbackQuery) -> None:
     )
 
 
-@BOT.callback_query_handler(state=CategoryDeleteStatesGroup.ask_delete_products)
+@telegram_bot.callback_query_handler(state=CategoryDeleteStatesGroup.ask_delete_products)
 def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     delete_all_products = message.data == y_or_n.callback_answer_yes
@@ -60,7 +60,7 @@ def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=CategoryDeleteStatesGroup.confirm_delete)
+@telegram_bot.callback_query_handler(state=CategoryDeleteStatesGroup.confirm_delete)
 def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:

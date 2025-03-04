@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement
 from src.frontend.telegram.handlers.utils import (
@@ -20,7 +20,7 @@ messages = ProductUseActionMessages()
 templates = ProductUseActionTemplates()
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.USE_PREFIX,
     state=ProductsStatesGroup.products,
 )
@@ -41,7 +41,7 @@ def handler_product_use_action(message: CallbackQuery) -> None:
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(state=ProductUseStatesGroup.input_diff)
+@telegram_bot.message_handler(state=ProductUseStatesGroup.input_diff)
 def handle_product_use_input_diff(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:

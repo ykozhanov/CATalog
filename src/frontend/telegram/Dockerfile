@@ -1,26 +1,23 @@
-FROM python:3.13
+FROM python:3.12.9
 
 WORKDIR /telegram
 
-RUN apt-get update && apt-get install -y supervisor \
-    && rm -rf /var/lib/apt/lists/* \
+COPY frontend/telegram/pyproject.toml src/frontend/telegram/
+COPY frontend/telegram/uv.lock src/frontend/telegram/
 
-COPY frontend/telegram/pyproject.toml frontend/telegram/
-COPY frontend/telegram/uv.lock frontend/telegram/
-
-COPY db_lib/pyproject.toml db_lib/
-COPY db_lib/uv.lock db_lib/
+COPY db_lib/pyproject.toml src/db_lib/
+COPY db_lib/uv.lock src/db_lib/
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
+RUN uv pip install src/frontend/telegram/ --system
+RUN uv pip install src/db_lib/ --system
 
-RUN uv sync --directory frontend/telegram/ --active
-RUN uv sync --directory db_lib/ --active
+COPY frontend/telegram/ src/frontend/telegram/
+COPY db_lib/ src/db_lib/
 
 ENV KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+ENV PYTHONPATH=/telegram/
 
-COPY frontend/telegram/ frontend/telegram/
-COPY db_lib/ db_lib/
-
-CMD ["python", "frontend/telegram/main.py"]
+CMD ["python", "-m" ,"src.frontend.telegram.main"]

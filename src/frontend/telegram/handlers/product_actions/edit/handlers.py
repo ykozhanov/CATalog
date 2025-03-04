@@ -2,7 +2,7 @@ from datetime import datetime
 
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -34,7 +34,7 @@ templates = ProductUpdateActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.message_handler(
+@telegram_bot.message_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=ProductsStatesGroup.products,
 )
@@ -55,7 +55,7 @@ def handle_action_update_product(message: CallbackQuery) -> None:
     )
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_name)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_name)
 def handle_product_update_message_ask_input_name(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -73,7 +73,7 @@ def handle_product_update_message_ask_input_name(message: CallbackQuery):
         sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_name)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_name)
 def handle_product_update_waiting_input_name(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NAME:
@@ -87,7 +87,7 @@ def handle_product_update_waiting_input_name(message: Message):
     )
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_unit)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_unit)
 def handle_product_update_message_ask_input_unit(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -108,7 +108,7 @@ def handle_product_update_message_ask_input_unit(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_unit)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_unit)
 def handle_product_update_waiting_input_unit(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_UNIT:
@@ -122,7 +122,7 @@ def handle_product_update_waiting_input_unit(message: Message):
     )
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_quantity)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_quantity)
 def handle_product_update_message_ask_input_quantity(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -143,7 +143,7 @@ def handle_product_update_message_ask_input_quantity(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_quantity)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_quantity)
 def handle_product_update_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
@@ -160,7 +160,7 @@ def handle_product_update_waiting_input_quantity(message: Message):
         )
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_exp_date)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_exp_date)
 def handle_product_update_ask_input_exp_date(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -181,7 +181,7 @@ def handle_product_update_ask_input_exp_date(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_day)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_day)
 def handle_product_update_waiting_input_day(message: Message):
     sm = SendMessage(message)
     try:
@@ -198,7 +198,7 @@ def handle_product_update_waiting_input_day(message: Message):
             state=ProductUpdateStatesGroup.waiting_input_month,
         )
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_month)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_month)
 def handle_product_update_waiting_input_month(message: Message):
     sm = SendMessage(message)
     try:
@@ -216,7 +216,7 @@ def handle_product_update_waiting_input_month(message: Message):
         )
 
 
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_year)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_year)
 def handle_product_update_waiting_input_year(message: Message):
     sm = SendMessage(message)
     try:
@@ -236,7 +236,7 @@ def handle_product_update_waiting_input_year(message: Message):
 
 
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_note)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_note)
 def handle_product_update_ask_input_note(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -257,7 +257,7 @@ def handle_product_update_ask_input_note(message: CallbackQuery):
 
 
 @check_authentication_decorator
-@BOT.message_handler(state=ProductUpdateStatesGroup.waiting_input_note)
+@telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_note)
 def handle_product_update_waiting_input_note(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NOTE:
@@ -272,7 +272,7 @@ def handle_product_update_waiting_input_note(message: Message):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_choice_category)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_choice_category)
 def handle_product_update_ask_choice_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -309,7 +309,7 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.waiting_choice_category)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.waiting_choice_category)
 def handle_product_update_waiting_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -336,7 +336,7 @@ def handle_product_update_waiting_category(message: CallbackQuery):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.check_update_product)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.check_update_product)
 def handle_product_update_check_update_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -363,7 +363,7 @@ def handle_product_update_check_update_product(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.callback_query_handler(state=ProductUpdateStatesGroup.ask_try_again)
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_try_again)
 def handle_product_update_ask_try_again(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()

@@ -2,8 +2,10 @@
 name = "telegram-catalog"
 version = "0.1.0"
 description = ""
-requires-python = "==3.13.0"
-authors = ["ykozhanov <ykozhanov97@gmail.com>"]
+requires-python = "==3.12.9"
+authors = [
+    {name = "ykozhanov", email = "ykozhanov97@gmail.com" }
+]
 dependencies = [
     "sqlalchemy==2.0.36",
     "pytelegrambotapi==4.26.0",

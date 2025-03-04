@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.database.models import User
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
 from src.frontend.telegram.core.utils import SendMessage, crud
@@ -15,7 +15,7 @@ templates_login = LoginCommandTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.message_handler(commands=[COMMANDS.start[0]])
+@telegram_bot.message_handler(commands=[COMMANDS.start[0]])
 def handle_command_start(message: Message) -> None:
     sm = SendMessage(message)
     msg_data = sm.get_message_data()

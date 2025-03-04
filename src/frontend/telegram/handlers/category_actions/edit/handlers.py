@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -22,7 +22,7 @@ templates = CategoryUpdateActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=CategoriesStatesGroup.categories,
 )
@@ -41,7 +41,7 @@ def handle_action_update_category(message: CallbackQuery) -> None:
     )
 
 
-@BOT.message_handler(state=CategoryUpdateStatesGroup.waiting_input_name)
+@telegram_bot.message_handler(state=CategoryUpdateStatesGroup.waiting_input_name)
 def handle_category_update_waiting_input_name(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NAME:
@@ -57,7 +57,7 @@ def handle_category_update_waiting_input_name(message: Message):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=CategoryUpdateStatesGroup.check_update)
+@telegram_bot.callback_query_handler(state=CategoryUpdateStatesGroup.check_update)
 def handle_category_update_check_update(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -84,7 +84,7 @@ def handle_category_update_check_update(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.callback_query_handler(state=CategoryUpdateStatesGroup.ask_try_again)
+@telegram_bot.callback_query_handler(state=CategoryUpdateStatesGroup.ask_try_again)
 def handle_category_update_ask_try_again(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()

@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
@@ -16,7 +16,7 @@ messages = LogoutCommandMessages()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.message_handler(commands=[COMMANDS.logout[0]])
+@telegram_bot.message_handler(commands=[COMMANDS.logout[0]])
 def handle_command_logout(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -30,7 +30,7 @@ def handle_command_logout(message: Message) -> None:
     )
 
 
-@BOT.message_handler(commands=[COMMANDS.logout[0]])
+@telegram_bot.message_handler(commands=[COMMANDS.logout[0]])
 def handle_ask_logout(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     msg_data = sm.get_message_data()

@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -32,7 +32,7 @@ paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByEleme
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(
+@telegram_bot.message_handler(
     func=lambda m: m.text == KeyboardListActions.action_get_all_products,
     state=ActionsStatesGroup.choosing_action,
 )
@@ -64,7 +64,7 @@ def handle_action_get_all_products(message: Message) -> None:
         )
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data == y_or_n.callback_answer_no,
     state=ProductCreateStatesGroup.ask_add_new,
 )
@@ -74,7 +74,7 @@ def handle_state_ask_add_new_product_no(message: CallbackQuery) -> None:
 
 
 @check_authentication_decorator
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] in paginator_callbacks,
     state=ProductsStatesGroup.products,
 )
@@ -92,7 +92,7 @@ def handle_products_paginator(message: CallbackQuery):
     sm.send_message(messages.for_paginator, inline_keyboard=inline_keyboard)
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == PREFIX_PRODUCT_ELEMENT_PAGINATOR,
     state=ProductsStatesGroup.products,
 )

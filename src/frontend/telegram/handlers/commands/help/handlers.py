@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.bot.keyboards import KeyboardListActions
@@ -12,7 +12,7 @@ main_m = MainMessages()
 messages = HelpCommandMessages()
 
 
-@BOT.message_handler(commands=[COMMANDS.help[0]])
+@telegram_bot.message_handler(commands=[COMMANDS.help[0]])
 def handle_command_help(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:

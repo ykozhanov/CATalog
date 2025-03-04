@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.handlers.utils.md_dataclasses import LoginDataclass
 from src.frontend.telegram.core.utils import SendMessage
@@ -15,7 +15,7 @@ templates = LoginCommandTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.message_handler(commands=["login"])
+@telegram_bot.message_handler(commands=["login"])
 def handle_command_login(message: Message) -> None:
     sm = SendMessage(message)
     msg_data = sm.get_message_data()
@@ -30,7 +30,7 @@ def handle_command_login(message: Message) -> None:
             sm.send_message(messages.to_logout)
 
 
-@BOT.callback_query_handler(state=UsersStatesGroup.login)
+@telegram_bot.callback_query_handler(state=UsersStatesGroup.login)
 def handle_callback_login(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     if message.data == y_or_n.callback_answer_yes:
@@ -46,7 +46,7 @@ def handle_callback_login(message: CallbackQuery) -> None:
     sm.send_message(text=text, state=UsersStatesGroup.waiting_username)
 
 
-@BOT.message_handler(state=UsersStatesGroup.waiting_username)
+@telegram_bot.message_handler(state=UsersStatesGroup.waiting_username)
 def handle_state_waiting_username(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -58,7 +58,7 @@ def handle_state_waiting_username(message: Message) -> None:
         sm.send_message(text, state=UsersStatesGroup.waiting_password)
 
 
-@BOT.message_handler(state=UsersStatesGroup.waiting_password)
+@telegram_bot.message_handler(state=UsersStatesGroup.waiting_password)
 def handle_state_waiting_password(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -74,7 +74,7 @@ def handle_state_waiting_password(message: Message) -> None:
         login_user(message)
 
 
-@BOT.message_handler(state=UsersStatesGroup.waiting_password_repeat)
+@telegram_bot.message_handler(state=UsersStatesGroup.waiting_password_repeat)
 def handle_state_waiting_password_repeat(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -90,7 +90,7 @@ def handle_state_waiting_password_repeat(message: Message) -> None:
             )
 
 
-@BOT.message_handler(state=UsersStatesGroup.waiting_email)
+@telegram_bot.message_handler(state=UsersStatesGroup.waiting_email)
 def handle_state_waiting_email(message: Message) -> None:
     sm = SendMessage(message)
     email = message.text
@@ -111,7 +111,7 @@ def handle_state_waiting_email(message: Message) -> None:
             sm.send_message(messages.invalid_email)
 
 
-@BOT.callback_query_handler(state=UsersStatesGroup.register_check_data)
+@telegram_bot.callback_query_handler(state=UsersStatesGroup.register_check_data)
 def handle_callback_register_check_data(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     if message.data == y_or_n.callback_answer_yes:
@@ -128,7 +128,7 @@ def handle_callback_register_check_data(message: CallbackQuery) -> None:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.callback_query_handler(state=UsersStatesGroup.ask_register_again)
+@telegram_bot.callback_query_handler(state=UsersStatesGroup.ask_register_again)
 def handle_callback_ask_register_again(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     if message.data == y_or_n.callback_answer_yes:

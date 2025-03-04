@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -26,7 +26,7 @@ messages = GetProductsByExpDateActionMessages()
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(
+@telegram_bot.message_handler(
     func=lambda m: m.text == KeyboardListActions.action_get_products_by_exp_date,
     state=ActionsStatesGroup.choosing_action,
 )

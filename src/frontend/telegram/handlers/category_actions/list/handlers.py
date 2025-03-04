@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -28,7 +28,7 @@ y_or_n = KeyboardYesOrNo()
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.LIST_PREFIX,
     state=CategoriesStatesGroup.categories,
 )

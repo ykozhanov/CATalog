@@ -2,16 +2,20 @@
 name = "notification-service-catalog"
 version = "0.1.0"
 description = ""
-requires-python = "==3.13.0"
-authors = ["ykozhanov <ykozhanov97@gmail.com>"]
+requires-python = "==3.12.9"
+authors = [
+    {name = "ykozhanov", email = "ykozhanov97@gmail.com" }
+]
 dependencies = [
     "pytelegrambotapi==4.26.0",
     "pydantic==2.10.4",
     "pydantic-settings==2.7.1",
     "celery[redis]==5.4.0",
     "sqlalchemy==2.0.36",
+    "psycopg2==2.9.10",
     "requests==2.32.3",
-    "kafka-python==2.0.2",
+    "kafka-python-ng==2.2.3",
+#    "six==1.16.0",
     "pytz==2025.1",
     "cryptography==44.0.1",
 ]

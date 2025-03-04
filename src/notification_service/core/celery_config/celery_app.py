@@ -23,5 +23,3 @@ def setup_periodic_tasks(sender: Celery, **kwargs):
             name=b.name,
             expires=b.expires,
         )
-
-app.conf.timezone = "UTC"

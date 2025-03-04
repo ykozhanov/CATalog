@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -22,7 +22,7 @@ templates = CategoryCreateActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data == PaginatorListHelper.CALLBACK_CREATE,
     state=CategoriesStatesGroup.categories,
 )
@@ -37,7 +37,7 @@ def handle_paginator_category_create_new_category(message: CallbackQuery):
     )
 
 
-@BOT.callback_query_handler(state=CategoryCreateStatesGroup.ask_add_new)
+@telegram_bot.callback_query_handler(state=CategoryCreateStatesGroup.ask_add_new)
 def handle_category_create_ask_add_new(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
@@ -54,7 +54,7 @@ def handle_category_create_ask_add_new(message: CallbackQuery) -> None:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=CategoryCreateStatesGroup.waiting_input_name)
+@telegram_bot.message_handler(state=CategoryCreateStatesGroup.waiting_input_name)
 def handle_category_create_waiting_input_name(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NAME:
@@ -70,7 +70,7 @@ def handle_category_create_waiting_input_name(message: Message):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=CategoryCreateStatesGroup.check_new)
+@telegram_bot.callback_query_handler(state=CategoryCreateStatesGroup.check_new)
 def handle_product_category_check_new_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()

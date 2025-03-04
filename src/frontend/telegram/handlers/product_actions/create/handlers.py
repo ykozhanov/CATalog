@@ -2,7 +2,7 @@ from datetime import datetime
 
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -32,7 +32,7 @@ templates = ProductCreateActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@BOT.callback_query_handler(
+@telegram_bot.callback_query_handler(
     func=lambda m: m.data == PaginatorListHelper.CALLBACK_CREATE,
     state=ProductsStatesGroup.products,
 )
@@ -47,7 +47,7 @@ def handle_paginator_create_new_product(message: CallbackQuery):
     )
 
 
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.ask_add_new)
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_add_new)
 def handle_ask_add_new_product(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
@@ -64,7 +64,7 @@ def handle_ask_add_new_product(message: CallbackQuery) -> None:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_name)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_name)
 def handle_product_create_waiting_input_name(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NAME:
@@ -77,7 +77,7 @@ def handle_product_create_waiting_input_name(message: Message):
     )
 
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_unit)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_unit)
 def handle_product_create_waiting_input_unit(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_UNIT:
@@ -90,7 +90,7 @@ def handle_product_create_waiting_input_unit(message: Message):
     )
 
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_quantity)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_quantity)
 def handle_product_create_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
@@ -108,7 +108,7 @@ def handle_product_create_waiting_input_quantity(message: Message):
         )
 
 
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.ask_input_exp_date)
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_input_exp_date)
 def handle_product_create_ask_input_exp_date(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -123,7 +123,7 @@ def handle_product_create_ask_input_exp_date(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_day)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_day)
 def handle_product_create_waiting_input_day(message: Message):
     sm = SendMessage(message)
     try:
@@ -140,7 +140,7 @@ def handle_product_create_waiting_input_day(message: Message):
             state=ProductCreateStatesGroup.waiting_input_month,
         )
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_month)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_month)
 def handle_product_create_waiting_input_month(message: Message):
     sm = SendMessage(message)
     try:
@@ -158,7 +158,7 @@ def handle_product_create_waiting_input_month(message: Message):
         )
 
 
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_year)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_year)
 def handle_product_create_waiting_input_year(message: Message):
     sm = SendMessage(message)
     try:
@@ -179,7 +179,7 @@ def handle_product_create_waiting_input_year(message: Message):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.ask_input_note)
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_input_note)
 def handle_product_create_ask_input_note(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -198,7 +198,7 @@ def handle_product_create_ask_input_note(message: CallbackQuery):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
 def handle_product_create_waiting_input_note(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NOTE:
@@ -230,7 +230,7 @@ def handle_product_create_waiting_input_note(message: Message):
         )
 
 
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.waiting_choice_category)
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.waiting_choice_category)
 def handle_product_create_waiting_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -257,7 +257,7 @@ def handle_product_create_waiting_category(message: CallbackQuery):
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.callback_query_handler(state=ProductCreateStatesGroup.check_new)
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.check_new)
 def handle_product_create_check_new_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()

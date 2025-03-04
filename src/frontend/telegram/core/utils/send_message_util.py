@@ -14,7 +14,7 @@ from telegram_bot_pagination import InlineKeyboardPaginator
 
 from src.frontend.telegram.core.exceptions import CreateMessageError
 from src.frontend.telegram.core.exceptions.messages import MESSAGE_CREATE_MESSAGE_ERROR
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.bot import telegram_bot
 
 
 # from typing import Literal
@@ -97,17 +97,17 @@ class SendMessage(GetMessageData):
         return None
 
     def set_state(self, state: State | None) -> None:
-        BOT.set_state(
+        telegram_bot.set_state(
             user_id=self.msg_data.user_id,
             state=state,
             chat_id=self.msg_data.chat_id,
         )
 
     def delete_message(self) -> None:
-        BOT.delete_message(chat_id=self.msg_data.chat_id, message_id=self.msg_data.message_id)
+        telegram_bot.delete_message(chat_id=self.msg_data.chat_id, message_id=self.msg_data.message_id)
 
     def delete_reply_keyboard(self) -> None:
-        BOT.edit_message_reply_markup(
+        telegram_bot.edit_message_reply_markup(
             chat_id=self.msg_data.chat_id,
             message_id=self.msg_data.message_id,
             reply_markup=None,
@@ -130,7 +130,7 @@ class SendMessage(GetMessageData):
         )
         if state or finish_state:
             self.set_state(state)
-        BOT.send_message(
+        telegram_bot.send_message(
             chat_id=self.msg_data.chat_id,
             text=text,
             parse_mode=parse_mode,

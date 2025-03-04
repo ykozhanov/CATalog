@@ -1,6 +1,7 @@
 from telebot.types import BotCommand
 
-from src.frontend.telegram.settings import APP_NAME, BOT
+from src.frontend.telegram.bot import telegram_bot
+from src.frontend.telegram.settings import APP_NAME
 
 
 class Commands:
@@ -24,7 +25,7 @@ class Commands:
 
 COMMANDS = Commands()
 
-BOT.set_my_commands(
+telegram_bot.set_my_commands(
     [
         BotCommand(command=f"/{COMMANDS.start[0]}", description=COMMANDS.start[1]),
         BotCommand(command=f"/{COMMANDS.login[0]}", description=COMMANDS.login[1]),

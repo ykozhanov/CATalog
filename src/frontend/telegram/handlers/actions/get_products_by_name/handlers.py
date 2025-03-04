@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import BOT
+from src.frontend.telegram.settings import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -24,7 +24,7 @@ messages = GetProductsByNameActionMessages()
 templates = GetProductsByNameActionTemplates()
 
 
-@BOT.message_handler(
+@telegram_bot.message_handler(
     func=lambda m: m.text == KeyboardListActions.action_get_product_by_name,
     state=ActionsStatesGroup.choosing_action,
 )
@@ -36,7 +36,7 @@ def handle_action_get_product_by_name(message: Message) -> None:
 
 @exc_handler_decorator
 @check_authentication_decorator
-@BOT.message_handler(state=ProductsStatesGroup.waiting_name_product)
+@telegram_bot.message_handler(state=ProductsStatesGroup.waiting_name_product)
 def handle_name_product_for_get_product_by_name(message: Message) -> None:
     sm = SendMessage(message)
     sm.delete_reply_keyboard()

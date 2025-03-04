@@ -1,23 +1,24 @@
-FROM python:3.13
+FROM python:3.12.9
 
 WORKDIR /server
 
-COPY backend/pyproject.toml backend/
-COPY backend/uv.lock backend/
+COPY backend/pyproject.toml src/backend/
+COPY backend/uv.lock src/backend/
 
-COPY db_lib/pyproject.toml db_lib/
-COPY db_lib/uv.lock db_lib/
+COPY db_lib/pyproject.toml src/db_lib/
+COPY db_lib/uv.lock src/db_lib/
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
-RUN uv sync --directory backend/ --active
-RUN uv sync --directory db_lib/ --active
+RUN uv pip install src/backend/ --system
+RUN uv pip install src/db_lib/ --system
 
-COPY backend/ backend/
-COPY db_lib/ db_lib/
+COPY backend src/backend/
+COPY db_lib src/db_lib/
 
-ENV FLASK_APP=backend/app.py
+ENV FLASK_APP=/server/src/backend/app.py
+ENV PYTHONPATH=/server/
 
 EXPOSE 5000
 
