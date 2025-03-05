@@ -33,7 +33,7 @@ class CategoryDataclass:
         return asdict(self)
 
 
-@classmethod
+@dataclass
 class LoginDataclass:
     register: bool | None = None
     username: str | None = None

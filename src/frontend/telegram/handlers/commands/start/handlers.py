@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.database.models import User
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
 from src.frontend.telegram.core.utils import SendMessage, crud

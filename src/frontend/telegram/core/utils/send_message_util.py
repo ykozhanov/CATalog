@@ -10,7 +10,6 @@ from telebot.types import (
     Message,
     CallbackQuery,
 )
-from telegram_bot_pagination import InlineKeyboardPaginator
 
 from src.frontend.telegram.core.exceptions import CreateMessageError
 from src.frontend.telegram.core.exceptions.messages import MESSAGE_CREATE_MESSAGE_ERROR
@@ -87,7 +86,7 @@ class SendMessage(GetMessageData):
             reply_keyboard: list[str] | None,
             inline_keyboard: list[tuple[str, str]] | InlineKeyboardMarkup | None,
             delete_reply_keyboard: bool | None,
-    ) -> ReplyKeyboardMarkup | InlineKeyboardMarkup | InlineKeyboardPaginator | ReplyKeyboardRemove | None:
+    ) -> ReplyKeyboardMarkup | InlineKeyboardMarkup | ReplyKeyboardRemove | None:
         if reply_keyboard:
             return self._get_reply_keyboard(reply_keyboard)
         if inline_keyboard:

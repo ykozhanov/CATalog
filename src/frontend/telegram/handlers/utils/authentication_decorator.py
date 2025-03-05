@@ -6,7 +6,7 @@ from telebot.types import Message, CallbackQuery
 from src.frontend.telegram.core.exceptions import AuthenticationError
 from src.frontend.telegram.api import UsersAPI, UserController
 from src.frontend.telegram.core.utils import SendMessage
-from src.frontend.telegram.handlers.utils import MainMessages
+from .messages import MainMessages
 from .main_data_contextmanager import MainDataContextmanager
 
 
