@@ -1,8 +1,8 @@
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from src.backend.core.database.models import Base
-from src.backend.settings import USER_MODEL
+from src.backend.core.database.models import Base, User
+# from src.backend.settings import USER_MODEL
 
 
 class Profile(Base):
@@ -12,9 +12,9 @@ class Profile(Base):
     refresh_token: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
 
-    user: Mapped[USER_MODEL] = relationship(
-        USER_MODEL,
-        back_populates="profile",
+    user: Mapped[User] = relationship(
+        User,
+        backref="profile",
         lazy="joined",
         cascade="all, delete-orphan",
     )

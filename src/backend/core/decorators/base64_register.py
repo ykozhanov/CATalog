@@ -5,12 +5,13 @@ from functools import wraps
 from flask import request, jsonify, Response
 from pydantic import ValidationError
 
-from src.backend.core.settings_app import AUTH_HEADER
 from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import TOKEN_STARTSWITH_BASIC
 from src.backend.core.database.schemas import RegisterSchema
 from src.backend.core.exceptions import AuthenticationError
 from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
+
+from .base64_login import AUTH_HEADER
 
 R = TypeVar("R")
 

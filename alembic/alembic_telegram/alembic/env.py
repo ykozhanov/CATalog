@@ -1,4 +1,9 @@
+import os
 from logging.config import fileConfig
+
+from dotenv import load_dotenv
+load_dotenv()
+
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -6,7 +11,17 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.frontend.telegram.core.database.models import Base
-from src.frontend.telegram.core.database.database_init import get_db_path
+
+
+def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
+    return "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
+        username=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        host=host if host else os.getenv("POSTGRES_HOST"),
+        port=port if port else os.getenv("POSTGRES_PORT"),
+        dbname=os.getenv("DB_NAME_BACKEND"),
+    )
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

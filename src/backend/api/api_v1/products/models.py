@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from datetime import date
 
 from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey, Float, event
@@ -6,9 +9,12 @@ from sqlalchemy.engine import Connection
 
 from src.backend.core.database.models import Base
 
-from src.backend.settings import PROFILE_MODEL
-from src.backend.api.api_v1.categories.models import Category
+# from src.backend.settings import PROFILE_MODEL
+# from src.backend.api.api_v1.categories.models import Category
 
+if TYPE_CHECKING:
+    from src.backend.core.database.models import Profile
+    from src.backend.api.api_v1.categories.models import Category
 
 class Product(Base):
     __tablename__ = "products"
@@ -23,9 +29,9 @@ class Product(Base):
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
-    category: Mapped[Category] = relationship(Category, back_populates="products", lazy="joined")
-    profile: Mapped[PROFILE_MODEL] = relationship(
-        PROFILE_MODEL,
+    category: Mapped["Category"] = relationship("Category", back_populates="products", lazy="joined")
+    profile: Mapped["Profile"] = relationship(
+        "Profile",
         back_populates="products",
         lazy="joined",
         cascade="all, delete-orphan",

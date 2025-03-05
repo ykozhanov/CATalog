@@ -3,10 +3,10 @@ from typing import Callable, TypeVar
 from functools import wraps
 
 from flask import request, jsonify
-from flask.typing import Response
+from flask.wrappers import Response
 from pydantic import ValidationError
 
-from src.backend.core.settings_app import AUTH_HEADER
+# from src.backend.core.settings_app import AUTH_HEADER
 from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import TOKEN_STARTSWITH_BASIC
 from src.backend.core.database.schemas import LoginSchema
@@ -14,7 +14,7 @@ from src.backend.core.exceptions import AuthenticationError
 from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
 
 R = TypeVar("R")
-
+AUTH_HEADER = "Authorization"
 
 def base64_login_decorator(func: Callable[..., R]) -> Callable[..., tuple[Response, int] | R]:
     """Декоратор для обработки авторизации с использованием Base64.

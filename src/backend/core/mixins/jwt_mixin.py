@@ -1,13 +1,14 @@
 import uuid
+import os
 from datetime import datetime, timedelta, UTC
 from typing import Any
 
 import jwt
 
-from src.backend.core.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+# from src.backend.core.settings_app import JWT_PRIVATE_KEY, JWT_PUBLIC_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 from src.backend.core.request import JWTPayloadSchema, TYPE_ACCESS_JWT, TYPE_REFRESH_JWT
-from src.backend.core.exceptions import AuthenticationError
-from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
+from src.backend.core.exceptions import AuthenticationError, ENVError
+from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401, MESSAGE_ENV_ERROR
 
 '''
 Для генерации RSA ключей используйте команды:
@@ -18,6 +19,13 @@ from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
 `openssl rsa -in jwt-private.pem -outform PEM -pubout -out jwt-public.pem`
 Эта команда извлекает открытый ключ из ранее сгенерированного закрытого ключа, который хранится в файле jwt-private.pem.
 '''
+
+JWT_PRIVATE_KEY = os.getenv("JWT_PRIVATE_KEY")
+JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY")
+if not JWT_PUBLIC_KEY or not JWT_PRIVATE_KEY:
+    raise ENVError(f"{MESSAGE_ENV_ERROR}: установите JWT_PRIVATE_KEY и JWT_PUBLIC_KEY")
+
+JWT_ALGORITHM = "RS256"
 
 
 class JWTMixin:

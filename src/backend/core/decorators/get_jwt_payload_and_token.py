@@ -7,9 +7,11 @@ from pydantic import ValidationError
 from src.backend.core.mixins import JWTMixin
 from src.backend.core.exceptions import AuthenticationError
 from src.backend.core.exceptions.messages import MESSAGE_TOKEN_INVALID_401
-from src.backend.core.settings_app import AUTH_HEADER
+# from src.backend.core.settings_app import AUTH_HEADER
 from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import Type_JWT, TOKEN_STARTSWITH_BEARER, JWTPayloadSchema
+
+from .base64_login import AUTH_HEADER
 
 R = TypeVar("R")
 

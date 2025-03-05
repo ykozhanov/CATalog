@@ -1,15 +1,16 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 from logging.config import fileConfig
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
-from src.backend.core.database.models import Base
+from src.backend.api.api_v1.models import Base
 
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:

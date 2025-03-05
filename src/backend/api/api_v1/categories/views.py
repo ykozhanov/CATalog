@@ -7,7 +7,7 @@ from src.db_lib.base.exceptions import NotFoundInDBError
 from src.backend.core.utils import crud, session
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
-from src.backend.settings import USER_MODEL, PROFILE_MODEL
+from src.backend.core.database.models import User, Profile
 from src.backend.core.exceptions import ForbiddenError, BadRequestError
 
 from .schemas import CategoryInSchema, CategoryOutSchema, CategoryListOutSchema
@@ -24,8 +24,8 @@ class CategoriesMethodView(MethodView):
     attr_for_list_out_schema = "categories"
 
     @login_jwt_required_decorator
-    def get(self, current_user: USER_MODEL) -> tuple[Response, int]:
-        profile: PROFILE_MODEL = getattr(current_user, "profile")
+    def get(self, current_user: User) -> tuple[Response, int]:
+        profile: Profile = getattr(current_user, "profile")
         result = getattr(profile, self.attr_for_list_out_schema)
         data_for_list_out_schema = {
             self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result]
@@ -33,7 +33,7 @@ class CategoriesMethodView(MethodView):
         return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
 
     @login_jwt_required_decorator
-    def post(self, current_user: USER_MODEL) -> tuple[Response, int]:
+    def post(self, current_user: User) -> tuple[Response, int]:
         try:
             new_element_data = request.get_json()
             new_element_validated = self.element_in_schema(**new_element_data)
@@ -52,7 +52,7 @@ class CategoriesByIDMethodView(MethodView):
     element_list_out_schema = CategoryListOutSchema
 
     @login_jwt_required_decorator
-    def get(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
+    def get(self, current_user: User, element_id: int) -> tuple[Response, int]:
         try:
             element = crud.read(model=self.model, pk=element_id)
             if element is None:
@@ -67,7 +67,7 @@ class CategoriesByIDMethodView(MethodView):
             return jsonify(self.element_out_schema.model_validate(element)), 200
 
     @login_jwt_required_decorator
-    def put(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
+    def put(self, current_user: User, element_id: int) -> tuple[Response, int]:
         try:
             old_element = crud.read(self.model, pk=element_id)
             if old_element is None:
@@ -91,7 +91,7 @@ class CategoriesByIDMethodView(MethodView):
             return jsonify(self.element_out_schema.model_validate(update_element)), 200
 
     @login_jwt_required_decorator
-    def delete(self, current_user: USER_MODEL, element_id: int) -> tuple[Response, int]:
+    def delete(self, current_user: User, element_id: int) -> tuple[Response, int]:
         try:
             delete_all_products = request.args.get(QUERY_STRING_DELETE_ALL_PRODUCTS, "false").lower() == "true"
             old_element = crud.read(self.model, pk=element_id)

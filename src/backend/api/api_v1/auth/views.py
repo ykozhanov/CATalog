@@ -10,10 +10,11 @@ from src.backend.core.request import TYPE_REFRESH_JWT
 from src.backend.core.database.schemas import LoginSchema, RegisterSchema
 from src.backend.core.exceptions import AuthenticationError
 from src.backend.core.exceptions.messages import MESSAGE_REGISTER_ERROR_401
+from src.backend.core.database.models import User, Profile
 
-from src.backend.settings import USER_MODEL
+# from src.backend.settings import USER_MODEL
 from .schemas import TokensSchema
-from .models import Profile
+# from .models import Profile
 
 
 class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
@@ -37,7 +38,7 @@ class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
                 - В случае ошибки: (JSON с сообщением об ошибке, 401)
         """
         try:
-            user = crud.where(model=USER_MODEL, attr="username", content=login_data.username)[0]
+            user = crud.where(model=User, attr="username", content=login_data.username)[0]
             if not user or not self._check_hashpw(password=login_data.password, hashed_password=user.password):
                 raise AuthenticationError()
             refresh_token = self._get_jwt_token(sub=user.id)
@@ -70,10 +71,10 @@ class RegisterMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
                 - В случае ошибки: (JSON с сообщением об ошибке, 401)
         """
         try:
-            user = crud.where(model=USER_MODEL, attr="username", content=register_data.username)[0]
+            user = crud.where(model=User, attr="username", content=register_data.username)[0]
             if user:
                 raise AuthenticationError(f"{MESSAGE_REGISTER_ERROR_401}: Пользователь с таким username уже существует")
-            new_user = USER_MODEL(register_data.model_dump())
+            new_user = User(register_data.model_dump())
             new_user_with_id = crud.create(obj=new_user)
             refresh_token = self._get_jwt_token(sub=new_user_with_id.id)
             jwt_token_model = Profile(refresh_token=refresh_token, user_id=new_user_with_id.id)
