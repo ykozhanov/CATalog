@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from datetime import date
 
-from sqlalchemy import Integer, String, CheckConstraint, Date, Text, func, ForeignKey, Float, event
+from sqlalchemy import Integer, String, CheckConstraint, Date, func, ForeignKey, Float, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Mapper
 from sqlalchemy.engine import Connection
 
@@ -24,7 +24,7 @@ class Product(Base):
     unit: Mapped[str] = mapped_column(String(length=10), nullable=False, default="шт.")
     quantity: Mapped[float] = mapped_column(Float, CheckConstraint("quantity >= 0"), nullable=False, default=1)
     exp_date: Mapped[date] = mapped_column(Date)
-    note: Mapped[str] = mapped_column(Text(length=500))
+    note: Mapped[str] = mapped_column(String(length=500))
     created_at: Mapped[date] = mapped_column(Date, default=func.current_date)
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
