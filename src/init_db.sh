@@ -9,6 +9,3 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE ${DB_NAME_FRONTEND_TELEGRAM};
     CREATE DATABASE ${DB_NAME_NOTIFICATION_SERVICE};
 EOSQL
-
-# Ожидание завершения процесса PostgreSQL
-wait
