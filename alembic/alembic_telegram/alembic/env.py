@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.backend.core.database.models import Base
-from src.backend.settings import get_db_path
+from src.frontend.telegram.core.database.models import Base
+from src.frontend.telegram.core.database.database_init import get_db_path
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
