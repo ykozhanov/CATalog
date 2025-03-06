@@ -33,8 +33,6 @@ def get_session() -> Generator[SessionType, None, None]:
     except Exception:
         session.rollback()
         raise
-    finally:
-        session.close()
 
 
 REDIS_HOSTNAME_CACHE_B = os.getenv("REDIS_HOSTNAME")

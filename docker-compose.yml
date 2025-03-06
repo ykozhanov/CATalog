@@ -3,6 +3,7 @@ services:
     build:
       context: src/
       dockerfile: backend/Dockerfile
+    restart: always
     ports:
       - "5000:5000"
     networks:
@@ -10,9 +11,12 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      db:
+        condition: service_healthy
 
   zookeeper:
     image: bitnami/zookeeper:3.6.3
+    restart: always
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -26,11 +30,13 @@ services:
       interval: 15s
       retries: 3
       timeout: 10s
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      db:
+        condition: service_healthy
 
   kafka:
     image: bitnami/kafka:3.7.0
+    restart: always
     environment:
 #      KAFKA_CLIENT_USER: ${KAFKA_USERNAME}
 #      KAFKA_CLIENT_PASSWORD: ${KAFKA_PASSWORD}
@@ -42,6 +48,8 @@ services:
     depends_on:
       zookeeper:
         condition: service_healthy
+      db:
+        condition: service_healthy
     networks:
       - network
     healthcheck:
@@ -50,20 +58,19 @@ services:
       retries: 3
       start_period: 15s
       timeout: 5s
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
 
   telegram:
     build:
       context: src/
       dockerfile: frontend/telegram/Dockerfile
+    restart: always
     env_file:
       - .env
     depends_on:
       kafka:
         condition: service_healthy
       db:
-        condition: service_started
+        condition: service_healthy
     networks:
       - network
 
@@ -71,13 +78,14 @@ services:
     build:
       context: src/
       dockerfile: notification_service/Dockerfile
+    restart: always
     env_file:
       - .env
     depends_on:
       kafka:
         condition: service_healthy
       db:
-        condition: service_started
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -85,6 +93,7 @@ services:
 
   redis:
     image: redis:7.4.2
+    restart: always
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
@@ -110,6 +119,11 @@ services:
       - "5432:5432"
     networks:
       - network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 networks:
   network:

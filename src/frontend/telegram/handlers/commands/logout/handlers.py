@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
@@ -10,6 +10,8 @@ from src.frontend.telegram.handlers.commands import COMMANDS
 from src.frontend.telegram.broker_kafka import UserSubject
 
 from .messages import LogoutCommandMessages
+
+__all__ = ["handle_command_logout"]
 
 main_m = MainMessages()
 messages = LogoutCommandMessages()

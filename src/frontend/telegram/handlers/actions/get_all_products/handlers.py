@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -22,6 +22,8 @@ from .utils import (
     ATTRS_FOR_TEMPLATE_PRODUCT,
     TEMPLATE_BUTTON_PRODUCT,
 )
+
+__all__ = ["handle_action_get_all_products"]
 
 main_m = MainMessages()
 messages = GetAllProductsActionMessages()

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -27,6 +27,8 @@ from .messages import (
     MAX_LEN_NOTE,
 )
 from .states import ProductUpdateStatesGroup
+
+__all__ = ["handle_action_update_product"]
 
 main_m = MainMessages()
 messages = ProductUpdateActionMessages()

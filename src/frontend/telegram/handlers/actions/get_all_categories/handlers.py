@@ -21,6 +21,9 @@ from .utils import (
     TEMPLATE_BUTTON_CATEGORY,
 )
 
+__all__ = ["handle_action_get_all_categories"]
+
+
 main_m = MainMessages()
 messages = GetAllCategoriesActionMessages()
 templates = GetAllCategoriesActionTemplates()
@@ -70,7 +73,7 @@ def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
 
 @check_authentication_decorator
 @telegram_bot.callback_query_handler(
-    func=lambda m: m.split("#")[0] in paginator_callbacks,
+    func=lambda m: m.data.split("#")[0] in paginator_callbacks,
     state=CategoriesStatesGroup.categories,
 )
 def handle_categories_paginator(message: CallbackQuery):

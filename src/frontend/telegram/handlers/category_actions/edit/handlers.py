@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -15,6 +15,8 @@ from src.frontend.telegram.api import CategoriesAPI
 from src.frontend.telegram.api.categories.schemas import CategoryOutSchema
 from .messages import CategoryUpdateActionMessages, CategoryUpdateActionTemplates, MAX_LEN_NAME
 from .states import CategoryUpdateStatesGroup
+
+__all__ = ["handle_action_update_category"]
 
 main_m = MainMessages()
 messages = CategoryUpdateActionMessages()

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -25,6 +25,8 @@ from .messages import (
 )
 from .utils import get_inline_categories
 from .states import ProductCreateStatesGroup
+
+__all__ = ["handle_paginator_create_new_product"]
 
 main_m = MainMessages()
 messages = ProductCreateActionMessages()

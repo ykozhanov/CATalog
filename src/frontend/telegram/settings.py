@@ -1,8 +1,5 @@
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from src.frontend.telegram.core.exceptions import ENVError
 from src.frontend.telegram.core.exceptions.messages import MESSAGE_ENV_ERROR
 

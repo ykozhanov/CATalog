@@ -10,6 +10,8 @@ from src.frontend.telegram.handlers.commands import COMMANDS
 from src.frontend.telegram.handlers.commands.login.messages import LoginCommandTemplates
 from .messages import StartCommandMessages
 
+__all__ = ["handle_command_start"]
+
 messages = StartCommandMessages()
 templates_login = LoginCommandTemplates()
 y_or_n = KeyboardYesOrNo()

@@ -1,6 +1,6 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -19,6 +19,8 @@ from src.frontend.telegram.handlers.actions.get_all_products.utils import (
     TEMPLATE_BUTTON_PRODUCT,
 )
 from .messages import GetProductsByExpDateActionMessages
+
+__all__ = ["handle_action_get_product_by_exp_date"]
 
 main_m = MainMessages()
 messages = GetProductsByExpDateActionMessages()

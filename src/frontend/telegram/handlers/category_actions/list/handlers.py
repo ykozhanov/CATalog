@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -20,6 +20,8 @@ from src.frontend.telegram.handlers.actions.get_all_products.utils import (
 from src.frontend.telegram.api import ProductsAPI
 
 from .messages import CategoryListActionTemplates
+
+__all__ = ["handle_category_list_action"]
 
 main_m = MainMessages()
 templates = CategoryListActionTemplates()

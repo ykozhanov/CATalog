@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.bot.states import CategoriesStatesGroup
 from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement, KeyboardYesOrNo
 from src.frontend.telegram.handlers.utils import (
@@ -14,6 +14,8 @@ from src.frontend.telegram.api import CategoriesAPI
 
 from .messages import CategoryDeleteActionTemplates, CategoryDeleteActionMessages
 from .states import CategoryDeleteStatesGroup
+
+__all__ = ["handler_category_delete_action"]
 
 main_m = MainMessages()
 messages = CategoryDeleteActionMessages()

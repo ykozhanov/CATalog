@@ -1,4 +1,6 @@
 import requests
+import base64
+
 from pydantic import ValidationError
 
 from src.frontend.telegram.core.exceptions import AuthenticationError
@@ -10,6 +12,14 @@ from .schemas import UserInSchema
 from .exceptions import CreateOrGetUserError, MESSAGE_CREATE_USER_ERROR, MESSAGE_GET_TOKEN_ERROR
 
 
+def create_base_token(username: str, password: str, register_email: str | None = None):
+    if register_email:
+        for_encode = f"{username}:{password}:{register_email}".encode("utf-8")
+    else:
+        for_encode = f"{username}:{password}".encode("utf-8")
+    return base64.b64encode(for_encode).decode("utf-8")
+
+
 class UsersAPI:
     _api_prefix_login = "/users/login/"
     _api_prefix_register = "/users/register/"
@@ -17,12 +27,9 @@ class UsersAPI:
 
     @classmethod
     def login_or_register(cls, username: str, password: str, register_email: str | None = None) -> UserInSchema:
-        if register_email:
-            credentials = (username, password, register_email)
-        else:
-            credentials = (username, password)
+        headers = {"Authorization": f"Basic {create_base_token(username, password, register_email)}"}
         url = f"{BACKEND_URL}{cls._api_prefix_register if register_email else cls._api_prefix_login}"
-        response = requests.post(url, auth=credentials)
+        response = requests.post(url, headers=headers)
 
         try:
             if response.ok:

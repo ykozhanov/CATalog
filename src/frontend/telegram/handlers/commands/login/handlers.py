@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.handlers.utils.md_dataclasses import LoginDataclass
 from src.frontend.telegram.core.utils import SendMessage
@@ -8,6 +8,8 @@ from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
 from src.frontend.telegram.bot.states import UsersStatesGroup
 from .utils import is_valid_email, login_user
 from .messages import LoginCommandMessages, LoginCommandTemplates
+
+__all__ = ["handle_command_login"]
 
 main_m = MainMessages()
 messages = LoginCommandMessages()

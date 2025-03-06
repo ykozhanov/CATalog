@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage, PaginatorListHelper
 from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
@@ -15,6 +15,8 @@ from src.frontend.telegram.api import CategoriesAPI
 from src.frontend.telegram.api.categories.schemas import CategoryOutSchema
 from .messages import CategoryCreateActionTemplates, CategoryCreateActionMessages, MAX_LEN_NAME
 from .states import CategoryCreateStatesGroup
+
+__all__ = ["handle_paginator_category_create_new_category"]
 
 main_m = MainMessages()
 messages = CategoryCreateActionMessages()

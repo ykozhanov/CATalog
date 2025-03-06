@@ -1,6 +1,6 @@
 from telebot.types import Message, CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement
 from src.frontend.telegram.handlers.utils import (
@@ -14,6 +14,8 @@ from src.frontend.telegram.api import ProductsAPI
 
 from .messages import ProductUseActionTemplates, ProductUseActionMessages
 from .states import ProductUseStatesGroup
+
+__all__ = ["handler_product_use_action"]
 
 main_m = MainMessages()
 messages = ProductUseActionMessages()

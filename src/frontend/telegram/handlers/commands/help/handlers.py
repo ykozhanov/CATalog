@@ -1,12 +1,14 @@
 from telebot.types import Message
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
 from src.frontend.telegram.bot.keyboards import KeyboardListActions
 from src.frontend.telegram.bot.states import ActionsStatesGroup
 from src.frontend.telegram.handlers.commands import COMMANDS
 from .messages import HelpCommandMessages
+
+__all__ = ["handle_command_help"]
 
 main_m = MainMessages()
 messages = HelpCommandMessages()

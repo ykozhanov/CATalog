@@ -1,6 +1,6 @@
 from telebot.types import CallbackQuery
 
-from src.frontend.telegram.settings import telegram_bot
+from src.frontend.telegram.bot import telegram_bot
 from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.bot.keyboards import KeyboardActionsByElement, KeyboardYesOrNo
 from src.frontend.telegram.handlers.utils import (
@@ -19,6 +19,7 @@ main_m = MainMessages()
 templates = ProductDeleteActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
+__all__ = ["handler_product_delete_action"]
 
 @telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.DELETE_PREFIX,
