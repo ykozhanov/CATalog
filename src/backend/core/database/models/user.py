@@ -20,7 +20,7 @@ class User(Base):
 
     profile: Mapped[Profile] = relationship(
         "Profile",
-        back_populates="profile",
+        back_populates="user",
         lazy="joined",
         cascade="all, delete-orphan",
     )

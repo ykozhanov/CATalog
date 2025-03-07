@@ -9,12 +9,9 @@ from sqlalchemy.engine import Connection
 
 from src.backend.core.database.models import Base
 
-# from src.backend.settings import PROFILE_MODEL
-# from src.backend.api.api_v1.categories.models import Category
-
 if TYPE_CHECKING:
-    from src.backend.core.database.models import Profile
     from src.backend.api.api_v1.categories.models import Category
+
 
 class Product(Base):
     __tablename__ = "products"
@@ -30,12 +27,6 @@ class Product(Base):
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
     category: Mapped["Category"] = relationship("Category", back_populates="products", lazy="joined")
-    profile: Mapped["Profile"] = relationship(
-        "Profile",
-        back_populates="products",
-        lazy="joined",
-        cascade="all, delete-orphan",
-    )
 
 
 def delete_product_if_quantity_zero(mapper: Mapper, connection: Connection, target: Product):

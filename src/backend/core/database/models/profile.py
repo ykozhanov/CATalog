@@ -1,7 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.backend.core.database.models import Base, User
+from src.backend.api.api_v1.categories.models import Category
+
+if TYPE_CHECKING:
+    from src.backend.api.api_v1.categories.models import Category
+    from src.backend.api.api_v1.products.models import Product
 
 
 class Profile(Base):
@@ -12,7 +20,21 @@ class Profile(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), index=True)
 
     user: Mapped[User] = relationship(
-        User,
-        backref="profile",
+        "User",
+        back_populates="profile",
         lazy="joined",
+    )
+
+    categories: Mapped[list[Category]] = relationship(
+        "Category",
+        backref="profile",
+        lazy="subquery",
+        cascade="all, delete-orphan",
+    )
+
+    profile: Mapped["Profile"] = relationship(
+        "Profile",
+        backref="profile",
+        lazy="subquery",
+        cascade="all, delete-orphan",
     )

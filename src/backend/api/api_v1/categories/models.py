@@ -6,11 +6,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.backend.core.database.models import Base
 
-# from src.backend.api.api_v1.products.models import Product
-# from src.backend.settings import PROFILE_MODEL
-
 if TYPE_CHECKING:
-    from src.backend.core.database.models import Profile
     from src.backend.api.api_v1.products.models import Product
 
 class Category(Base):
@@ -23,14 +19,8 @@ class Category(Base):
     products: Mapped[list["Product"]] = relationship(
         "Product",
         back_populates="category",
-        order_by="Product.exp_date, Product.exp_date is NULL",
+        order_by="Product.exp_date, null()",
         lazy="selectin",
-    )
-    profile: Mapped["Profile"] = relationship(
-        "Profile",
-        backref="categories",
-        lazy="subquery",
-        cascade="all, delete-orphan",
     )
 
     __table_args__ = (
