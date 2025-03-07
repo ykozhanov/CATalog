@@ -21,9 +21,9 @@ def create_base_token(username: str, password: str, register_email: str | None =
 
 
 class UsersAPI:
-    _api_prefix_login = "/users/login/"
-    _api_prefix_register = "/users/register/"
-    _api_prefix_token = "/users/token/"
+    _api_prefix_login = "/auth/login/"
+    _api_prefix_register = "/auth/register/"
+    _api_prefix_token = "/auth/token/"
 
     @classmethod
     def login_or_register(cls, username: str, password: str, register_email: str | None = None) -> UserInSchema:

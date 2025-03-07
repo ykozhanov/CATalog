@@ -1,8 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# from src.backend.settings import PROFILE_MODEL
 from .base import Base
+
+if TYPE_CHECKING:
+    from .profile import Profile
 
 
 class User(Base):
@@ -13,7 +18,12 @@ class User(Base):
     password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     email: Mapped[str] = mapped_column(String(length=150), nullable=False)
 
-    # profile: Mapped[PROFILE_MODEL] = relationship(PROFILE_MODEL, back_populates="profile", lazy="joined")
+    profile: Mapped[Profile] = relationship(
+        "Profile",
+        back_populates="profile",
+        lazy="joined",
+        cascade="all, delete-orphan",
+    )
 
     def __str__(self) -> str:
         return self.__class__.__name__

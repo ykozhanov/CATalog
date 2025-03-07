@@ -1,7 +1,7 @@
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
-from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages
+from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages, exc_handler_decorator
 from src.frontend.telegram.handlers.utils.md_dataclasses import LoginDataclass
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
@@ -35,6 +35,7 @@ def handle_command_login(message: Message) -> None:
 @telegram_bot.callback_query_handler(state=UsersStatesGroup.login)
 def handle_callback_login(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         text = messages.input_username
     elif message.data == y_or_n.callback_answer_no:
@@ -60,6 +61,7 @@ def handle_state_waiting_username(message: Message) -> None:
         sm.send_message(text, state=UsersStatesGroup.waiting_password)
 
 
+@exc_handler_decorator
 @telegram_bot.message_handler(state=UsersStatesGroup.waiting_password)
 def handle_state_waiting_password(message: Message) -> None:
     sm = SendMessage(message)
@@ -113,6 +115,7 @@ def handle_state_waiting_email(message: Message) -> None:
             sm.send_message(messages.invalid_email)
 
 
+@exc_handler_decorator
 @telegram_bot.callback_query_handler(state=UsersStatesGroup.register_check_data)
 def handle_callback_register_check_data(message: CallbackQuery) -> None:
     sm = SendMessage(message)

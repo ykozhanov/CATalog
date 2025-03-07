@@ -53,7 +53,7 @@ class LoginCommandTemplates:
         **Email**: {email}.
         
         Верно?
-        """
+        """.strip()
 
     @staticmethod
     def got_exception(e: Exception) -> str:

@@ -12,9 +12,7 @@ from src.backend.core.exceptions import AuthenticationError
 from src.backend.core.exceptions.messages import MESSAGE_REGISTER_ERROR_401
 from src.backend.core.database.models import User, Profile
 
-# from src.backend.settings import USER_MODEL
 from .schemas import TokensSchema
-# from .models import Profile
 
 
 class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):

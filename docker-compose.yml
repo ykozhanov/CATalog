@@ -8,6 +8,8 @@ services:
       - "5000:5000"
     networks:
       - network
+    env_file:
+      - .env
     depends_on:
       redis:
         condition: service_healthy

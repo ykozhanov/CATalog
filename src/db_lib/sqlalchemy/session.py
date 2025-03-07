@@ -58,9 +58,9 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                 return session.query(model).all()
             return session.query(model).order_by(order_by).all()
 
-    def where(self, model: type[T], attr: str, search: Any) -> list[T]:
+    def where(self, model: type[T], attr: str, content: Any) -> list[T]:
         with next(self._session_generator) as session:
-            return session.query(model).filter(getattr(model, attr) == search).all()
+            return session.query(model).filter(getattr(model, attr) == content).all()
 
     def re(self, model: type[T], main_attr: str, filters: dict[str, Any], pattern: str) -> list[T]:
         with next(self._session_generator) as session:
