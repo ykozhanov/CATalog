@@ -1,5 +1,6 @@
 import os
 from typing import Generator
+from contextlib import contextmanager
 
 import redis
 from sqlalchemy import create_engine
@@ -8,8 +9,6 @@ from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 from src.backend.core.exceptions import ENVError
 from src.backend.core.exceptions.messages import MESSAGE_ENV_ERROR
 
-# from src.backend.settings import get_db_path
-# from src.backend.core.settings_app import redis_cache_url
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
     return "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
@@ -26,19 +25,20 @@ SessionFactory = sessionmaker(bind=engine)
 Session = scoped_session(SessionFactory)
 
 
+@contextmanager
 def get_session() -> Generator[SessionType, None, None]:
     session = Session()
     try:
-        yield session
-    except Exception:
-        session.rollback()
-        raise
+        yield Session()
+    finally:
+        session.close()
 
 
 REDIS_HOSTNAME_CACHE_B = os.getenv("REDIS_HOSTNAME")
 REDIS_PORT_CACHE_B = os.getenv("REDIS_PORT")
 REDIS_DB_CACHE_B = os.getenv("REDIS_DB")
 REDIS_PASSWORD_CACHE_B = os.getenv("REDIS_PASSWORD")
+
 
 def redis_cache_url() -> str:
     if not REDIS_HOSTNAME_CACHE_B or not REDIS_PORT_CACHE_B or not REDIS_DB_CACHE_B:

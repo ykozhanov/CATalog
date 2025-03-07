@@ -57,7 +57,7 @@ services:
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
-      retries: 3
+      retries: 5
       start_period: 15s
       timeout: 5s
 

@@ -48,8 +48,8 @@ class LoginCommandTemplates:
     @staticmethod
     def check_md(username: str, email: str) -> str:
         return f"Вы зарегистрируетесь со следующими учетными данными:\n\n"\
-        f"*\tНикнейм*: {username};\n"\
-        f"*\tEmail*: {email}.\n\n"\
+        f"*\t\t\tНикнейм*: {username};\n"\
+        f"*\t\t\tEmail*: {email}.\n\n"\
         "Верно?"
 
     @staticmethod

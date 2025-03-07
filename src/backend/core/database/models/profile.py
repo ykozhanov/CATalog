@@ -5,7 +5,6 @@ from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.backend.core.database.models import Base, User
-from src.backend.api.api_v1.categories.models import Category
 
 if TYPE_CHECKING:
     from src.backend.api.api_v1.categories.models import Category
@@ -32,8 +31,8 @@ class Profile(Base):
         cascade="all, delete-orphan",
     )
 
-    profile: Mapped["Profile"] = relationship(
-        "Profile",
+    products: Mapped["Product"] = relationship(
+        "Product",
         backref="profile",
         lazy="subquery",
         cascade="all, delete-orphan",
