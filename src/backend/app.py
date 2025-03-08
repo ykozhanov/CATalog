@@ -1,6 +1,4 @@
-from typing import Any
-
-from flask import Flask, Blueprint
+from flask import Flask
 
 from src.backend.api.api_v1 import categories_bp, auth_bp, products_bp
 from src.backend.settings import COMMON_PREFIX

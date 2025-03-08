@@ -1,13 +1,16 @@
 import re
 from datetime import datetime, UTC
+from unicodedata import category
 
 from flask import jsonify, request, Response
 from flask.views import MethodView
 from pydantic import ValidationError, BaseModel
 
-from src.db_lib.base.exceptions import NotFoundInDBError
+from src.db_lib.base.exceptions import NotFoundInDBError, IntegrityDBError
+from src.db_lib.base.exceptions.messages import MESSAGE_INTEGRITY_ERROR
 
 from src.backend.core.utils import crud, session as S
+from src.backend.core.mixins import JWTMixin
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
 from src.backend.core.database.models import User, Profile
@@ -48,7 +51,7 @@ class RedisCacheProductMixin:
         return [model.model_validate_json(e) for e in data]
 
 
-class ProductsMethodView(RedisCacheProductMixin, MethodView):
+class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
     model = Product
     element_in_schema = ProductInSchema
     element_out_schema = ProductOutSchema
@@ -99,8 +102,8 @@ class ProductsMethodView(RedisCacheProductMixin, MethodView):
             elif exp_days := request.args.get(QUERY_STRING_SEARCH_BY_EXP_DAYS, type=int):
                 result = self._get_products_by_exp_days(exp_days, current_user)
             else:
-                profile: Profile = getattr(current_user, "profile")
-                result = getattr(profile, self.attr_for_list_out_schema)
+                result = current_user.profile.products
+            result = [] if not result else result
             data_for_list_out_schema = {
                 self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result],
             }
@@ -114,29 +117,33 @@ class ProductsMethodView(RedisCacheProductMixin, MethodView):
         try:
             new_element_data = request.get_json()
             new_element_validated = self.element_in_schema(**new_element_data)
+            all_categories = [category.id for category in current_user.profile.categories]
+            if new_element_validated.category_id not in all_categories:
+                raise IntegrityDBError(f"{MESSAGE_INTEGRITY_ERROR}: Указанной категории не существует")
             new_element_model = self.model(profile_id=current_user.profile.id, **new_element_validated.model_dump())
             self.del_cache_by_name_or_category_id(
                 current_user,
+                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
                 name=new_element_model.name,
                 category_id=new_element_model.category_id,
             )
             new_element = crud.create(new_element_model)
-        except ValidationError as e:
+        except (ValidationError, IntegrityDBError) as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 400
         else:
-            return jsonify(self.element_out_schema.model_validate(new_element)), 201
+            return jsonify(dict(self.element_out_schema.model_validate(new_element))), 201
 
 
-class ProductsByIDMethodView(RedisCacheProductMixin, MethodView):
+class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
     model = Product
     element_in_schema = ProductInSchema
     element_out_schema = ProductOutSchema
     element_list_out_schema = ProductListOutSchema
 
     @login_jwt_required_decorator
-    def get(self, current_user: User, element_id: int) -> tuple[Response, int]:
+    def get(self, current_user: User, product_id: int) -> tuple[Response, int]:
         try:
-            element = crud.read(model=self.model, pk=element_id)
+            element = crud.read(model=self.model, pk=product_id)
             if element is None:
                 raise NotFoundInDBError()
             if element.profile_id != current_user.profile.id:
@@ -146,12 +153,12 @@ class ProductsByIDMethodView(RedisCacheProductMixin, MethodView):
         except NotFoundInDBError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 404
         else:
-            return jsonify(self.element_out_schema.model_validate(element)), 200
+            return jsonify(dict(self.element_out_schema.model_validate(element))), 200
 
     @login_jwt_required_decorator
-    def put(self, current_user: User, element_id: int) -> tuple[Response, int]:
+    def put(self, current_user: User, product_id: int) -> tuple[Response, int]:
         try:
-            old_element = crud.read(self.model, pk=element_id)
+            old_element = crud.read(self.model, pk=product_id)
             if old_element is None:
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
@@ -165,6 +172,7 @@ class ProductsByIDMethodView(RedisCacheProductMixin, MethodView):
             )
             self.del_cache_by_name_or_category_id(
                 current_user,
+                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
                 name=old_element.name,
                 category_id=old_element.category_id,
             )
@@ -175,12 +183,12 @@ class ProductsByIDMethodView(RedisCacheProductMixin, MethodView):
         except NotFoundInDBError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 404
         else:
-            return jsonify(self.element_out_schema.model_validate(update_element)), 200
+            return jsonify(dict(self.element_out_schema.model_validate(update_element))), 200
 
     @login_jwt_required_decorator
-    def delete(self, current_user: User, element_id: int) -> tuple[Response, int]:
+    def delete(self, current_user: User, product_id: int) -> tuple[Response, int]:
         try:
-            old_element = crud.read(self.model, pk=element_id)
+            old_element = crud.read(self.model, pk=product_id)
             if old_element is None:
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
@@ -188,6 +196,7 @@ class ProductsByIDMethodView(RedisCacheProductMixin, MethodView):
             crud.delete(self.model, pk=old_element.id)
             self.del_cache_by_name_or_category_id(
                 current_user,
+                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
                 name=old_element.name,
                 category_id=old_element.category_id,
             )

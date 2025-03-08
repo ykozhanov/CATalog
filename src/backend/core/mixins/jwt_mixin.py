@@ -104,7 +104,7 @@ class JWTWithGetTokenMixin(JWTMixin):
         if refresh_token:
             payload_data = self._decode_jwt(token=refresh_token, exc=exc, message=message)
             payload_from_refresh: JWTPayloadSchema = JWTPayloadSchema(**payload_data)
-            sub = payload_from_refresh.sub
+            sub = str(payload_from_refresh.sub)
             td = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         else:
             if not sub:
@@ -112,7 +112,7 @@ class JWTWithGetTokenMixin(JWTMixin):
             td = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
         payload = JWTPayloadSchema(
-            sub=sub,
+            sub=str(sub),
             iat=datetime.now(UTC),
             exp=datetime.now() + td,
             jti=uuid.uuid4().hex,

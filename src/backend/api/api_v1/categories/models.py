@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, case
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.backend.core.database.models import Base
+from src.backend.api.api_v1.products.models import Product
 
-if TYPE_CHECKING:
-    from src.backend.api.api_v1.products.models import Product
+# if TYPE_CHECKING:
+#     pass
 
 class Category(Base):
     __tablename__ = "categories"
@@ -19,7 +20,13 @@ class Category(Base):
     products: Mapped[list["Product"]] = relationship(
         "Product",
         back_populates="category",
-        order_by="Product.exp_date, null()",
+        order_by=(
+            case(
+                (Product.exp_date.isnot(None), 1),
+                else_=0,
+            ),
+            Product.exp_date,
+        ),
         lazy="selectin",
     )
 

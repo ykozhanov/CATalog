@@ -20,9 +20,9 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String(length=100), nullable=False, index=True)
     unit: Mapped[str] = mapped_column(String(length=10), nullable=False, default="шт.")
     quantity: Mapped[float] = mapped_column(Float, CheckConstraint("quantity >= 0"), nullable=False, default=1)
-    exp_date: Mapped[date] = mapped_column(Date)
-    note: Mapped[str] = mapped_column(String(length=500))
-    created_at: Mapped[date] = mapped_column(Date, default=func.current_date)
+    exp_date: Mapped[date] = mapped_column(Date, nullable=True)
+    note: Mapped[str] = mapped_column(String(length=500), nullable=True)
+    created_at: Mapped[date] = mapped_column(Date, default=func.current_date())
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 

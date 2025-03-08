@@ -24,14 +24,14 @@ class Profile(Base):
         lazy="joined",
     )
 
-    categories: Mapped[list[Category]] = relationship(
+    categories: Mapped[list["Category"]] = relationship(
         "Category",
         backref="profile",
         lazy="subquery",
         cascade="all, delete-orphan",
     )
 
-    products: Mapped["Product"] = relationship(
+    products: Mapped[list["Product"]] = relationship(
         "Product",
         backref="profile",
         lazy="subquery",

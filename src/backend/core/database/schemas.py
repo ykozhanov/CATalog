@@ -8,5 +8,5 @@ class LoginSchema(BaseModel):
 
 class RegisterSchema(BaseModel):
     username: str
-    password: bytes
+    password: bytes | str
     email: EmailStr

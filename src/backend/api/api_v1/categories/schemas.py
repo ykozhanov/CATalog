@@ -6,7 +6,7 @@ class CategoryInSchema(BaseModel):
 
 
 class CategoryOutSchema(BaseModel):
-    id: str
+    id: int
     name: str
 
     model_config = ConfigDict(

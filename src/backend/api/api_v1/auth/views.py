@@ -9,7 +9,7 @@ from src.backend.core.response import ErrorMessageSchema
 from src.backend.core.request import TYPE_REFRESH_JWT
 from src.backend.core.database.schemas import LoginSchema, RegisterSchema
 from src.backend.core.exceptions import AuthenticationError
-from src.backend.core.exceptions.messages import MESSAGE_REGISTER_ERROR_401
+from src.backend.core.exceptions.messages import MESSAGE_REGISTER_ERROR_401, MESSAGE_AUTHENTICATION_ERROR_401
 from src.backend.core.database.models import User, Profile
 
 from .schemas import TokensSchema
@@ -37,8 +37,15 @@ class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
         """
         try:
             get_users = crud.where(model=User, attr="username", content=login_data.username)
-            if not get_users or not self._check_hashpw(password=login_data.password, hashed_password=get_users[0].password):
-                raise AuthenticationError()
+            if not get_users:
+                raise AuthenticationError(
+                    f"{MESSAGE_AUTHENTICATION_ERROR_401}: Нет пользователя {login_data.username}"
+                )
+            user = get_users[0]
+            if not self._check_hashpw(login_data.password, user.password):
+                raise AuthenticationError(
+                    f"{MESSAGE_AUTHENTICATION_ERROR_401}: Неверный логин или пароль | {self._check_hashpw(password=login_data.password, hashed_password=user.password)}"
+                )
             user = get_users[0]
             refresh_token = self._get_jwt_token(sub=user.id)
             access_token = self._get_jwt_token(refresh_token=refresh_token)
@@ -46,7 +53,7 @@ class LoginMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
         except (AuthenticationError, NotFoundInDBError) as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 401
         else:
-            return jsonify(TokensSchema(access_token=access_token, refresh_token=refresh_token).model_dump()), 200
+            return jsonify(dict(TokensSchema(access_token=access_token, refresh_token=refresh_token))), 200
 
 
 class RegisterMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
@@ -71,17 +78,20 @@ class RegisterMethodView(MethodView, HashPWMixin, JWTWithGetTokenMixin):
         """
         try:
             if crud.where(model=User, attr="username", content=register_data.username):
-                raise AuthenticationError(f"{MESSAGE_REGISTER_ERROR_401}: Пользователь с таким username уже существует")
+                raise AuthenticationError(
+                    f"{MESSAGE_REGISTER_ERROR_401}: Пользователь {register_data.username} уже существует"
+                )
+            register_data.password = self._hashpw(register_data.password)
             new_user = User(**register_data.model_dump())
             new_user_with_id = crud.create(obj=new_user)
             refresh_token = self._get_jwt_token(sub=new_user_with_id.id)
             jwt_token_model = Profile(refresh_token=refresh_token, user_id=new_user_with_id.id)
             crud.create(obj=jwt_token_model)
             access_token = self._get_jwt_token(refresh_token=refresh_token, message=MESSAGE_REGISTER_ERROR_401)
-            return jsonify(TokensSchema(access_token=access_token, refresh_token=refresh_token).model_dump()), 201
+            return jsonify(dict(TokensSchema(access_token=access_token, refresh_token=refresh_token))), 201
 
         except AuthenticationError as e:
-            return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 401
+            return jsonify(dict(ErrorMessageSchema(message=str(e)))), 401
 
 
 class TokenMethodView(MethodView, JWTWithGetTokenMixin):
@@ -108,4 +118,4 @@ class TokenMethodView(MethodView, JWTWithGetTokenMixin):
             access_token = self._get_jwt_token(refresh_token=refresh_token)
         except AuthenticationError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 401
-        return jsonify(TokensSchema(access_token=access_token, refresh_token=refresh_token).model_dump()), 200
+        return jsonify(dict(TokensSchema(access_token=access_token, refresh_token=refresh_token))), 200
