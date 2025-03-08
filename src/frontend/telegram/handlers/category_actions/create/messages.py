@@ -13,7 +13,7 @@ class CategoryCreateActionMessages:
 
     @property
     def success(self) -> str:
-        return "Новый товар успешно создан!\nВернуться к списку действий /help"
+        return "Новая категория успешно создана!\nВернуться к списку действий /help"
 
 
 class CategoryCreateActionTemplates:
@@ -21,11 +21,10 @@ class CategoryCreateActionTemplates:
     def check_md(
             name: str,
     ) -> str:
-        return f"""Новый категория:
-            **Имя**: {name}.
-        
-        Всё верно?
-        """
+        return "Новая категория:\n\n"\
+            f"\t\t\t*Имя*: {name}\n\n"\
+            "Всё верно?"
+
 
     @staticmethod
     def error_max_len(max_len: int) -> str:

@@ -10,10 +10,9 @@ class GetProductsByExpDateActionMessages:
 
     @property
     def empty(self) -> str:
-        return f"""У вас пока нет ни одного товара с истекающим сроком годности.
-        
-        Вернуться к списку действий /{COMMANDS.help[0]}
-        """
+        return "У вас пока нет ни одного товара с истекающим сроком годности.\n\n"\
+            f"Вернуться к списку действий /{COMMANDS.help[0]}"
+
 
     @property
     def for_paginator(self) -> str:

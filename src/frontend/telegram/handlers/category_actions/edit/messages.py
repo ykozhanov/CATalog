@@ -18,11 +18,9 @@ class CategoryUpdateActionMessages:
 class CategoryUpdateActionTemplates:
     @staticmethod
     def check_md(name: str) -> str:
-        return f"""Обновленная категория:
-            **Имя**: {name}.
-        
-        Всё верно?
-        """
+        return f"Обновленная категория:\n\n"\
+            f"\t\t\t*Имя*: {name}\n\n"\
+            "Всё верно?"
 
     @staticmethod
     def error_max_len(max_len: int) -> str:

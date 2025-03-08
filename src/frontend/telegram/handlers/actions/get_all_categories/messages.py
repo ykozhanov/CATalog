@@ -11,6 +11,5 @@ class GetAllCategoriesActionMessages:
 class GetAllCategoriesActionTemplates:
     @staticmethod
     def detail_md(name: str) -> str:
-        return f"""О категории:
-            **Имя**: {name}.
-        """
+        return "О категории:\n\n"\
+            f"\t\t\t*Имя**: {name}"

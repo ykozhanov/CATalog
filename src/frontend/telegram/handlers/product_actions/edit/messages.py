@@ -96,16 +96,14 @@ class ProductUpdateActionTemplates:
             note: str,
             category: str,
     ) -> str:
-        return f"""Обновленный товар:
-            **Имя**: {name};
-            **Количество**: {quantity};
-            **Единица измерения**: {unit};
-            **Срок годности (до)**: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else "без срока годности"};
-            **Примечание**: {note if note else ""};
-            **Категория**: {category}.
-        
-        Всё верно?
-        """
+        return "Обновленный товар:\n\n"\
+            f"\t\t\t*Имя*: {name}\n"\
+            f"\t\t\t*Количество*: {quantity}\n"\
+            f"\t\t\t*Единица измерения*: {unit}\n"\
+            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else 'без срока годности'}\n"\
+            f"\t\t\t*Примечание*: {note if note else ''}\n"\
+            f"\t\t\t*Категория*: {category}\n\n"\
+            "Всё верно?"
 
     @staticmethod
     def error_max_len(max_len: int) -> str:

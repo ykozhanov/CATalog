@@ -8,7 +8,7 @@ from src.backend.core.utils import crud, session
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.mixins import JWTMixin
 from src.backend.core.response.schemas import ErrorMessageSchema
-from src.backend.core.database.models import User, Profile
+from src.backend.core.database.models import User
 from src.backend.core.exceptions import ForbiddenError, BadRequestError
 from src.backend.core.exceptions.messages import MESSAGE_BAD_REQUEST_ERROR_400
 

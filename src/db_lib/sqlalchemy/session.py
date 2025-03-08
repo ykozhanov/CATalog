@@ -50,7 +50,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
                     setattr(obj, key, value)
                 if self._autocommit:
                     session.commit()
-                return obj
+                return session.query(model).get(pk)
             except Exception as e:
                 session.rollback()
                 raise e
@@ -92,10 +92,10 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
             if not isinstance(main_attr_data, str):
                 raise BadRequestDBError(f"{MESSAGE_BAD_REQUEST_DB}: значение 'main_attr' в 'filters' должно быть str")
             try:
-                query = session.query(model).filter(getattr(model, main_attr_data).op("REGEXP")(pattern))
+                query = session.query(model).filter(getattr(model, main_attr_data).op("~*")(pattern))
                 for attr, value in filters.items():
                     if attr != main_attr:
-                        query.filter(getattr(model, attr) == value)
+                        query = query.filter(getattr(model, attr) == value)
                 return query.all()
             except Exception as e:
                 session.rollback()

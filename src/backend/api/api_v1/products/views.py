@@ -1,6 +1,6 @@
 import re
+import json
 from datetime import datetime, UTC
-from unicodedata import category
 
 from flask import jsonify, request, Response
 from flask.views import MethodView
@@ -13,7 +13,7 @@ from src.backend.core.utils import crud, session as S
 from src.backend.core.mixins import JWTMixin
 from src.backend.core.decorators import login_jwt_required_decorator
 from src.backend.core.response.schemas import ErrorMessageSchema
-from src.backend.core.database.models import User, Profile
+from src.backend.core.database.models import User, Base
 from src.backend.core.exceptions import ForbiddenError
 from src.backend.core.database import redis_cache
 
@@ -43,12 +43,12 @@ class RedisCacheProductMixin:
             redis_cache.delete(cache_key_category_id)
 
     @staticmethod
-    def get_json_list_for_cache(model: type[BaseModel], data: list[BaseModel]) -> list[str]:
-        return [model.model_validate(e).model_dump_json() for e in data]
+    def get_json_list_for_cache(model: type[BaseModel], data: list[Base]) -> str:
+        return json.dumps([model.model_validate(e).model_dump_json() for e in data])
 
     @staticmethod
-    def get_model_list_from_cache(model: type[BaseModel], data: list[str]) -> list[BaseModel]:
-        return [model.model_validate_json(e) for e in data]
+    def get_model_list_from_cache(model: type[BaseModel], data: str) -> list[BaseModel]:
+        return [model.model_validate_json(e) for e in json.loads(data)]
 
 
 class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
@@ -65,20 +65,20 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
         pattern = rf"(?i).*{re.escape(name)}.*"
         filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
         data = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME, filters=filters, pattern=pattern)
-        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_in_schema, data=data))
+        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
         return data
 
     def _get_products_by_category_id(self, category_id: int, current_user: User) -> list[model]:
         cache_key = f"{self.attr_for_list_out_schema}_{QUERY_STRING_SEARCH_BY_CATEGORY_ID}:{category_id}:{current_user.profile.id}"
         if data := redis_cache.get(cache_key):
-            return self.get_model_list_from_cache(model=self.element_in_schema, data=data)
+            return self.get_model_list_from_cache(model=self.element_out_schema, data=data)
         session = S.session()
         with session as s:
             data = s.query(self.model).filter(
                 self.model.category_id == category_id,
                 self.model.profile_id == current_user.profile.id,
             ).all()
-        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_in_schema, data=data))
+        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
         return data
 
     def _get_products_by_exp_days(self, exp_days: int, current_user: User) -> list[model]:
@@ -96,7 +96,7 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             if name := request.args.get(QUERY_STRING_SEARCH_BY_NAME):
                 result = self._get_products_by_name(name, current_user)
             elif category_id := request.args.get(QUERY_STRING_SEARCH_BY_CATEGORY_ID, type=int):
-                if category_id not in (c for c in current_user.profile.categories):
+                if category_id not in (c.id for c in current_user.profile.categories):
                     raise ForbiddenError()
                 result = self._get_products_by_category_id(category_id, current_user)
             elif exp_days := request.args.get(QUERY_STRING_SEARCH_BY_EXP_DAYS, type=int):
@@ -176,6 +176,10 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
                 name=old_element.name,
                 category_id=old_element.category_id,
             )
+            if update_element:
+                result = jsonify(dict(self.element_out_schema.model_validate(update_element))), 200
+            else:
+                result = jsonify(), 204
         except ValidationError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 400
         except ForbiddenError as e:
@@ -183,7 +187,7 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
         except NotFoundInDBError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 404
         else:
-            return jsonify(dict(self.element_out_schema.model_validate(update_element))), 200
+            return result
 
     @login_jwt_required_decorator
     def delete(self, current_user: User, product_id: int) -> tuple[Response, int]:

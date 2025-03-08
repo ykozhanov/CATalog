@@ -23,11 +23,10 @@ class GetAllProductsActionTemplates:
             note: str,
             category: str,
     ) -> str:
-        return f"""О товаре:
-            **Имя**: {name};
-            **Количество**: {quantity};
-            **Единица измерения**: {unit};
-            **Срок годности (до)**: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else "без срока годности"};
-            **Примечание**: {note if note else ""};
-            **Категория**: {category}.
-        """
+        return "О товаре:\n\n"\
+            f"\t\t\t*Имя*: {name}\n"\
+            f"\t\t\t*Количество*: {quantity}\n"\
+            f"\t\t\t*Единица измерения*: {unit}\n"\
+            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else 'без срока годности'}\n"\
+            f"\t\t\t*Примечание*: {note if note else ''}\n"\
+            f"\t\t\t*Категория*: {category}"

@@ -7,7 +7,7 @@ class ProductInSchema(BaseModel):
     name: str
     unit: str | None = None
     quantity: confloat(ge=0) | None = None
-    exp_date: date = None
+    exp_date: date | None = None
     note: str | None = None
     category_id: int | None = None
 

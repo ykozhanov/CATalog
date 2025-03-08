@@ -47,27 +47,23 @@ class LoginCommandMessages:
 class LoginCommandTemplates:
     @staticmethod
     def check_md(username: str, email: str) -> str:
-        return f"Вы зарегистрируетесь со следующими учетными данными:\n\n"\
-        f"*\t\t\tНикнейм*: {username};\n"\
-        f"*\t\t\tEmail*: {email}.\n\n"\
+        return "Вы зарегистрируетесь со следующими учетными данными:\n\n"\
+        f"\t\t\t*Никнейм*: {username}\n"\
+        f"\t\t\t*Email*: {email}\n\n"\
         "Верно?"
 
     @staticmethod
     def got_exception(e: Exception) -> str:
-        return f"""Что-то пошло не так!
+        return "Что-то пошло не так!\n\n"\
+            f"{str(e)}\n\n"\
+            f"Используйте /{COMMANDS.login[0]} для повторного входа / регистрации."
 
-        {str(e)}
-
-        Используйте /{COMMANDS.login[0]} для повторного входа / регистрации.
-        """
 
     @staticmethod
     def after_login(username: str) -> str:
-        return f"""Вы успешно зарегистрировались!
-        Добро пожаловать {username}.
-        
-        Используйте /{COMMANDS.help[0]} для получения списка команд.
-        """
+        return "Вы успешно зарегистрировались!\n"\
+            f"Добро пожаловать {username}!\n\n"\
+            f"Используйте /{COMMANDS.help[0]} для получения списка команд."
 
     @staticmethod
     def to_help(username: str) -> str:

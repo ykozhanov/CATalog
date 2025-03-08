@@ -17,10 +17,6 @@ class MainMessages:
 
     @staticmethod
     def t_got_exception(e: Exception) -> str:
-        return f"""
-        Что-то пошло не так!
-        
-        {str(e)}
-        
-        Используйте /{COMMANDS.help[0]} для получения списка команд.
-        """
+        return "Что-то пошло не так!\n\n"\
+            f"{str(e)}\n\n"\
+            f"Используйте /{COMMANDS.help[0]} для получения списка команд."
