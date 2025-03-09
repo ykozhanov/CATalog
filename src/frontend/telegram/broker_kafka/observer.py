@@ -39,7 +39,7 @@ class KafkaUserObserver(Observer):
 
     def update(self, v: TelegramUserSchema):
         with producer_kafka() as p:
-            p.send(topic=self._topic, value=dict(v), key=v.telegram_chat_id)
+            p.send(topic=self._topic, value=v.model_dump_json(), key=str(v.telegram_chat_id).encode("utf-8"))
             p.flush()
             
 
@@ -48,7 +48,7 @@ class UserSubject(Subject):
         self._user = TelegramUserSchema(
             telegram_user_id=user_id,
             telegram_chat_id=chat_id,
-            refresh_jtw_token=encrypt_refresh_token(refresh_token) if refresh_token is not None else refresh_token,
+            refresh_jtw_token=encrypt_refresh_token(refresh_token) if not refresh_token is None else refresh_token,
         )
         self._observers: list[Observer] = []
 

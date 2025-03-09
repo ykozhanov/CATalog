@@ -2,6 +2,7 @@ import re
 
 from telebot.types import Message, CallbackQuery
 
+from src.db_lib.base.exceptions.base_exceptions import NotFoundInDBError
 from src.frontend.telegram.api.users.users_api import UsersAPI
 from src.frontend.telegram.api.users.users_controller import UserController
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
@@ -29,7 +30,10 @@ def login_user(message: Message | CallbackQuery) -> None:
             password=md.login.password,
             register_email=md.login.email,
         )
-        uc.delete_user()
+        try:
+            uc.delete_user()
+        except NotFoundInDBError:
+            pass
         user = uc.add_user(user_in_schema)
         md.user = user
         UserSubject(

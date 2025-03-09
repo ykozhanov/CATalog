@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserInSchema(BaseModel):
-    access_token: str
-    refresh_token: str
+    access_jtw_token: str = Field(..., alias="access_token")
+    refresh_jtw_token: str = Field(..., alias="refresh_token")

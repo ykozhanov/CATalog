@@ -21,8 +21,11 @@ y_or_n = KeyboardYesOrNo()
 @telegram_bot.message_handler(commands=[COMMANDS.logout[0]])
 def handle_command_logout(message: Message) -> None:
     sm = SendMessage(message)
+    msg_data = sm.get_message_data()
     with MainDataContextmanager(message) as md:
-        if md.user is None:
+        uc = UserController(telegram_user_id=msg_data.user_id)
+        user = uc.get_user()
+        if md.user is None and not user:
             sm.send_message(main_m.to_login, finish_state=True)
             return
     sm.send_message(
@@ -36,6 +39,7 @@ def handle_command_logout(message: Message) -> None:
 def handle_ask_logout(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     msg_data = sm.get_message_data()
+    sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             md.user = None

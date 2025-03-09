@@ -36,16 +36,20 @@ def handle_command_login(message: Message) -> None:
 def handle_callback_login(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
+
+    with MainDataContextmanager(message) as md:
+        md.login = LoginDataclass()
+
     if message.data == y_or_n.callback_answer_yes:
         text = messages.input_username
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
-            md.login = LoginDataclass()
             md.login.register = True
         text = messages.input_register_username
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
         return
+
     sm.send_message(text=text, state=UsersStatesGroup.waiting_username)
 
 

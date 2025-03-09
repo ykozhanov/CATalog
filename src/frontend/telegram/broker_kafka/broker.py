@@ -9,12 +9,15 @@ from src.frontend.telegram.settings import KAFKA_BOOTSTRAP_SERVERS, KAFKA_USERNA
 
 @contextmanager
 def producer_kafka() -> Generator[KafkaProducer, None, None]:
-    with KafkaProducer(
+    kafka_producer = KafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_serializer=lambda data: json.dumps(data).encode("utf-8"),
         sasl_mechanism="PLAIN",
-        security_protocol='SASL_PLAINTEXT',
-        sasl_plain_username=KAFKA_USERNAME,
-        sasl_plain_password=KAFKA_PASSWORD,
-        ) as p:
-        yield p
+        security_protocol="PLAINTEXT",
+        # sasl_plain_username=KAFKA_USERNAME,
+        # sasl_plain_password=KAFKA_PASSWORD,
+        )
+    try:
+        yield kafka_producer
+    finally:
+        kafka_producer.close()
