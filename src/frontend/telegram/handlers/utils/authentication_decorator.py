@@ -1,3 +1,4 @@
+import logging
 from typing import Callable
 from functools import wraps
 
@@ -18,10 +19,12 @@ def get_message(args: tuple) -> CallbackQuery | Message | None:
 
 
 def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., None]:
+    logging.info(f"Старт 'check_authentication_decorator'")
 
-    @wraps
+    @wraps(func)
     def wrapped(*args, **kwargs):
-        if message := get_message(args) is None:
+        message = get_message(args)
+        if message is None:
             return func(*args, **kwargs)
         sm = SendMessage(message)
         msg_data = sm.get_message_data()
@@ -32,7 +35,7 @@ def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., N
             try:
                 with MainDataContextmanager(message) as md:
                     if md.user is None:
-                        sm.send_message(text=main_m.to_login, finish_state=True)
+                        sm.send_message(text=main_m.to_login, finish_state=True, delete_reply_keyboard=True)
                         return
                 user_in_schema = UsersAPI.token(refresh_jwt_token=md.user.refresh_jtw_token)
                 uc = UserController(telegram_user_id=msg_data.user_id)
@@ -41,10 +44,12 @@ def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., N
                 with MainDataContextmanager(message) as md:
                     md.user = user
             except AuthenticationError:
-                sm.send_message(text=main_m.to_login, finish_state=True)
+                sm.send_message(text=main_m.to_login, finish_state=True, delete_reply_keyboard=True)
+                return
             else:
                 return func(*args, **kwargs)
         else:
             return result
 
+    logging.info(f"Конец 'check_authentication_decorator'")
     return wrapped

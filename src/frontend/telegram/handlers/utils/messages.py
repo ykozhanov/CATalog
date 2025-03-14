@@ -5,7 +5,7 @@ from src.frontend.telegram.handlers.commands import COMMANDS
 class MainMessages:
     @property
     def to_help(self) -> str:
-        return f"Для выбора действия воспользуйтесь {COMMANDS.help[0]}"
+        return f"Для выбора действия воспользуйтесь /{COMMANDS.help[0]}"
 
     @property
     def to_login(self) -> str:

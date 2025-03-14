@@ -105,12 +105,13 @@ class SendMessage(GetMessageData):
     def delete_message(self) -> None:
         telegram_bot.delete_message(chat_id=self.msg_data.chat_id, message_id=self.msg_data.message_id)
 
-    def delete_reply_keyboard(self) -> None:
-        telegram_bot.edit_message_reply_markup(
-            chat_id=self.msg_data.chat_id,
-            message_id=self.msg_data.message_id,
-            reply_markup=None,
-        )
+    # def delete_reply_keyboard(self) -> None:
+    #     telegram_bot.send_message(self.msg_data.chat_id, "", reply_markup=ReplyKeyboardRemove())
+        # telegram_bot.edit_message_reply_markup(
+        #     chat_id=self.msg_data.chat_id,
+        #     message_id=self.msg_data.message_id,
+        #     reply_markup=None,
+        # )
 
     def send_message(
             self,

@@ -1,3 +1,5 @@
+import logging
+
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
@@ -9,7 +11,7 @@ from src.frontend.telegram.handlers.utils import (
     check_authentication_decorator,
     get_inline_paginator_list,
 )
-from src.frontend.telegram.bot.keyboards import KeyboardListActions, KeyboardYesOrNo, KeyboardActionsByElement
+from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement, k_list_actions
 from src.frontend.telegram.bot.states import ActionsStatesGroup, ProductsStatesGroup
 from src.frontend.telegram.handlers.product_actions.create.states import ProductCreateStatesGroup
 from src.frontend.telegram.api import ProductsAPI
@@ -32,15 +34,15 @@ y_or_n = KeyboardYesOrNo()
 paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByElement.BACK_PREFIX)
 
 
-@exc_handler_decorator
-@check_authentication_decorator
 @telegram_bot.message_handler(
-    func=lambda m: m.text == KeyboardListActions.action_get_all_products,
+    func=lambda m: m.text == k_list_actions.action_get_all_products,
     state=ActionsStatesGroup.choosing_action,
 )
+@exc_handler_decorator
+@check_authentication_decorator
 def handle_action_get_all_products(message: Message) -> None:
+    logging.debug("Старт 'handle_action_get_all_products'")
     sm = SendMessage(message)
-    sm.delete_reply_keyboard()
     get_all_categories(message)
     with MainDataContextmanager(message) as md:
         if a_token := md.user.access_jtw_token:
@@ -56,7 +58,12 @@ def handle_action_get_all_products(message: Message) -> None:
             attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
             template=TEMPLATE_BUTTON_PRODUCT,
         )
-        sm.send_message(messages.for_paginator, state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
+        sm.send_message(
+            messages.for_paginator,
+            state=ProductsStatesGroup.products,
+            inline_keyboard=inline_keyboard,
+            delete_reply_keyboard=True,
+        )
     else:
         sm.send_message(
             text=messages.empty,

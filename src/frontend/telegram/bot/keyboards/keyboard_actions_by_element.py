@@ -11,24 +11,24 @@ class KeyboardActionsByElement:
         self._element_index = element_index
 
 
-    @property
-    def answer_edit(self) -> str:
+    @classmethod
+    def answer_edit(cls) -> str:
         return "Изменить"
 
-    @property
-    def answer_delete(self) -> str:
+    @classmethod
+    def answer_delete(cls) -> str:
         return "Удалить"
 
-    @property
-    def answer_use(self) -> str:
+    @classmethod
+    def answer_use(cls) -> str:
         return "Использовать"
 
-    @property
-    def answer_list(self) -> str:
+    @classmethod
+    def answer_list(cls) -> str:
         return "Товары"
 
-    @property
-    def answer_back(self) -> str:
+    @classmethod
+    def answer_back(cls) -> str:
         return "Назад"
 
     @property

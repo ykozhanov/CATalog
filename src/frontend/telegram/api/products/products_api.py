@@ -59,7 +59,7 @@ class ProductsAPI:
         response = requests.get(self._url, auth=BearerAuth(self._access_token))
         try:
             if response.ok:
-                elements = [self._element_in_schema(**e) for e in response.json()]
+                elements = [self._element_in_schema(**e) for e in response.json().get(self._attr_for_list_out_schema, [])]
                 data = {
                     self._attr_for_list_out_schema: elements,
                 }

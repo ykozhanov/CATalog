@@ -37,13 +37,13 @@ y_or_n = KeyboardYesOrNo()
 
 
 @telegram_bot.message_handler(
-    func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
+    func=lambda m: m.text.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=ProductsStatesGroup.products,
 )
-def handle_action_update_product(message: CallbackQuery) -> None:
+def handle_action_update_product(message: Message) -> None:
     sm = SendMessage(message)
     sm.delete_message()
-    product_index = int(message.data.split("#")[1])
+    product_index = int(message.text.split("#")[1])
     with MainDataContextmanager(message) as md:
         md.product = ProductDataclass()
         if products := md.products is None:

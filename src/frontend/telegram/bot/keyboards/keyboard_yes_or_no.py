@@ -21,3 +21,6 @@ class KeyboardYesOrNo:
             (self.answer_yes, self.callback_answer_yes),
             (self.answer_no, self.callback_answer_no),
         ]
+
+
+k_y_or_n = KeyboardYesOrNo()

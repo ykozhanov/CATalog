@@ -9,7 +9,7 @@ from src.frontend.telegram.handlers.utils import (
     check_authentication_decorator,
     get_inline_paginator_list,
 )
-from src.frontend.telegram.bot.keyboards import KeyboardListActions, KeyboardYesOrNo, KeyboardActionsByElement
+from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement, k_list_actions
 from src.frontend.telegram.bot.states import ActionsStatesGroup, CategoriesStatesGroup
 from src.frontend.telegram.handlers.category_actions.create.states import CategoryCreateStatesGroup
 
@@ -34,12 +34,11 @@ paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByEleme
 @exc_handler_decorator
 @check_authentication_decorator
 @telegram_bot.message_handler(
-    func=lambda m: m.text == KeyboardListActions.action_get_all_categories,
+    func=lambda m: m.text == k_list_actions.action_get_all_categories,
     state=ActionsStatesGroup.choosing_action,
 )
 def handle_action_get_all_categories(message: Message) -> None:
     sm = SendMessage(message)
-    sm.delete_reply_keyboard()
 
     if categories := get_all_categories(message) is None:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
@@ -52,7 +51,12 @@ def handle_action_get_all_categories(message: Message) -> None:
             attrs_for_template=ATTRS_FOR_TEMPLATE_CATEGORY,
             template=TEMPLATE_BUTTON_CATEGORY,
         )
-        sm.send_message(messages.for_paginator, state=CategoriesStatesGroup.categories, inline_keyboard=inline_keyboard)
+        sm.send_message(
+            messages.for_paginator,
+            state=CategoriesStatesGroup.categories,
+            inline_keyboard=inline_keyboard,
+            delete_reply_keyboard=True,
+        )
     else:
         sm.send_message(
             text=messages.empty,

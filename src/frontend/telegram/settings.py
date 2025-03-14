@@ -14,7 +14,7 @@ def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
     )
 
 
-DEBUG=bool(os.getenv("DEBUG", "False"))
+DEBUG=os.getenv("DEBUG", "False") == "True"
 
 BOT_TOKEN=os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:

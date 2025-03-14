@@ -8,9 +8,9 @@ from src.notification_service.telegram.database.db_controller import TelegramUse
 topics = [kafka_settings.topic_name_new_telegram_user, kafka_settings.topic_name_delete_telegram_user]
 
 
-def get_data_from_msg(data: str):
+def get_data_from_msg(data: str) -> TelegramUserSchema:
     get_data = json.loads(data)
-    return TelegramUserSchema.model_validate_json(get_data).model_dump()
+    return TelegramUserSchema.model_validate_json(get_data)
 
 
 # Создание экземпляра KafkaConsumer

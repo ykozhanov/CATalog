@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from pydantic import ValidationError
 
@@ -42,19 +44,25 @@ class CategoriesAPI:
             raise self._main_exc(str(e))
 
     def get_all(self) -> list[_element_in_schema]:
+        logging.info("Старт 'CategoriesAPI -> get_all'")
         response = requests.get(self._url, auth=BearerAuth(self._access_token))
+        logging.debug(f"response.json: {response.json()}")
         try:
             if response.ok:
-                elements = [self._element_in_schema(**e) for e in response.json()]
+                elements = [self._element_in_schema(**e) for e in response.json().get(self._attr_for_list_out_schema, [])]
                 data = {
                     self._attr_for_list_out_schema: elements,
                 }
+                logging.info("Конец 'CategoriesAPI -> get_all'")
                 return getattr(self._element_in_list_schema(**data), self._attr_for_list_out_schema)
             if response.status_code == 401:
+                logging.info("Конец 'CategoriesAPI -> get_all'")
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
             else:
+                logging.info("Конец 'CategoriesAPI -> get_all'")
                 raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {response.text}")
         except (ValidationError, self._main_exc) as e:
+            logging.info("Конец 'CategoriesAPI -> get_all'")
             raise self._main_exc(str(e))
 
     def delete(self, element_id: int, delete_all_products: bool = False) -> None:

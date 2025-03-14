@@ -60,7 +60,7 @@ class LoginCommandTemplates:
 
 
     @staticmethod
-    def after_login(username: str) -> str:
+    def after_register(username: str) -> str:
         return "Вы успешно зарегистрировались!\n"\
             f"Добро пожаловать {username}!\n\n"\
             f"Используйте /{COMMANDS.help[0]} для получения списка команд."

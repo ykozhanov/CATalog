@@ -11,7 +11,7 @@ from src.frontend.telegram.handlers.utils import (
 )
 
 from src.frontend.telegram.bot.states import ProductsStatesGroup, ActionsStatesGroup
-from src.frontend.telegram.bot.keyboards import KeyboardListActions
+from src.frontend.telegram.bot.keyboards import k_list_actions
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.handlers.actions.get_all_products.utils import (
     PREFIX_PRODUCT_ELEMENT_PAGINATOR,
@@ -29,15 +29,17 @@ messages = GetProductsByExpDateActionMessages()
 @exc_handler_decorator
 @check_authentication_decorator
 @telegram_bot.message_handler(
-    func=lambda m: m.text == KeyboardListActions.action_get_products_by_exp_date,
+    func=lambda m: m.text == k_list_actions.action_get_products_by_exp_date,
     state=ActionsStatesGroup.choosing_action,
 )
 def handle_action_get_product_by_exp_date(message: Message) -> None:
     sm = SendMessage(message)
-    sm.delete_reply_keyboard()
     with MainDataContextmanager(message) as md:
         if a_token := md.user.access_jtw_token is None:
-            return sm.send_message(main_m.something_went_wrong, finish_state=True)
+            return sm.send_message(
+                main_m.something_went_wrong, finish_state=True,
+                delete_reply_keyboard=True
+            )
         p_api = ProductsAPI(a_token)
         products = md.products = p_api.get_by()
     if products:
@@ -47,6 +49,11 @@ def handle_action_get_product_by_exp_date(message: Message) -> None:
             attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
             template=TEMPLATE_BUTTON_PRODUCT,
         )
-        sm.send_message(messages.for_paginator, state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
+        sm.send_message(
+            messages.for_paginator,
+            state=ProductsStatesGroup.products,
+            inline_keyboard=inline_keyboard,
+            delete_reply_keyboard=True,
+        )
     else:
         sm.send_message(messages.empty, delete_reply_keyboard=True, finish_state=True)

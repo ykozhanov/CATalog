@@ -1,3 +1,4 @@
+import logging
 import re
 
 from telebot.types import Message, CallbackQuery
@@ -20,6 +21,7 @@ def is_valid_email(email: str) -> bool:
 
 
 def login_user(message: Message | CallbackQuery) -> None:
+    logging.info("Старт 'login_user'")
     sm = SendMessage(message)
     msg_data = sm.get_message_data()
     uc = UserController(telegram_user_id=msg_data.user_id)
@@ -36,13 +38,17 @@ def login_user(message: Message | CallbackQuery) -> None:
             pass
         user = uc.add_user(user_in_schema)
         md.user = user
+        logging.debug(f"md.user: {md.user}")
         UserSubject(
             user_id=msg_data.user_id,
             chat_id=msg_data.chat_id,
             refresh_token=user.refresh_jtw_token,
         ).create_user()
         sm.send_message(
-            text=templates.after_login(md.login.username),
+            text=templates.after_register(md.login.username) \
+                if md.login.register \
+                else templates.to_help(md.login.username),
             finish_state=True,
         )
         md.login = None
+        logging.info("Конец 'login_user'")

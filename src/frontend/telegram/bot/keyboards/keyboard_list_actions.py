@@ -21,5 +21,8 @@ class KeyboardListActions:
             self.action_get_all_products,
             self.action_get_all_categories,
             self.action_get_product_by_name,
-            self.action_get_products_by_exp_date
+            self.action_get_products_by_exp_date,
         ]
+
+
+k_list_actions = KeyboardListActions()

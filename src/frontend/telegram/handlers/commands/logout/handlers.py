@@ -1,3 +1,5 @@
+import logging
+
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
@@ -35,14 +37,18 @@ def handle_command_logout(message: Message) -> None:
     )
 
 
-@telegram_bot.message_handler(commands=[COMMANDS.logout[0]])
+@telegram_bot.callback_query_handler(state=UsersStatesGroup.ask_logout)
 def handle_ask_logout(message: CallbackQuery) -> None:
+    logging.info("Старт 'handle_ask_logout'")
     sm = SendMessage(message)
     msg_data = sm.get_message_data()
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             md.user = None
+
+        logging.debug(f"msg_data: user_id = {msg_data.user_id} | chat_id = {msg_data.chat_id}")
+
         UserController(telegram_user_id=msg_data.user_id).delete_user()
         UserSubject(user_id=msg_data.user_id, chat_id=msg_data.chat_id).delete_user()
         sm.send_message(messages.callback_yes, finish_state=True)
@@ -50,3 +56,5 @@ def handle_ask_logout(message: CallbackQuery) -> None:
         sm.send_message(messages.callback_no, finish_state=True)
     else:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+
+    logging.info("Конец 'handle_ask_logout'")
