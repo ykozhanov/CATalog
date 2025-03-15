@@ -58,7 +58,6 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
     element_list_out_schema = ProductListOutSchema
     attr_for_list_out_schema = "products"
 
-    # TODO РЕШИТЬ ПРОБЛЕМУ С ВОЗВРАТОМ PydanticModel
     def _get_products_by_name(self, name: str, current_user: User) -> list[element_out_schema]:
         cache_key = f"{self.attr_for_list_out_schema}_{QUERY_STRING_SEARCH_BY_NAME}:{name}:{current_user.profile.id}"
         if data := redis_cache.get(cache_key):
@@ -117,8 +116,7 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
     @login_jwt_required_decorator
     def post(self, current_user: User) -> tuple[Response, int]:
         try:
-            new_element_data = request.get_json()
-            new_element_validated = self.element_in_schema(**new_element_data)
+            new_element_validated = self.element_in_schema.model_validate_json(request.get_json())
             all_categories = [category.id for category in current_user.profile.categories]
             if new_element_validated.category_id not in all_categories:
                 raise IntegrityDBError(f"{MESSAGE_INTEGRITY_ERROR}: Указанной категории не существует")
@@ -165,8 +163,7 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
-            update_element_data = request.get_json()
-            update_element_validated = self.element_in_schema(**update_element_data)
+            update_element_validated = self.element_in_schema.model_validate_json(request.get_json())
             update_element = crud.update(
                 model=self.model,
                 pk=old_element.id,

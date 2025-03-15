@@ -119,7 +119,7 @@ class SendMessage(GetMessageData):
             parse_mode: str | None = None,
             state: State | None = None,
             finish_state: bool = False,
-            inline_keyboard: list[tuple[str, str]] | InlineKeyboardMarkup = None,
+            inline_keyboard: list[tuple[str, str]] | InlineKeyboardMarkup | None = None,
             reply_keyboard: list[str] | None = None,
             delete_reply_keyboard: bool = False,
     ) -> None:

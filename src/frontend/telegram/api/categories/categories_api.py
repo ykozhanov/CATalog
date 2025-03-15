@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -37,9 +38,9 @@ class CategoriesAPI:
         response = requests.post(self._url, auth=BearerAuth(self._access_token), json=element.model_dump_json())
         try:
             if response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             elif not response.ok:
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_POST_ERROR}: {response.text}")
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_POST_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))
 
@@ -49,18 +50,14 @@ class CategoriesAPI:
         logging.debug(f"response.json: {response.json()}")
         try:
             if response.ok:
-                elements = [self._element_in_schema(**e) for e in response.json().get(self._attr_for_list_out_schema, [])]
-                data = {
-                    self._attr_for_list_out_schema: elements,
-                }
-                logging.info("Конец 'CategoriesAPI -> get_all'")
-                return getattr(self._element_in_list_schema(**data), self._attr_for_list_out_schema)
+                data = self._element_in_list_schema.model_validate(response.json())
+                return getattr(data, self._attr_for_list_out_schema)
             if response.status_code == 401:
                 logging.info("Конец 'CategoriesAPI -> get_all'")
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             else:
                 logging.info("Конец 'CategoriesAPI -> get_all'")
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {response.text}")
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
             logging.info("Конец 'CategoriesAPI -> get_all'")
             raise self._main_exc(str(e))
@@ -70,9 +67,9 @@ class CategoriesAPI:
         response = requests.delete(f"{self._url}{element_id}", auth=BearerAuth(self._access_token), params=params)
         try:
             if response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             elif not response.ok:
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_DELETE_ERROR}: {response.text}")
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_DELETE_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))
 
@@ -80,8 +77,8 @@ class CategoriesAPI:
         response = requests.put(f"{self._url}{element_id}", auth=BearerAuth(self._access_token), json=put_element.model_dump_json())
         try:
             if response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             elif not response.ok:
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_PUT_ERROR}: {response.text}")
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_PUT_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))

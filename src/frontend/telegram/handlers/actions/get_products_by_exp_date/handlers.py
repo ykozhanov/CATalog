@@ -26,22 +26,20 @@ main_m = MainMessages()
 messages = GetProductsByExpDateActionMessages()
 
 
-@exc_handler_decorator
-@check_authentication_decorator
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_products_by_exp_date,
-    state=ActionsStatesGroup.choosing_action,
+    # state=ActionsStatesGroup.choosing_action,
 )
+@exc_handler_decorator
+@check_authentication_decorator
 def handle_action_get_product_by_exp_date(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
-        if a_token := md.user.access_jtw_token is None:
-            return sm.send_message(
-                main_m.something_went_wrong, finish_state=True,
-                delete_reply_keyboard=True
-            )
-        p_api = ProductsAPI(a_token)
-        products = md.products = p_api.get_by()
+        a_token = md.user.access_jtw_token
+    if a_token is None:
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
+    p_api = ProductsAPI(a_token)
+    products = md.products = p_api.get_by()
     if products:
         inline_keyboard = get_inline_paginator_list(
             elements=products,

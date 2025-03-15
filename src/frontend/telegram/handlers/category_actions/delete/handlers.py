@@ -31,7 +31,8 @@ def handler_category_delete_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     category_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
-        if categories := md.categories is None:
+        categories = md.categories
+        if categories is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_category = categories[category_index]
     sm.send_message(
@@ -47,9 +48,10 @@ def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
     delete_all_products = message.data == y_or_n.callback_answer_yes
     if message.data == y_or_n.callback_answer_yes or message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
+            old_category = md.old_category
             md.category.delete_all_products = delete_all_products
-            if old_category := md.old_category is None:
-                sm.send_message(main_m.something_went_wrong, finish_state=True)
+            if old_category is None:
+                return sm.send_message(main_m.something_went_wrong, finish_state=True)
         name = old_category.name
         text = templates.confirm_all_md(name) if delete_all_products else templates.confirm_only_category_md(name)
         sm.send_message(
@@ -60,9 +62,9 @@ def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
 
+@telegram_bot.callback_query_handler(state=CategoryDeleteStatesGroup.confirm_delete)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=CategoryDeleteStatesGroup.confirm_delete)
 def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:

@@ -29,7 +29,7 @@ templates = GetProductsByNameActionTemplates()
 
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_product_by_name,
-    state=ActionsStatesGroup.choosing_action,
+    # state=ActionsStatesGroup.choosing_action,
 )
 def handle_action_get_product_by_name(message: Message) -> None:
     sm = SendMessage(message)
@@ -40,22 +40,19 @@ def handle_action_get_product_by_name(message: Message) -> None:
     )
 
 
+@telegram_bot.message_handler(state=ProductsStatesGroup.waiting_name_product)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.message_handler(state=ProductsStatesGroup.waiting_name_product)
 def handle_name_product_for_get_product_by_name(message: Message) -> None:
     sm = SendMessage(message)
     name = message.text
 
     with MainDataContextmanager(message) as md:
-        if a_token := md.user.access_jtw_token is None:
-            return sm.send_message(
-                main_m.something_went_wrong,
-                finish_state=True,
-                delete_reply_keyboard=True,
-            )
-        p_api = ProductsAPI(access_token=a_token)
-        products = md.products = p_api.get_by(name=name)
+        a_token = md.user.access_jtw_token
+    if a_token is None:
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
+    p_api = ProductsAPI(access_token=a_token)
+    products = md.products = p_api.get_by(name=name)
     if products:
         inline_keyboard = get_inline_paginator_list(
             elements=products,

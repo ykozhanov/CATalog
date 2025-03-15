@@ -1,4 +1,3 @@
-import logging
 from typing import Callable
 from functools import wraps
 
@@ -19,8 +18,6 @@ def get_message(args: tuple) -> CallbackQuery | Message | None:
 
 
 def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., None]:
-    logging.info(f"Старт 'check_authentication_decorator'")
-
     @wraps(func)
     def wrapped(*args, **kwargs):
         message = get_message(args)
@@ -51,5 +48,4 @@ def check_authentication_decorator(func: Callable[..., None]) -> Callable[..., N
         else:
             return result
 
-    logging.info(f"Конец 'check_authentication_decorator'")
     return wrapped

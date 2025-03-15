@@ -1,3 +1,4 @@
+import logging
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
@@ -31,18 +32,21 @@ y_or_n = KeyboardYesOrNo()
 paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByElement.BACK_PREFIX)
 
 
-@exc_handler_decorator
-@check_authentication_decorator
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_all_categories,
-    state=ActionsStatesGroup.choosing_action,
+    # state=ActionsStatesGroup.choosing_action,
 )
+# @exc_handler_decorator
+@check_authentication_decorator
 def handle_action_get_all_categories(message: Message) -> None:
+    logging.info("Старт 'handle_action_get_all_categories'")
     sm = SendMessage(message)
+    categories = get_all_categories(message)
+    logging.debug(f"{categories=}")
 
-    if categories := get_all_categories(message) is None:
-        sm.send_message(main_m.something_went_wrong, finish_state=True)
-        return
+    if categories is None:
+        logging.info("Конец 'handle_action_get_all_categories'")
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
 
     if categories:
         inline_keyboard = get_inline_paginator_list(
@@ -55,15 +59,14 @@ def handle_action_get_all_categories(message: Message) -> None:
             messages.for_paginator,
             state=CategoriesStatesGroup.categories,
             inline_keyboard=inline_keyboard,
-            delete_reply_keyboard=True,
         )
     else:
         sm.send_message(
             text=messages.empty,
             state=CategoryCreateStatesGroup.ask_add_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
-            delete_reply_keyboard=True,
         )
+    logging.info("Конец 'handle_action_get_all_categories'")
 
 
 @telegram_bot.callback_query_handler(
@@ -75,15 +78,16 @@ def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
     sm.send_message(text=main_m.to_help, finish_state=True)
 
 
-@check_authentication_decorator
 @telegram_bot.callback_query_handler(
     func=lambda m: m.data.split("#")[0] in paginator_callbacks,
     state=CategoriesStatesGroup.categories,
 )
+@check_authentication_decorator
 def handle_categories_paginator(message: CallbackQuery):
     with MainDataContextmanager(message) as md:
         categories = md.categories
     sm = SendMessage(message)
+    sm.delete_message()
     inline_keyboard = get_inline_paginator_list(
         elements=categories,
         prefix_element=PREFIX_CATEGORY_ELEMENT_PAGINATOR,
@@ -100,6 +104,7 @@ def handle_categories_paginator(message: CallbackQuery):
 )
 def handle_category_element(message: CallbackQuery):
     sm = SendMessage(message)
+    sm.delete_message()
     category_index, page = (int(e) for e in message.data.split("#") if e.isdigit())
     with MainDataContextmanager(message) as md:
         categories = md.categories

@@ -1,10 +1,8 @@
 from telebot.custom_filters import StateFilter
 
 from .bot import telegram_bot
-from .handlers import *
 
 from .settings import DEBUG
-
 if DEBUG:
     import logging
 
@@ -15,6 +13,8 @@ if DEBUG:
             logging.StreamHandler(),  # Вывод в консоль
         ]
     )
+
+from .handlers import *
 
 
 if __name__ == "__main__":

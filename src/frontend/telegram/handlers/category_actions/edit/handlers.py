@@ -34,7 +34,8 @@ def handle_action_update_category(message: CallbackQuery) -> None:
     category_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         md.category = CategoryDataclass()
-        if categories := md.categories is None:
+        categories = md.categories
+        if categories is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_category = categories[category_index]
     sm.send_message(
@@ -54,12 +55,13 @@ def handle_category_update_waiting_input_name(message: Message):
         templates.check_md(name),
         state=CategoryUpdateStatesGroup.check_update,
         inline_keyboard=y_or_n.get_inline_keyboard(),
+        parse_mode="Markdown",
     )
 
 
+@telegram_bot.callback_query_handler(state=CategoryUpdateStatesGroup.check_update)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=CategoryUpdateStatesGroup.check_update)
 def handle_category_update_check_update(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -67,8 +69,9 @@ def handle_category_update_check_update(message: CallbackQuery):
         with MainDataContextmanager(message) as md:
             category_id = md.old_category.id
             category_data = md.category
-            if a_token := md.user.access_jtw_token is None:
-                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+            a_token = md.user.access_jtw_token
+        if a_token is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
         c_api = CategoriesAPI(a_token)
         category = CategoryOutSchema(**category_data.dict())
         c_api.put(category_id, category)

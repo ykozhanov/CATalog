@@ -12,4 +12,4 @@ class GetAllCategoriesActionTemplates:
     @staticmethod
     def detail_md(name: str) -> str:
         return "О категории:\n\n"\
-            f"\t\t\t*Имя**: {name}"
+            f"\t\t\t*Имя*: {name}"

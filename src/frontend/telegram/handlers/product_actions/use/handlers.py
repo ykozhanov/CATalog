@@ -31,7 +31,7 @@ def handler_product_use_action(message: CallbackQuery) -> None:
     sm.delete_message()
     product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
-        if products := md.products is None:
+        if (products := md.products) is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_product = old_product = products[product_index]
     sm.send_message(
@@ -41,9 +41,9 @@ def handler_product_use_action(message: CallbackQuery) -> None:
     )
 
 
+@telegram_bot.message_handler(state=ProductUseStatesGroup.input_diff)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.message_handler(state=ProductUseStatesGroup.input_diff)
 def handle_product_use_input_diff(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -51,7 +51,7 @@ def handle_product_use_input_diff(message: Message) -> None:
         a_token = md.user.access_jtw_token
         md.old_product = None
     if old_product is None or a_token is None:
-        return sm.send_message(main_m.something_went_wrong)
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
     try:
         diff = float(message.text)
     except ValueError:

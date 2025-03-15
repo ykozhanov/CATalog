@@ -28,16 +28,18 @@ class CategoriesMethodView(JWTMixin, MethodView):
     @login_jwt_required_decorator
     def get(self, current_user: User) -> tuple[Response, int]:
         result = current_user.profile.categories
-        data_for_list_out_schema = {
-            self.attr_for_list_out_schema: [self.element_out_schema.model_validate(element) for element in result]
-        }
-        return jsonify(self.element_list_out_schema(**data_for_list_out_schema).model_dump()), 200
+        return (
+            jsonify(
+                self.element_list_out_schema.model_validate({self.attr_for_list_out_schema: result})
+                .model_dump()
+            ),
+            200,
+        )
 
     @login_jwt_required_decorator
     def post(self, current_user: User) -> tuple[Response, int]:
         try:
-            new_element_data = request.get_json()
-            new_element_validated = self.element_in_schema(**new_element_data)
+            new_element_validated = self.element_in_schema.model_validate_json(request.get_json())
             if crud.where(self.model, "name", new_element_validated.name):
                 raise BadRequestError(
                     f"{MESSAGE_BAD_REQUEST_ERROR_400}: Категория {new_element_validated.name} уже существует"
@@ -79,8 +81,7 @@ class CategoriesByIDMethodView(JWTMixin, MethodView):
                 raise NotFoundInDBError()
             if old_element.profile_id != current_user.profile.id:
                 raise ForbiddenError()
-            update_element_data = request.get_json()
-            update_element_validated = self.element_in_schema(**update_element_data)
+            update_element_validated = self.element_in_schema.model_validate_json(request.get_json())
             update_element = crud.update(
                 model=self.model,
                 pk=old_element.id,

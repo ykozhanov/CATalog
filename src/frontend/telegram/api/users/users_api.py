@@ -1,3 +1,4 @@
+import json
 import requests
 import base64
 
@@ -35,7 +36,7 @@ class UsersAPI:
             if response.ok:
                 return UserInSchema(**response.json())
             else:
-                raise CreateOrGetUserError(f"{MESSAGE_CREATE_USER_ERROR}: {response.text}")
+                raise CreateOrGetUserError(f"{MESSAGE_CREATE_USER_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except ValidationError as e:
             raise CreateOrGetUserError(str(e))
 
@@ -49,8 +50,8 @@ class UsersAPI:
                 data = response.json()
                 return UserInSchema(**data)
             elif response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             else:
-                raise CreateOrGetUserError(f"{MESSAGE_GET_TOKEN_ERROR}: {response.text}")
+                raise CreateOrGetUserError(f"{MESSAGE_GET_TOKEN_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except ValidationError as e:
             raise CreateOrGetUserError(str(e))

@@ -3,6 +3,7 @@ from .authentication_decorator import check_authentication_decorator
 from .messages import MainMessages
 from .exc_decorator import exc_handler_decorator
 from .get_paginator_list import get_inline_paginator_list
+from .login_decorator import check_login_decorator
 
 __all__ = [
     "MainDataContextmanager",
@@ -10,4 +11,5 @@ __all__ = [
     "MainMessages",
     "exc_handler_decorator",
     "get_inline_paginator_list",
+    "check_login_decorator",
 ]

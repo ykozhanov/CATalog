@@ -46,7 +46,8 @@ def handle_action_update_product(message: Message) -> None:
     product_index = int(message.text.split("#")[1])
     with MainDataContextmanager(message) as md:
         md.product = ProductDataclass()
-        if products := md.products is None:
+        products = md.products
+        if products is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_product = products[product_index]
 
@@ -237,8 +238,8 @@ def handle_product_update_waiting_input_year(message: Message):
         )
 
 
-@check_authentication_decorator
 @telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_input_note)
+@check_authentication_decorator
 def handle_product_update_ask_input_note(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -258,8 +259,8 @@ def handle_product_update_ask_input_note(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
-@check_authentication_decorator
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_note)
+@check_authentication_decorator
 def handle_product_update_waiting_input_note(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NOTE:
@@ -272,9 +273,9 @@ def handle_product_update_waiting_input_note(message: Message):
     )
 
 
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_choice_category)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_choice_category)
 def handle_product_update_ask_choice_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -290,9 +291,8 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
         with MainDataContextmanager(message) as md:
             categories = md.categories
             category_id = md.old_product.category_id
-            if category := get_category(categories, category_id) is None:
-                sm.send_message(main_m.something_went_wrong, finish_state=True)
-                return
+            if (category := get_category(categories, category_id)) is None:
+                return sm.send_message(main_m.something_went_wrong, finish_state=True)
             md.product.category_id = category.id
             md.product.category_name = category.name
             name = md.product.name
@@ -336,9 +336,9 @@ def handle_product_update_waiting_category(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.check_update_product)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.check_update_product)
 def handle_product_update_check_update_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -346,8 +346,9 @@ def handle_product_update_check_update_product(message: CallbackQuery):
         with MainDataContextmanager(message) as md:
             product_id = md.old_product.id
             product_data = md.product
-            if a_token := md.user.access_jtw_token is None:
-                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+            a_token = md.user.access_jtw_token
+        if a_token is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
         p_api = ProductsAPI(a_token)
         product = ProductOutSchema(**product_data.dict())
         p_api.put(product_id, product)

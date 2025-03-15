@@ -8,7 +8,7 @@ from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMes
 from src.frontend.telegram.bot.keyboards import k_list_actions
 from src.frontend.telegram.bot.states import ActionsStatesGroup
 from src.frontend.telegram.handlers.commands import COMMANDS
-from src.frontend.telegram.handlers.commands.login.utils import login_user
+from src.frontend.telegram.handlers.utils import check_login_decorator
 from .messages import HelpCommandMessages
 
 __all__ = ["handle_command_help"]
@@ -18,6 +18,7 @@ messages = HelpCommandMessages()
 
 
 @telegram_bot.message_handler(commands=[COMMANDS.help[0]])
+@check_login_decorator
 def handle_command_help(message: Message) -> None:
     logging.info("Старт 'handle_command_help'")
     sm = SendMessage(message)

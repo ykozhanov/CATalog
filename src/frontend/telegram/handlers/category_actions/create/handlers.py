@@ -45,15 +45,15 @@ def handle_category_create_ask_add_new(message: CallbackQuery) -> None:
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
-            md.product = CategoryDataclass()
+            md.category = CategoryDataclass()
         sm.send_message(
             text=messages.input_name,
             state=CategoryCreateStatesGroup.waiting_input_name,
         )
     elif message.data == y_or_n.callback_answer_no:
-        sm.send_message(text=main_m.to_help, finish_state=True)
+        sm.send_message(main_m.to_help, finish_state=True)
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.message_handler(state=CategoryCreateStatesGroup.waiting_input_name)
@@ -65,22 +65,24 @@ def handle_category_create_waiting_input_name(message: Message):
         md.category.name = name = message.text
     sm.send_message(
         text=templates.check_md(name),
+        parse_mode="Markdown",
         state=CategoryCreateStatesGroup.check_new,
         inline_keyboard=y_or_n.get_inline_keyboard(),
     )
 
 
+@telegram_bot.callback_query_handler(state=CategoryCreateStatesGroup.check_new)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=CategoryCreateStatesGroup.check_new)
 def handle_product_category_check_new_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             category_data = md.category
-            if a_token := md.user.access_jtw_token is None:
-                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+            a_token = md.user.access_jtw_token
+        if a_token is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
         c_api = CategoriesAPI(a_token)
         category = CategoryOutSchema(**category_data.dict())
         c_api.post(category)

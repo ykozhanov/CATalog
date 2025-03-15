@@ -179,9 +179,9 @@ def handle_product_create_waiting_input_year(message: Message):
         )
 
 
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_input_note)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_input_note)
 def handle_product_create_ask_input_note(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -198,9 +198,9 @@ def handle_product_create_ask_input_note(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
+@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
 def handle_product_create_waiting_input_note(message: Message):
     sm = SendMessage(message)
     if len(message.text) > MAX_LEN_NOTE:
@@ -257,17 +257,18 @@ def handle_product_create_waiting_category(message: CallbackQuery):
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
 
 
+@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.check_new)
 @exc_handler_decorator
 @check_authentication_decorator
-@telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.check_new)
 def handle_product_create_check_new_product(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             product_data = md.product
-            if a_token := md.user.access_jtw_token is None:
-                return sm.send_message(main_m.something_went_wrong, finish_state=True)
+            a_token = md.user.access_jtw_token
+        if a_token is None:
+            return sm.send_message(main_m.something_went_wrong, finish_state=True)
         p_api = ProductsAPI(a_token)
         product = ProductOutSchema(**product_data.dict())
         p_api.post(product)
