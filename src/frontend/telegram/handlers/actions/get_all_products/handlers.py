@@ -12,7 +12,7 @@ from src.frontend.telegram.handlers.utils import (
     get_inline_paginator_list,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement, k_list_actions
-from src.frontend.telegram.bot.states import ActionsStatesGroup, ProductsStatesGroup
+from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.handlers.product_actions.create.states import ProductCreateStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import get_all_categories
@@ -36,9 +36,8 @@ paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByEleme
 
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_all_products,
-    # state=ActionsStatesGroup.choosing_action,
 )
-@exc_handler_decorator
+# @exc_handler_decorator
 @check_authentication_decorator
 def handle_action_get_all_products(message: Message) -> None:
     logging.debug("Старт 'handle_action_get_all_products'")
@@ -108,6 +107,7 @@ def handle_products_paginator(message: CallbackQuery):
 )
 def handle_product_element(message: CallbackQuery):
     sm = SendMessage(message)
+    sm.delete_message()
     product_index, page = (int(e) for e in message.data.split("#") if e.isdigit())
     with MainDataContextmanager(message) as md:
         product = md.products

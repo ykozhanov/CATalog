@@ -1,7 +1,7 @@
 from src.frontend.telegram.api.categories.schemas import CategoryInSchema
 
 PREFIX_PRODUCT_ELEMENT_PAGINATOR = "product"
-TEMPLATE_BUTTON_PRODUCT = "{name}: {quantity} {unit} | годен до {exp_date}"
+TEMPLATE_BUTTON_PRODUCT = "{name}: {quantity} {unit} | Годен до: {exp_date}"
 ATTRS_FOR_TEMPLATE_PRODUCT = ["name", "quantity", "unit", "exp_date"]
 
 

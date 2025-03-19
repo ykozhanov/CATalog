@@ -23,7 +23,7 @@ from .messages import (
     MAX_LEN_UNIT,
     MAX_LEN_NAME,
 )
-from .utils import get_inline_categories
+from .utils import get_inline_categories, check_and_get_year
 from .states import ProductCreateStatesGroup
 
 __all__ = ["handle_paginator_create_new_product"]
@@ -96,7 +96,7 @@ def handle_product_create_waiting_input_unit(message: Message):
 def handle_product_create_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
-        if quantity := float(message.text.replace(",", ".")) < 0:
+        if (quantity := float(message.text.replace(",", "."))) < 0:
             raise ValueError()
     except ValueError:
         return sm.send_message(messages.error_quantity)
@@ -120,6 +120,7 @@ def handle_product_create_ask_input_exp_date(message: CallbackQuery):
         sm.send_message(
             text=messages.ask_input_note,
             state=ProductCreateStatesGroup.ask_input_note,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
@@ -163,10 +164,8 @@ def handle_product_create_waiting_input_month(message: Message):
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_year)
 def handle_product_create_waiting_input_year(message: Message):
     sm = SendMessage(message)
-    try:
-        year = datetime.strptime(message.text, "%y").year
-    except ValueError:
-        sm.send_message(messages.error_year)
+    if (year := check_and_get_year(message.text)) is None:
+        return sm.send_message(messages.error_year)
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_year = year
@@ -225,7 +224,14 @@ def handle_product_create_waiting_input_note(message: Message):
             note = md.product.note
             category = md.product.category_name
         sm.send_message(
-            templates.check_md(name, unit, quantity, exp_date, note, category),
+            templates.check_md(
+                name=name,
+                unit=unit,
+                quantity=quantity,
+                exp_date=exp_date,
+                note=note,
+                category=category,
+            ),
             state=ProductCreateStatesGroup.check_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",

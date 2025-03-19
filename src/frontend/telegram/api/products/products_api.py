@@ -1,4 +1,5 @@
 import json
+import logging
 
 import requests
 from pydantic import ValidationError
@@ -46,27 +47,39 @@ class ProductsAPI:
             raise self._main_exc(str(e))
 
     def get(self, element_id: int) -> _element_in_schema:
+        logging.info("Старт 'ProductsAPI -> get'")
         response = requests.get(url=f"{self._url}{element_id}", auth=BearerAuth(self._access_token))
+        logging.debug(f"response.json: {response.json()}")
         try:
             if response.status_code == 401:
+                logging.info("Конец 'ProductsAPI -> get'")
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             elif not response.ok:
+                logging.info("Конец 'ProductsAPI -> get'")
                 raise self._main_exc(f"{self._main_message_error}. {MESSAGE_POST_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
+            logging.info("Конец 'ProductsAPI -> get'")
             return self._element_in_schema(**response.json())
         except (ValidationError, self._main_exc) as e:
+            logging.info("Конец 'ProductsAPI -> get'")
             raise self._main_exc(str(e))
 
     def get_all(self) -> list[_element_in_schema]:
+        logging.info("Старт 'ProductsAPI -> get_all'")
         response = requests.get(self._url, auth=BearerAuth(self._access_token))
+        logging.debug(f"response.json: {response.json()}")
         try:
             if response.ok:
                 data = self._element_in_list_schema.model_validate(response.json())
+                logging.info("Конец 'ProductsAPI -> get_all'")
                 return getattr(data, self._attr_for_list_out_schema)
             if response.status_code == 401:
+                logging.info("Конец 'ProductsAPI -> get_all'")
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             else:
+                logging.info("Конец 'ProductsAPI -> get_all'")
                 raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
+            logging.info("Конец 'ProductsAPI -> get_all'")
             raise self._main_exc(str(e))
 
     def get_by(

@@ -14,7 +14,7 @@ class ProductCreateActionMessages:
 
     @property
     def input_unit(self) -> str:
-        return f"Введите единицу измерения(не более {MAX_LEN_UNIT} символов):"
+        return f"Введите единицу измерения (не более {MAX_LEN_UNIT} символов):"
 
     @property
     def input_quantity(self) -> str:

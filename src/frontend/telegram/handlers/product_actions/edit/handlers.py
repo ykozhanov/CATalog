@@ -17,6 +17,7 @@ from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
 from src.frontend.telegram.handlers.actions.get_all_products.utils import get_category
+from src.frontend.telegram.handlers.product_actions.create.utils import check_and_get_year
 
 from .utils import get_inline_categories
 from .messages import (
@@ -36,14 +37,14 @@ templates = ProductUpdateActionTemplates()
 y_or_n = KeyboardYesOrNo()
 
 
-@telegram_bot.message_handler(
-    func=lambda m: m.text.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
+@telegram_bot.callback_query_handler(
+    func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.EDIT_PREFIX,
     state=ProductsStatesGroup.products,
 )
-def handle_action_update_product(message: Message) -> None:
+def handle_action_update_product(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()
-    product_index = int(message.text.split("#")[1])
+    product_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         md.product = ProductDataclass()
         products = md.products
@@ -222,16 +223,14 @@ def handle_product_update_waiting_input_month(message: Message):
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_year)
 def handle_product_update_waiting_input_year(message: Message):
     sm = SendMessage(message)
-    try:
-        year = datetime.strptime(message.text, "%y").year
-    except ValueError:
-        sm.send_message(messages.error_year)
+    if (year := check_and_get_year(message.text)) is None:
+        return sm.send_message(messages.error_year)
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_year = year
-            exp_date = datetime(year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
+            exp_date = datetime(year=year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
             md.product.exp_date = exp_date
-        sm.send_message(
+        return sm.send_message(
             text=messages.ask_input_note,
             state=ProductUpdateStatesGroup.ask_input_note,
             inline_keyboard=y_or_n.get_inline_keyboard(),
@@ -254,6 +253,7 @@ def handle_product_update_ask_input_note(message: CallbackQuery):
         sm.send_message(
             text=messages.ask_choice_category,
             state=ProductUpdateStatesGroup.ask_choice_category,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
@@ -270,6 +270,7 @@ def handle_product_update_waiting_input_note(message: Message):
     sm.send_message(
         text=messages.ask_choice_category,
         state=ProductUpdateStatesGroup.ask_choice_category,
+        inline_keyboard=y_or_n.get_inline_keyboard(),
     )
 
 
