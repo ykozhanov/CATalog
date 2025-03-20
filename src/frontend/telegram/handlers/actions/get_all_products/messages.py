@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
+from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE, VIEW_NONE
 
 
 class GetAllProductsActionMessages:
@@ -27,6 +27,6 @@ class GetAllProductsActionTemplates:
             f"\t\t\t*Имя*: {name}\n"\
             f"\t\t\t*Количество*: {quantity}\n"\
             f"\t\t\t*Единица измерения*: {unit}\n"\
-            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else 'без срока годности'}\n"\
-            f"\t\t\t*Примечание*: {note if note else ''}\n"\
+            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else VIEW_NONE}\n"\
+            f"\t\t\t*Примечание*: {note if note else VIEW_NONE}\n"\
             f"\t\t\t*Категория*: {category}"

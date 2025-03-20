@@ -7,7 +7,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     MainDataContextmanager,
     exc_handler_decorator,
-    check_authentication_decorator,
+    check_authentication_decorator, escape_markdown,
 )
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.api import CategoriesAPI
@@ -53,9 +53,11 @@ def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
             if old_category is None:
                 return sm.send_message(main_m.something_went_wrong, finish_state=True)
         name = old_category.name
-        text = templates.confirm_all_md(name) if delete_all_products else templates.confirm_only_category_md(name)
+        text = templates.confirm_all_md(escape_markdown(name)) if delete_all_products \
+            else templates.confirm_only_category_md(escape_markdown(name))
         sm.send_message(
-            text, parse_mode="Markdown",
+            text,
+            parse_mode="Markdown",
             inline_keyboard=y_or_n.get_inline_keyboard(),
             state=CategoryDeleteStatesGroup.confirm_delete,
         )
@@ -77,9 +79,11 @@ def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
             return sm.send_message(main_m.something_went_wrong)
         c_api = CategoriesAPI(a_token)
         c_api.delete(old_category.id, delete_all_products)
-        sm.send_message(templates.success_md(old_category.name), parse_mode="Markdown", finish_state=True)
+        text = templates.success_md(escape_markdown(old_category.name))
+        sm.send_message(text, parse_mode="Markdown", finish_state=True)
     elif message.data == y_or_n.callback_answer_no:
-        sm.send_message(templates.answer_no_md(old_category.name), parse_mode="Markdown", finish_state=True)
+        text = templates.answer_no_md(escape_markdown(old_category.name))
+        sm.send_message(text, parse_mode="Markdown", finish_state=True)
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
         

@@ -19,3 +19,17 @@ def check_and_get_year(message: str) -> int | None:
             return datetime.strptime(message, "%y").year
         except ValueError:
             return None
+
+
+def day_str_to_int(day: str | int) -> int:
+    day_int = int(day)
+    if 1 > day_int or day_int > 31:
+        raise ValueError
+    return day
+
+
+def month_str_to_int(month: str | int) -> int:
+    month_int = int(month)
+    if 1 > month_int or month_int > 31:
+        raise ValueError
+    return month

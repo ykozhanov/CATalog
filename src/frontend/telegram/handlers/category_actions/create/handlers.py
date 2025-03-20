@@ -7,6 +7,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     check_authentication_decorator,
     exc_handler_decorator,
+    escape_markdown,
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import CategoryDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
@@ -63,8 +64,9 @@ def handle_category_create_waiting_input_name(message: Message):
         return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
         md.category.name = name = message.text
+    text = templates.check_md(escape_markdown(name))
     sm.send_message(
-        text=templates.check_md(name),
+        text=text,
         parse_mode="Markdown",
         state=CategoryCreateStatesGroup.check_new,
         inline_keyboard=y_or_n.get_inline_keyboard(),

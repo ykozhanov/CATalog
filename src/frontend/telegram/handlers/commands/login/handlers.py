@@ -1,7 +1,12 @@
 from telebot.types import Message, CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
-from src.frontend.telegram.handlers.utils import MainDataContextmanager, MainMessages, exc_handler_decorator
+from src.frontend.telegram.handlers.utils import (
+    MainDataContextmanager,
+    MainMessages,
+    exc_handler_decorator,
+    escape_markdown,
+)
 from src.frontend.telegram.handlers.utils.md_dataclasses import LoginDataclass
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
@@ -106,8 +111,9 @@ def handle_state_waiting_email(message: Message) -> None:
         if is_valid_email(email):
             md.login.email = email
             if username := md.login.username:
+                text = templates.check_md(username=escape_markdown(username), email=escape_markdown(md.login.email))
                 sm.send_message(
-                    text=templates.check_md(username=username, email=md.login.email),
+                    text,
                     parse_mode="Markdown",
                     state=UsersStatesGroup.register_check_data,
                     inline_keyboard=y_or_n.get_inline_keyboard(),
@@ -123,6 +129,7 @@ def handle_state_waiting_email(message: Message) -> None:
 @telegram_bot.callback_query_handler(state=UsersStatesGroup.register_check_data)
 def handle_callback_register_check_data(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         login_user(message)
     elif message.data == y_or_n.callback_answer_no:
@@ -140,6 +147,7 @@ def handle_callback_register_check_data(message: CallbackQuery) -> None:
 @telegram_bot.callback_query_handler(state=UsersStatesGroup.ask_register_again)
 def handle_callback_ask_register_again(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.send_message()
     if message.data == y_or_n.callback_answer_yes:
         sm.send_message(messages.input_register_username, state=UsersStatesGroup.waiting_username)
     elif message.data == y_or_n.callback_answer_no:

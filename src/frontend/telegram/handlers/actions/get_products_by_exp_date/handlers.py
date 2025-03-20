@@ -28,7 +28,6 @@ messages = GetProductsByExpDateActionMessages()
 
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_products_by_exp_date,
-    # state=ActionsStatesGroup.choosing_action,
 )
 @exc_handler_decorator
 @check_authentication_decorator

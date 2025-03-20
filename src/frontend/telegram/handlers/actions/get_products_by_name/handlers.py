@@ -29,7 +29,6 @@ templates = GetProductsByNameActionTemplates()
 
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_product_by_name,
-    # state=ActionsStatesGroup.choosing_action,
 )
 def handle_action_get_product_by_name(message: Message) -> None:
     sm = SendMessage(message)

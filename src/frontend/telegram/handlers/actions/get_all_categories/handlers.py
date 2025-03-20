@@ -8,7 +8,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     exc_handler_decorator,
     check_authentication_decorator,
-    get_inline_paginator_list,
+    get_inline_paginator_list, escape_markdown,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement, k_list_actions
 from src.frontend.telegram.bot.states import ActionsStatesGroup, CategoriesStatesGroup
@@ -34,9 +34,8 @@ paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByEleme
 
 @telegram_bot.message_handler(
     func=lambda m: m.text == k_list_actions.action_get_all_categories,
-    # state=ActionsStatesGroup.choosing_action,
 )
-# @exc_handler_decorator
+@exc_handler_decorator
 @check_authentication_decorator
 def handle_action_get_all_categories(message: Message) -> None:
     logging.info("Старт 'handle_action_get_all_categories'")
@@ -102,6 +101,7 @@ def handle_categories_paginator(message: CallbackQuery):
     func=lambda m: m.data.split("#")[0] == PREFIX_CATEGORY_ELEMENT_PAGINATOR,
     state=CategoriesStatesGroup.categories,
 )
+@exc_handler_decorator
 def handle_category_element(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
@@ -109,6 +109,6 @@ def handle_category_element(message: CallbackQuery):
     with MainDataContextmanager(message) as md:
         categories = md.categories
     category = categories[category_index]
-    text = templates.detail_md(category.name)
+    text = templates.detail_md(escape_markdown(category.name))
     inline_keyboard = KeyboardActionsByElement(page, category_index).get_inline_keyboard_category()
     sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")

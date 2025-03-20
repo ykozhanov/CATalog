@@ -9,11 +9,14 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     check_authentication_decorator,
     exc_handler_decorator,
+    escape_markdown,
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
 from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.api import ProductsAPI
+from src.frontend.telegram.api.products.exceptions import ProductError
+from src.frontend.telegram.api.products.exceptions import MESSAGE_PRODUCT_ERROR
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
 from .messages import (
@@ -23,7 +26,7 @@ from .messages import (
     MAX_LEN_UNIT,
     MAX_LEN_NAME,
 )
-from .utils import get_inline_categories, check_and_get_year
+from .utils import get_inline_categories, check_and_get_year, day_str_to_int, month_str_to_int
 from .states import ProductCreateStatesGroup
 
 __all__ = ["handle_paginator_create_new_product"]
@@ -130,9 +133,7 @@ def handle_product_create_ask_input_exp_date(message: CallbackQuery):
 def handle_product_create_waiting_input_day(message: Message):
     sm = SendMessage(message)
     try:
-        day = int(message.text)
-        if 31 < day < 1:
-            raise ValueError
+        day = day_str_to_int(message.text)
     except ValueError:
         sm.send_message(messages.error_day)
     else:
@@ -147,9 +148,7 @@ def handle_product_create_waiting_input_day(message: Message):
 def handle_product_create_waiting_input_month(message: Message):
     sm = SendMessage(message)
     try:
-        month = int(message.text)
-        if 12 < month < 1:
-            raise ValueError
+        month = month_str_to_int(message.text)
     except ValueError:
         sm.send_message(messages.error_month)
     else:
@@ -162,6 +161,7 @@ def handle_product_create_waiting_input_month(message: Message):
 
 
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_year)
+@exc_handler_decorator
 def handle_product_create_waiting_input_year(message: Message):
     sm = SendMessage(message)
     if (year := check_and_get_year(message.text)) is None:
@@ -169,7 +169,13 @@ def handle_product_create_waiting_input_year(message: Message):
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_year = year
-            exp_date = datetime(year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
+            try:
+                exp_date = datetime(year=year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
+            except TypeError:
+                raise ProductError(
+                    f"{MESSAGE_PRODUCT_ERROR}:"
+                    f"Не верная дата {md.product.exp_date_day}.{md.product.exp_date_month}.{year}"
+                )
             md.product.exp_date = exp_date
         sm.send_message(
             text=messages.ask_input_note,
@@ -217,21 +223,16 @@ def handle_product_create_waiting_input_note(message: Message):
         )
     else:
         with MainDataContextmanager(message) as md:
-            name = md.product.name
-            unit = md.product.unit
-            quantity = md.product.quantity
-            exp_date = md.product.exp_date
-            note = md.product.note
-            category = md.product.category_name
+            text = templates.check_md(
+                    name=escape_markdown(md.product.name),
+                    unit=escape_markdown(md.product.unit),
+                    quantity=md.product.quantity,
+                    exp_date=md.product.exp_date,
+                    note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
+                    category=escape_markdown(md.product.category_name),
+                )
         sm.send_message(
-            templates.check_md(
-                name=name,
-                unit=unit,
-                quantity=quantity,
-                exp_date=exp_date,
-                note=note,
-                category=category,
-            ),
+            text,
             state=ProductCreateStatesGroup.check_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",
@@ -247,14 +248,16 @@ def handle_product_create_waiting_category(message: CallbackQuery):
         with MainDataContextmanager(message) as md:
             md.product.category_id = category_id
             md.product.category_name = category_name
-            name = md.product.name
-            unit = md.product.unit
-            quantity = md.product.quantity
-            exp_date = md.product.exp_date
-            note = md.product.note
-            category = md.product.category_name
+            text = templates.check_md(
+                name=escape_markdown(md.product.name),
+                unit=escape_markdown(md.product.unit),
+                quantity=md.product.quantity,
+                exp_date=md.product.exp_date,
+                note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
+                category=escape_markdown(md.product.category_name),
+            )
         sm.send_message(
-            templates.check_md(name, unit, quantity, exp_date, note, category),
+            text,
             state=ProductCreateStatesGroup.check_new,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",

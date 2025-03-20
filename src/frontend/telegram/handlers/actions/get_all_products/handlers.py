@@ -9,7 +9,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     exc_handler_decorator,
     check_authentication_decorator,
-    get_inline_paginator_list,
+    get_inline_paginator_list, escape_markdown,
 )
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement, k_list_actions
 from src.frontend.telegram.bot.states import ProductsStatesGroup
@@ -34,10 +34,8 @@ y_or_n = KeyboardYesOrNo()
 paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByElement.BACK_PREFIX)
 
 
-@telegram_bot.message_handler(
-    func=lambda m: m.text == k_list_actions.action_get_all_products,
-)
-# @exc_handler_decorator
+@telegram_bot.message_handler(func=lambda m: m.text == k_list_actions.action_get_all_products)
+@exc_handler_decorator
 @check_authentication_decorator
 def handle_action_get_all_products(message: Message) -> None:
     logging.debug("Старт 'handle_action_get_all_products'")
@@ -105,25 +103,26 @@ def handle_products_paginator(message: CallbackQuery):
     func=lambda m: m.data.split("#")[0] == PREFIX_PRODUCT_ELEMENT_PAGINATOR,
     state=ProductsStatesGroup.products,
 )
+@exc_handler_decorator
 def handle_product_element(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     product_index, page = (int(e) for e in message.data.split("#") if e.isdigit())
     with MainDataContextmanager(message) as md:
-        product = md.products
+        products = md.products
         categories = md.categories
-    product = product[product_index]
+    product = products[product_index]
     category = get_category(categories, product.category_id)
     if category is not None:
         text = templates.detail_md(
-            name=product.name,
-            unit=product.unit,
+            name=escape_markdown(product.name),
+            unit=escape_markdown(product.unit),
             quantity=product.quantity,
             exp_date=product.exp_date,
-            note=product.note,
-            category=category.name,
+            note=escape_markdown(product.note) if product.note is not None else product.note,
+            category=escape_markdown(category.name),
         )
         inline_keyboard = KeyboardActionsByElement(page, product_index).get_inline_keyboard_product()
-        sm.send_message(text=text, inline_keyboard=inline_keyboard, parse_mode="Markdown")
+        sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)

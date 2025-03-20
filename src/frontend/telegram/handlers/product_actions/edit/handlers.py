@@ -8,7 +8,7 @@ from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
     MainMessages,
     check_authentication_decorator,
-    exc_handler_decorator,
+    exc_handler_decorator, escape_markdown,
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement
@@ -17,7 +17,11 @@ from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
 from src.frontend.telegram.handlers.actions.get_all_products.utils import get_category
-from src.frontend.telegram.handlers.product_actions.create.utils import check_and_get_year
+from src.frontend.telegram.handlers.product_actions.create.utils import (
+    check_and_get_year,
+    day_str_to_int,
+    month_str_to_int,
+)
 
 from .utils import get_inline_categories
 from .messages import (
@@ -170,14 +174,33 @@ def handle_product_update_ask_input_exp_date(message: CallbackQuery):
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         sm.send_message(
-            text=messages.input_day,
-            state=ProductUpdateStatesGroup.waiting_input_day,
+            messages.ask_set_ext_date,
+            state=ProductUpdateStatesGroup.ask_set_exp_date,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
             md.product.exp_date = md.old_product.exp_date
         sm.send_message(
-            text=messages.ask_input_note,
+            messages.ask_input_note,
+            state=ProductUpdateStatesGroup.ask_input_note,
+            inline_keyboard=y_or_n.get_inline_keyboard(),
+        )
+    else:
+        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+
+
+@telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_set_exp_date)
+def handle_product_update_ask_set_exp_date(message: CallbackQuery):
+    sm = SendMessage(message)
+    sm.delete_message()
+    if message.data == y_or_n.callback_answer_yes:
+        sm.send_message(messages.input_day, state=ProductUpdateStatesGroup.waiting_input_day)
+    elif message.data == y_or_n.callback_answer_no:
+        with MainDataContextmanager(message) as md:
+            md.product.exp_date = None
+        sm.send_message(
+            messages.ask_input_note,
             state=ProductUpdateStatesGroup.ask_input_note,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
@@ -189,9 +212,7 @@ def handle_product_update_ask_input_exp_date(message: CallbackQuery):
 def handle_product_update_waiting_input_day(message: Message):
     sm = SendMessage(message)
     try:
-        day = int(message.text)
-        if 31 < day < 1:
-            raise ValueError
+        day = day_str_to_int(message.text)
     except ValueError:
         sm.send_message(messages.error_day)
     else:
@@ -206,9 +227,7 @@ def handle_product_update_waiting_input_day(message: Message):
 def handle_product_update_waiting_input_month(message: Message):
     sm = SendMessage(message)
     try:
-        month = int(message.text)
-        if 12 < month < 1:
-            raise ValueError
+        month = month_str_to_int(message.text)
     except ValueError:
         sm.send_message(messages.error_month)
     else:
@@ -296,14 +315,16 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
                 return sm.send_message(main_m.something_went_wrong, finish_state=True)
             md.product.category_id = category.id
             md.product.category_name = category.name
-            name = md.product.name
-            unit = md.product.unit
-            quantity = md.product.quantity
-            exp_date = md.product.exp_date
-            note = md.product.note
-            category = md.product.category_name
+            text = templates.check_md(
+                    name=escape_markdown(md.product.name),
+                    unit=escape_markdown(md.product.unit),
+                    quantity=md.product.quantity,
+                    exp_date=md.product.exp_date,
+                    note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
+                    category=escape_markdown(md.product.category_name),
+                )
         sm.send_message(
-            text=templates.check_md(name, unit, quantity, exp_date, note, category),
+            text,
             state=ProductUpdateStatesGroup.check_update_product,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",
@@ -321,14 +342,16 @@ def handle_product_update_waiting_category(message: CallbackQuery):
         with MainDataContextmanager(message) as md:
             md.product.category_id = category_id
             md.product.category_name = category_name
-            name = md.product.name
-            unit = md.product.unit
-            quantity = md.product.quantity
-            exp_date = md.product.exp_date
-            note = md.product.note
-            category = md.product.category_name
+            text = templates.check_md(
+                    name=escape_markdown(md.product.name),
+                    unit=escape_markdown(md.product.unit),
+                    quantity=md.product.quantity,
+                    exp_date=md.product.exp_date,
+                    note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
+                    category=escape_markdown(md.product.category_name),
+                )
         sm.send_message(
-            templates.check_md(name, unit, quantity, exp_date, note, category),
+            text,
             state=ProductUpdateStatesGroup.check_update_product,
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",

@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE
+from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE, VIEW_NONE
 from src.frontend.telegram.handlers.product_actions.create.messages import MAX_LEN_NAME, MAX_LEN_UNIT, MAX_LEN_NOTE
 
 
@@ -36,6 +36,10 @@ class ProductUpdateActionMessages:
     @property
     def ask_input_exp_date(self) -> str:
         return "Хотите изменить срок годности?"
+
+    @property
+    def ask_set_ext_date(self) -> str:
+        return "Хотите установить срок годности?"
 
     @property
     def input_day(self) -> str:
@@ -100,8 +104,8 @@ class ProductUpdateActionTemplates:
             f"\t\t\t*Имя*: {name}\n"\
             f"\t\t\t*Количество*: {quantity}\n"\
             f"\t\t\t*Единица измерения*: {unit}\n"\
-            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else 'без срока годности'}\n"\
-            f"\t\t\t*Примечание*: {note if note else ''}\n"\
+            f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else VIEW_NONE}\n"\
+            f"\t\t\t*Примечание*: {note if note else VIEW_NONE}\n"\
             f"\t\t\t*Категория*: {category}\n\n"\
             "Всё верно?"
 

@@ -9,6 +9,7 @@ class ProductUpdateStatesGroup(StatesGroup):
     ask_input_quantity = State()
     waiting_input_quantity = State()
     ask_input_exp_date = State()
+    ask_set_exp_date = State()
     waiting_input_day = State()
     waiting_input_month = State()
     waiting_input_year = State()

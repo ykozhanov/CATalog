@@ -1,6 +1,14 @@
 from src.frontend.telegram.settings import APP_NAME
 from src.frontend.telegram.handlers.commands import COMMANDS
 
+special_markdown_characters = ["*", "_"]
+
+
+def escape_markdown(string: str) -> str:
+    for char in special_markdown_characters:
+        string = string.replace(char, f"\{char}")
+    return string
+
 
 class MainMessages:
     @property

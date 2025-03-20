@@ -7,7 +7,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     MainDataContextmanager,
     exc_handler_decorator,
-    check_authentication_decorator,
+    check_authentication_decorator, escape_markdown,
 )
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.api import ProductsAPI
@@ -57,8 +57,10 @@ def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         p_api = ProductsAPI(a_token)
         p_api.delete(old_product.id)
-        sm.send_message(templates.success_md(old_product.name), parse_mode="Markdown", finish_state=True)
+        text = templates.success_md(escape_markdown(old_product.name))
+        sm.send_message(text, parse_mode="Markdown", finish_state=True)
     elif message.data == y_or_n.callback_answer_no:
-        sm.send_message(templates.answer_no_md(old_product.name), parse_mode="Markdown", finish_state=True)
+        text = templates.answer_no_md(escape_markdown(old_product.name))
+        sm.send_message(text, parse_mode="Markdown", finish_state=True)
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)

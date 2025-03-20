@@ -1,10 +1,47 @@
+import datetime
 import math
-from typing import TypeVar
+from typing import TypeVar, Any, Callable
 
 from pydantic import BaseModel
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from src.frontend.telegram.settings import DISPLAY_DATE_FORMATE, VIEW_NONE
+
 T = TypeVar("T", bound=BaseModel)
+
+
+class FormatterTemplateDataAttrs:
+    __formatters_data_for_templates = {
+        datetime.date: "formater_date",
+        type(None): "formater_none",
+    }
+
+    def __init__(self, data: Any):
+        self.data = data
+        self.formatter = self.get_formatter(self.data)
+
+    def get_formatter(self, data: Any) -> Callable[..., str]:
+        data_type = type(data)
+        call = self.__formatters_data_for_templates.get(data_type, None)
+        if not call:
+            return self.default_formatter
+        return getattr(self, call)
+
+    @classmethod
+    def formater_date(cls, data: datetime.date) -> str:
+        return data.strftime(DISPLAY_DATE_FORMATE)
+
+    @classmethod
+    def formater_none(cls, data: None) -> str:
+        return VIEW_NONE
+
+    @classmethod
+    def default_formatter(cls, data: Any) -> str:
+        return str(data)
+
+    def formatted_data(self) -> str:
+        return self.formatter(self.data)
+
 
 
 class PaginatorListHelper:
@@ -47,11 +84,21 @@ class PaginatorListHelper:
             end = len(self._elements)
         return self._elements[start:end]
 
+
+    @staticmethod
+    def _get_data_for_template(elem: T, attrs: list[str]) -> dict[str, Any]:
+        data_for_template = {}
+        for attr in attrs:
+            attr_data = getattr(elem, attr)
+            formatted_attr_data = FormatterTemplateDataAttrs(attr_data).formatted_data()
+            data_for_template[attr] = formatted_attr_data
+        return data_for_template
+
     def get_buttons_for_page(self, attrs: list[str], template: str, page: int = 1) -> list[InlineKeyboardButton]:
         get_elements = self._get_list_elements_for_page(page)
         buttons = []
         for elem in get_elements:
-            for_template = {attr: getattr(elem, attr) for attr in attrs}
+            for_template = self._get_data_for_template(elem, attrs)
             text = template.format(**for_template)
             index = self._elements.index(elem)
             buttons.append(InlineKeyboardButton(text=text, callback_data=f"{self.prefix_element}#{index}#{page}"))

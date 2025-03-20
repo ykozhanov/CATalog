@@ -9,7 +9,6 @@ from src.frontend.telegram.bot.states import UsersStatesGroup
 from src.frontend.telegram.handlers.commands import COMMANDS
 from src.frontend.telegram.handlers.commands.login.messages import LoginCommandTemplates
 from src.frontend.telegram.handlers.utils import check_login_decorator
-from src.frontend.telegram.api import UserController
 from .messages import StartCommandMessages
 
 __all__ = ["handle_command_start"]
