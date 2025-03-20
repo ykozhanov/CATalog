@@ -10,7 +10,7 @@ from src.frontend.telegram.handlers.utils import (
     get_inline_paginator_list,
 )
 
-from src.frontend.telegram.bot.states import ProductsStatesGroup, ActionsStatesGroup
+from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.bot.keyboards import k_list_actions
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.handlers.actions.get_all_products.utils import (
@@ -26,9 +26,7 @@ main_m = MainMessages()
 messages = GetProductsByExpDateActionMessages()
 
 
-@telegram_bot.message_handler(
-    func=lambda m: m.text == k_list_actions.action_get_products_by_exp_date,
-)
+@telegram_bot.message_handler(func=lambda m: m.text == k_list_actions.action_get_products_by_exp_date)
 @exc_handler_decorator
 @check_authentication_decorator
 def handle_action_get_product_by_exp_date(message: Message) -> None:
@@ -45,12 +43,8 @@ def handle_action_get_product_by_exp_date(message: Message) -> None:
             prefix_element=PREFIX_PRODUCT_ELEMENT_PAGINATOR,
             attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
             template=TEMPLATE_BUTTON_PRODUCT,
+            add_create=False,
         )
-        sm.send_message(
-            messages.for_paginator,
-            state=ProductsStatesGroup.products,
-            inline_keyboard=inline_keyboard,
-            delete_reply_keyboard=True,
-        )
+        sm.send_message(messages.for_paginator, state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
     else:
-        sm.send_message(messages.empty, delete_reply_keyboard=True, finish_state=True)
+        sm.send_message(messages.empty, finish_state=True)

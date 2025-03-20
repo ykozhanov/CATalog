@@ -34,10 +34,7 @@ def handle_paginator_category_create_new_category(message: CallbackQuery):
         md.category = CategoryDataclass()
     sm = SendMessage(message)
     sm.delete_message()
-    sm.send_message(
-        text=messages.input_name,
-        state=CategoryCreateStatesGroup.waiting_input_name,
-    )
+    sm.send_message(messages.input_name, state=CategoryCreateStatesGroup.waiting_input_name)
 
 
 @telegram_bot.callback_query_handler(state=CategoryCreateStatesGroup.ask_add_new)
@@ -47,10 +44,7 @@ def handle_category_create_ask_add_new(message: CallbackQuery) -> None:
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             md.category = CategoryDataclass()
-        sm.send_message(
-            text=messages.input_name,
-            state=CategoryCreateStatesGroup.waiting_input_name,
-        )
+        sm.send_message(messages.input_name, state=CategoryCreateStatesGroup.waiting_input_name)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(main_m.to_help, finish_state=True)
     else:

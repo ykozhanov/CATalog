@@ -9,6 +9,7 @@ from src.frontend.telegram.handlers.utils import (
     exc_handler_decorator,
     check_authentication_decorator, escape_markdown,
 )
+from src.frontend.telegram.handlers.utils.md_dataclasses import CategoryDataclass
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.api import CategoriesAPI
 
@@ -29,6 +30,7 @@ y_or_n = KeyboardYesOrNo()
 )
 def handler_category_delete_action(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     category_index = int(message.data.split("#")[1])
     with MainDataContextmanager(message) as md:
         categories = md.categories
@@ -45,10 +47,12 @@ def handler_category_delete_action(message: CallbackQuery) -> None:
 @telegram_bot.callback_query_handler(state=CategoryDeleteStatesGroup.ask_delete_products)
 def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
     sm = SendMessage(message)
-    delete_all_products = message.data == y_or_n.callback_answer_yes
-    if message.data == y_or_n.callback_answer_yes or message.data == y_or_n.callback_answer_no:
+    sm.delete_message()
+    delete_all_products = (message.data == y_or_n.callback_answer_yes)
+    if message.data in (y_or_n.callback_answer_yes, y_or_n.callback_answer_no):
         with MainDataContextmanager(message) as md:
             old_category = md.old_category
+            md.category = CategoryDataclass()
             md.category.delete_all_products = delete_all_products
             if old_category is None:
                 return sm.send_message(main_m.something_went_wrong, finish_state=True)
@@ -69,6 +73,7 @@ def handle_category_delete_ask_delete_products(message: CallbackQuery) -> None:
 @check_authentication_decorator
 def handle_product_delete_confirm_delete(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     with MainDataContextmanager(message) as md:
         old_category = md.old_category
         a_token = md.user.access_jtw_token

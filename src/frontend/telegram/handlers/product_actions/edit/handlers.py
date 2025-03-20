@@ -14,11 +14,13 @@ from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement
 from src.frontend.telegram.bot.states import ProductsStatesGroup
 from src.frontend.telegram.api import ProductsAPI
+from src.frontend.telegram.api.products.exceptions import ProductError
+from src.frontend.telegram.api.products.exceptions import MESSAGE_PRODUCT_ERROR
 from src.frontend.telegram.api.products.schemas import ProductOutSchema
 from src.frontend.telegram.handlers.actions.get_all_categories.utils import PREFIX_CATEGORY_ELEMENT_PAGINATOR
 from src.frontend.telegram.handlers.actions.get_all_products.utils import get_category
 from src.frontend.telegram.handlers.product_actions.create.utils import (
-    check_and_get_year,
+    year_str_to_int,
     day_str_to_int,
     month_str_to_int,
 )
@@ -89,7 +91,7 @@ def handle_product_update_waiting_input_name(message: Message):
     with MainDataContextmanager(message) as md:
         md.product.name = message.text
     sm.send_message(
-        text=messages.ask_input_unit,
+        messages.ask_input_unit,
         state=ProductUpdateStatesGroup.ask_input_unit,
         inline_keyboard=y_or_n.get_inline_keyboard(),
     )
@@ -100,20 +102,17 @@ def handle_product_update_message_ask_input_unit(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
-        sm.send_message(
-            text=messages.input_unit,
-            state=ProductUpdateStatesGroup.waiting_input_unit,
-        )
+        sm.send_message(messages.input_unit, state=ProductUpdateStatesGroup.waiting_input_unit)
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
             md.product.unit = md.old_product.unit
         sm.send_message(
-            text=messages.ask_input_quantity,
+            messages.ask_input_quantity,
             state=ProductUpdateStatesGroup.ask_input_quantity,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_unit)
@@ -124,7 +123,7 @@ def handle_product_update_waiting_input_unit(message: Message):
     with MainDataContextmanager(message) as md:
         md.product.unit = message.text
     sm.send_message(
-        text=messages.ask_input_quantity,
+        messages.ask_input_quantity,
         state=ProductUpdateStatesGroup.ask_input_quantity,
         inline_keyboard=y_or_n.get_inline_keyboard(),
     )
@@ -135,20 +134,17 @@ def handle_product_update_message_ask_input_quantity(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
-        sm.send_message(
-            text=messages.input_quantity,
-            state=ProductUpdateStatesGroup.waiting_input_quantity,
-        )
+        sm.send_message(messages.input_quantity, state=ProductUpdateStatesGroup.waiting_input_quantity)
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
             md.product.quantity = md.old_product.quantity
         sm.send_message(
-            text=messages.ask_input_exp_date,
+            messages.ask_input_exp_date,
             state=ProductUpdateStatesGroup.ask_input_exp_date,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_quantity)
@@ -162,7 +158,7 @@ def handle_product_update_waiting_input_quantity(message: Message):
         with MainDataContextmanager(message) as md:
             md.product.quantity = quantity
         sm.send_message(
-            text=messages.ask_input_exp_date,
+            messages.ask_input_exp_date,
             state=ProductUpdateStatesGroup.ask_input_exp_date,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
@@ -187,7 +183,7 @@ def handle_product_update_ask_input_exp_date(message: CallbackQuery):
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_set_exp_date)
@@ -205,7 +201,7 @@ def handle_product_update_ask_set_exp_date(message: CallbackQuery):
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_day)
@@ -218,10 +214,7 @@ def handle_product_update_waiting_input_day(message: Message):
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_day = day
-        sm.send_message(
-            text=messages.input_month,
-            state=ProductUpdateStatesGroup.waiting_input_month,
-        )
+        sm.send_message(messages.input_month, state=ProductUpdateStatesGroup.waiting_input_month)
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_month)
 def handle_product_update_waiting_input_month(message: Message):
@@ -233,24 +226,29 @@ def handle_product_update_waiting_input_month(message: Message):
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_month = month
-        sm.send_message(
-            text=messages.input_year,
-            state=ProductUpdateStatesGroup.waiting_input_year,
-        )
+        sm.send_message(messages.input_year, state=ProductUpdateStatesGroup.waiting_input_year)
 
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_year)
 def handle_product_update_waiting_input_year(message: Message):
     sm = SendMessage(message)
-    if (year := check_and_get_year(message.text)) is None:
+    try:
+        year = year_str_to_int(message.text)
+    except ValueError:
         return sm.send_message(messages.error_year)
     else:
         with MainDataContextmanager(message) as md:
             md.product.exp_date_year = year
-            exp_date = datetime(year=year, month=md.product.exp_date_month, day=md.product.exp_date_day).date()
+            month = md.product.exp_date_month
+            day = md.product.exp_date_day
+            try:
+                exp_date = datetime(year=year, month=month, day=day).date()
+            except ValueError:
+                raise ProductError(f"{MESSAGE_PRODUCT_ERROR}: Не верная дата {day}.{month}.{year}")
             md.product.exp_date = exp_date
+
         return sm.send_message(
-            text=messages.ask_input_note,
+            messages.ask_input_note,
             state=ProductUpdateStatesGroup.ask_input_note,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
@@ -262,20 +260,17 @@ def handle_product_update_ask_input_note(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
-        sm.send_message(
-            text=messages.input_note,
-            state=ProductUpdateStatesGroup.waiting_input_note,
-        )
+        sm.send_message(messages.input_note, state=ProductUpdateStatesGroup.waiting_input_note)
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
             md.product.note = md.old_product.note
         sm.send_message(
-            text=messages.ask_choice_category,
+            messages.ask_choice_category,
             state=ProductUpdateStatesGroup.ask_choice_category,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.message_handler(state=ProductUpdateStatesGroup.waiting_input_note)
@@ -287,7 +282,7 @@ def handle_product_update_waiting_input_note(message: Message):
     with MainDataContextmanager(message) as md:
         md.product.note = message.text
     sm.send_message(
-        text=messages.ask_choice_category,
+        messages.ask_choice_category,
         state=ProductUpdateStatesGroup.ask_choice_category,
         inline_keyboard=y_or_n.get_inline_keyboard(),
     )
@@ -301,9 +296,8 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
         inline_keyboard = get_inline_categories(message)
-
         sm.send_message(
-            text=messages.choice_category,
+            messages.choice_category,
             state=ProductUpdateStatesGroup.waiting_choice_category,
             inline_keyboard=inline_keyboard,
         )
@@ -330,7 +324,7 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
             parse_mode="Markdown",
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.waiting_choice_category)
@@ -357,7 +351,7 @@ def handle_product_update_waiting_category(message: CallbackQuery):
             parse_mode="Markdown",
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.check_update_product)
@@ -382,12 +376,12 @@ def handle_product_update_check_update_product(message: CallbackQuery):
         sm.send_message(messages.success, finish_state=True)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(
-            text=messages.try_again,
+            messages.try_again,
             state=ProductUpdateStatesGroup.ask_try_again,
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(state=ProductUpdateStatesGroup.ask_try_again)
@@ -405,4 +399,4 @@ def handle_product_update_ask_try_again(message: CallbackQuery):
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(main_m.to_help, finish_state=True)
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)

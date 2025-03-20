@@ -5,7 +5,7 @@ from src.frontend.telegram.api.categories.schemas import CategoryInSchema
 from src.frontend.telegram.handlers.utils import MainDataContextmanager
 
 PREFIX_CATEGORY_ELEMENT_PAGINATOR = "category"
-TEMPLATE_BUTTON_CATEGORY = "{name}"
+TEMPLATE_BUTTON_CATEGORY = "🏷️ {name}"
 ATTRS_FOR_TEMPLATE_CATEGORY = ["name"]
 
 

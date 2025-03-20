@@ -11,11 +11,13 @@ def get_inline_paginator_list(
         attrs_for_template: list[str],
         template: str,
         page: int = 1,
+        add_create: bool = True,
 ) -> InlineKeyboardMarkup:
     ph = PaginatorListHelper(
         elements=elements,
         prefix_element=prefix_element,
         items_per_page=ITEMS_PER_PAGE,
+        add_create=add_create,
     )
     buttons = ph.get_buttons_for_page(attrs=attrs_for_template, template=template, page=page)
     return ph.get_inline_keyboard(page_data=buttons)

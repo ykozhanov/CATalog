@@ -124,8 +124,12 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             self.del_cache_by_name_or_category_id(
                 current_user,
                 prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                name=new_element_model.name,
                 category_id=new_element_model.category_id,
+            )
+            self.del_cache_by_name_or_category_id(
+                current_user,
+                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                name=new_element_model.name,
             )
             new_element = crud.create(new_element_model)
         except (ValidationError, IntegrityDBError) as e:
@@ -172,8 +176,12 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             self.del_cache_by_name_or_category_id(
                 current_user,
                 prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                name=old_element.name,
                 category_id=old_element.category_id,
+            )
+            self.del_cache_by_name_or_category_id(
+                current_user,
+                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                name=old_element.name,
             )
             if update_element:
                 result = jsonify(dict(self.element_out_schema.model_validate(update_element))), 200
@@ -200,8 +208,12 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             self.del_cache_by_name_or_category_id(
                 current_user,
                 prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                name=old_element.name,
                 category_id=old_element.category_id,
+            )
+            self.del_cache_by_name_or_category_id(
+                current_user,
+                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                name=old_element.name,
             )
         except ForbiddenError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 403

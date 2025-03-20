@@ -45,8 +45,7 @@ def handle_action_get_all_products(message: Message) -> None:
         if a_token := md.user.access_jtw_token:
             p_api = ProductsAPI(access_token=a_token)
         else:
-            sm.send_message(text=main_m.something_went_wrong, finish_state=True)
-            return
+            return sm.send_message(text=main_m.something_went_wrong, finish_state=True)
         products = md.products = p_api.get_all()
     if products:
         inline_keyboard = get_inline_paginator_list(
@@ -55,18 +54,12 @@ def handle_action_get_all_products(message: Message) -> None:
             attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
             template=TEMPLATE_BUTTON_PRODUCT,
         )
-        sm.send_message(
-            messages.for_paginator,
-            state=ProductsStatesGroup.products,
-            inline_keyboard=inline_keyboard,
-            delete_reply_keyboard=True,
-        )
+        sm.send_message(messages.for_paginator, state=ProductsStatesGroup.products, inline_keyboard=inline_keyboard)
     else:
         sm.send_message(
             text=messages.empty,
             state=ProductCreateStatesGroup.ask_add_new,
-            inline_keyboard=y_or_n.get_inline_keyboard(),
-            delete_reply_keyboard=True,
+            inline_keyboard=y_or_n.get_inline_keyboard()
         )
 
 
@@ -76,7 +69,7 @@ def handle_action_get_all_products(message: Message) -> None:
 )
 def handle_state_ask_add_new_product_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
-    sm.send_message(text=main_m.to_help, finish_state=True)
+    sm.send_message(main_m.to_help, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(
@@ -105,12 +98,16 @@ def handle_products_paginator(message: CallbackQuery):
 )
 @exc_handler_decorator
 def handle_product_element(message: CallbackQuery):
+    logging.info(f"Старт 'handle_product_element'")
     sm = SendMessage(message)
     sm.delete_message()
     product_index, page = (int(e) for e in message.data.split("#") if e.isdigit())
     with MainDataContextmanager(message) as md:
+        logging.debug(f"md.products: {md.products}")
         products = md.products
         categories = md.categories
+    logging.debug(f"products: {products}")
+    logging.debug(f"product_index: {product_index}")
     product = products[product_index]
     category = get_category(categories, product.category_id)
     if category is not None:
@@ -126,3 +123,4 @@ def handle_product_element(message: CallbackQuery):
         sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
+    logging.info(f"Конец 'handle_product_element'")

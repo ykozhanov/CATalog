@@ -6,7 +6,8 @@ from src.frontend.telegram.handlers.utils import (
     MainDataContextmanager,
     MainMessages,
     check_authentication_decorator,
-    exc_handler_decorator, escape_markdown,
+    exc_handler_decorator,
+    escape_markdown,
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import CategoryDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo, KeyboardActionsByElement
@@ -38,10 +39,7 @@ def handle_action_update_category(message: CallbackQuery) -> None:
         if categories is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_category = categories[category_index]
-    sm.send_message(
-        text=messages.input_name,
-        state=CategoryUpdateStatesGroup.waiting_input_name,
-    )
+    sm.send_message(messages.input_name, state=CategoryUpdateStatesGroup.waiting_input_name)
 
 
 @telegram_bot.message_handler(state=CategoryUpdateStatesGroup.waiting_input_name)
@@ -87,7 +85,7 @@ def handle_category_update_check_update(message: CallbackQuery):
             inline_keyboard=y_or_n.get_inline_keyboard(),
         )
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(state=CategoryUpdateStatesGroup.ask_try_again)
@@ -97,11 +95,8 @@ def handle_category_update_ask_try_again(message: CallbackQuery):
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             md.category = CategoryDataclass()
-        sm.send_message(
-            text=messages.input_name,
-            state=CategoryUpdateStatesGroup.waiting_input_name,
-        )
+        sm.send_message(messages.input_name, state=CategoryUpdateStatesGroup.waiting_input_name)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(main_m.to_help, finish_state=True)
     else:
-        sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+        sm.send_message(main_m.something_went_wrong, finish_state=True)

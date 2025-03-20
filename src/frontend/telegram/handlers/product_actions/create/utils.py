@@ -6,30 +6,29 @@ from src.frontend.telegram.handlers.actions.get_all_categories.utils import (
     PREFIX_CATEGORY_ELEMENT_PAGINATOR,
 )
 
+
 def get_inline_categories(message: Message | CallbackQuery) -> list[tuple[str, str]]:
     categories = get_all_categories(message)
     return [(c.name, f"{PREFIX_CATEGORY_ELEMENT_PAGINATOR}#{c.id}#{c.name}") for c in categories]
 
 
-def check_and_get_year(message: str) -> int | None:
+def year_str_to_int(year: str | int) -> int:
+    year_str = str(year)
     try:
-        return datetime.strptime(message, "%Y").year
+        return datetime.strptime(year_str, "%Y").year
     except ValueError:
-        try:
-            return datetime.strptime(message, "%y").year
-        except ValueError:
-            return None
+        return datetime.strptime(year_str, "%y").year
 
 
 def day_str_to_int(day: str | int) -> int:
     day_int = int(day)
-    if 1 > day_int or day_int > 31:
+    if day_int < 1 or day_int > 31:
         raise ValueError
-    return day
+    return day_int
 
 
 def month_str_to_int(month: str | int) -> int:
     month_int = int(month)
-    if 1 > month_int or month_int > 31:
+    if month_int < 1 or month_int > 12:
         raise ValueError
-    return month
+    return month_int

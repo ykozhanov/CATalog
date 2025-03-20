@@ -7,7 +7,8 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     MainDataContextmanager,
     exc_handler_decorator,
-    check_authentication_decorator, escape_markdown,
+    check_authentication_decorator,
+    escape_markdown,
 )
 from src.frontend.telegram.core.utils import SendMessage
 from src.frontend.telegram.api import ProductsAPI
@@ -34,12 +35,12 @@ def handler_product_use_action(message: CallbackQuery) -> None:
         if (products := md.products) is None:
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.old_product = old_product = products[product_index]
-    text = escape_markdown(templates.old_md(name=old_product.name, unit=old_product.unit, quantity=old_product.quantity))
-    sm.send_message(
-        text,
-        parse_mode="Markdown",
-        state=ProductUseStatesGroup.input_diff,
+    text = templates.old_md(
+        name=escape_markdown(old_product.name),
+        unit=escape_markdown(old_product.unit),
+        quantity=old_product.quantity,
     )
+    sm.send_message(text, parse_mode="Markdown", state=ProductUseStatesGroup.input_diff)
 
 
 @telegram_bot.message_handler(state=ProductUseStatesGroup.input_diff)
@@ -67,6 +68,9 @@ def handle_product_use_input_diff(message: Message) -> None:
     p_api = ProductsAPI(a_token)
     p_api.put(old_product.id, new_product)
 
+    with MainDataContextmanager(message):
+        md.products = p_api.get_all()
+
     if new_quantity <= 0:
         return sm.send_message(
             templates.delete_md(escape_markdown(new_product.name)),
@@ -79,8 +83,4 @@ def handle_product_use_input_diff(message: Message) -> None:
         escape_markdown(new_product.unit),
         new_product.quantity,
     )
-    sm.send_message(
-        text,
-        parse_mode="Markdown",
-        finish_state=True,
-    )
+    sm.send_message(text, parse_mode="Markdown", finish_state=True)

@@ -7,7 +7,7 @@ from src.frontend.telegram.handlers.utils import (
     MainMessages,
     check_authentication_decorator,
     exc_handler_decorator,
-    get_inline_paginator_list,
+    get_inline_paginator_list, escape_markdown,
 )
 from src.frontend.telegram.bot.keyboards import k_list_actions
 from src.frontend.telegram.bot.states import ProductsStatesGroup, ActionsStatesGroup
@@ -27,16 +27,10 @@ messages = GetProductsByNameActionMessages()
 templates = GetProductsByNameActionTemplates()
 
 
-@telegram_bot.message_handler(
-    func=lambda m: m.text == k_list_actions.action_get_product_by_name,
-)
+@telegram_bot.message_handler(func=lambda m: m.text == k_list_actions.action_get_product_by_name)
 def handle_action_get_product_by_name(message: Message) -> None:
     sm = SendMessage(message)
-    sm.send_message(
-        messages.input_name,
-        state=ProductsStatesGroup.waiting_name_product,
-        delete_reply_keyboard=True,
-    )
+    sm.send_message(messages.input_name, state=ProductsStatesGroup.waiting_name_product, delete_reply_keyboard=True)
 
 
 @telegram_bot.message_handler(state=ProductsStatesGroup.waiting_name_product)
@@ -58,12 +52,13 @@ def handle_name_product_for_get_product_by_name(message: Message) -> None:
             prefix_element=PREFIX_PRODUCT_ELEMENT_PAGINATOR,
             attrs_for_template=ATTRS_FOR_TEMPLATE_PRODUCT,
             template=TEMPLATE_BUTTON_PRODUCT,
+            add_create=False,
         )
         sm.send_message(
-            templates.for_paginator(name),
+            templates.for_paginator_md(escape_markdown(name)),
             state=ProductsStatesGroup.products,
             inline_keyboard=inline_keyboard,
-            delete_reply_keyboard=True,
+            parse_mode="Markdown",
         )
     else:
-        sm.send_message(templates.empty(name), delete_reply_keyboard=True, finish_state=True)
+        sm.send_message(templates.empty_md(escape_markdown(name)), finish_state=True, parse_mode="Markdown")

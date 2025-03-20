@@ -32,9 +32,7 @@ y_or_n = KeyboardYesOrNo()
 paginator_callbacks = (PaginatorListHelper.CALLBACK_PAGE, KeyboardActionsByElement.BACK_PREFIX)
 
 
-@telegram_bot.message_handler(
-    func=lambda m: m.text == k_list_actions.action_get_all_categories,
-)
+@telegram_bot.message_handler(func=lambda m: m.text == k_list_actions.action_get_all_categories)
 @exc_handler_decorator
 @check_authentication_decorator
 def handle_action_get_all_categories(message: Message) -> None:
@@ -74,7 +72,7 @@ def handle_action_get_all_categories(message: Message) -> None:
 )
 def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
-    sm.send_message(text=main_m.to_help, finish_state=True)
+    sm.send_message(main_m.to_help, finish_state=True)
 
 
 @telegram_bot.callback_query_handler(

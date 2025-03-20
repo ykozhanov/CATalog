@@ -48,11 +48,13 @@ class PaginatorListHelper:
     CALLBACK_CREATE = "create"
     CALLBACK_PAGE = "page"
 
-    def __init__(self, elements: list[T], prefix_element: str, items_per_page: int = 5):
+    def __init__(self, elements: list[T], prefix_element: str, items_per_page: int = 5, add_create: bool = True):
         self.prefix_element = prefix_element
         self._elements = elements
         self._items_per_page = items_per_page
         self._page_count = math.ceil(len(elements) / items_per_page)
+        self._add_create = add_create
+
 
     def _get_paginator_keys(self, page: int) -> list[InlineKeyboardButton]:
         paginator_keys = []
@@ -110,5 +112,6 @@ class PaginatorListHelper:
         for b in page_data:
             keyboard.row(b)
         keyboard.row(*self._get_paginator_keys(page))
-        keyboard.row(InlineKeyboardButton(text=">> Создать <<", callback_data=self.CALLBACK_CREATE))
+        if self._add_create:
+            keyboard.row(InlineKeyboardButton(text="Создать 🆕", callback_data=self.CALLBACK_CREATE))
         return keyboard

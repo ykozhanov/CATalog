@@ -1,3 +1,5 @@
+import logging
+
 from telebot.types import CallbackQuery
 
 from src.frontend.telegram.bot import telegram_bot
@@ -33,9 +35,10 @@ y_or_n = KeyboardYesOrNo()
     func=lambda m: m.data.split("#")[0] == KeyboardActionsByElement.LIST_PREFIX,
     state=CategoriesStatesGroup.categories,
 )
-# @exc_handler_decorator
+@exc_handler_decorator
 @check_authentication_decorator
 def handle_category_list_action(message: CallbackQuery) -> None:
+    logging.info(f"Старт 'handle_category_list_action'")
     sm = SendMessage(message)
     sm.delete_message()
     category_index = int(message.data.split("#")[1])
@@ -43,13 +46,15 @@ def handle_category_list_action(message: CallbackQuery) -> None:
         a_token = md.user.access_jtw_token
         categories = md.categories
         if categories is None or a_token is None:
+            logging.info(f"Конец 'handle_category_list_action'")
             return sm.send_message(main_m.something_went_wrong, finish_state=True)
         md.product = ProductDataclass()
         md.product.category_id = category_id = categories[category_index].id
         md.product.category_name = name = categories[category_index].name
-
-    p_api = ProductsAPI(a_token)
-    products = p_api.get_by(category_id=category_id)
+        p_api = ProductsAPI(a_token)
+        products = md.products = p_api.get_by(category_id=category_id)
+    logging.debug(f"products: {products}")
+    logging.debug(f"md.products: {md.products}")
     if products:
         inline_keyboard = get_inline_paginator_list(
             elements=products,
@@ -70,3 +75,4 @@ def handle_category_list_action(message: CallbackQuery) -> None:
             inline_keyboard=y_or_n.get_inline_keyboard(),
             parse_mode="Markdown",
         )
+    logging.info(f"Конец 'handle_category_list_action'")

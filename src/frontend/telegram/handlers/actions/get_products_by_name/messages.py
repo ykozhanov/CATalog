@@ -8,12 +8,12 @@ class GetProductsByNameActionMessages:
 
 class GetProductsByNameActionTemplates:
     @staticmethod
-    def empty(name: str) -> str:
-        return f"У вас пока нет ни одного товара с названием '{name}'.\n\n"\
+    def empty_md(name: str) -> str:
+        return f"У вас пока нет ни одного товара с названием *{name}*.\n\n"\
             f"Вернуться к списку действий /{COMMANDS.help[0]}"
 
 
     @staticmethod
-    def for_paginator(name: str) -> str:
-        return f"Список товаров по названию '{name}':"
+    def for_paginator_md(name: str) -> str:
+        return f"Список товаров по названию *{name}*:"
 

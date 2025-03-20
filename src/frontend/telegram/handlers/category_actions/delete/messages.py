@@ -14,7 +14,7 @@ class CategoryDeleteActionTemplates:
 
     @staticmethod
     def confirm_only_category_md(name: str) -> str:
-        return f"Вы действительно хотите удалить категорию *{name}*"\
+        return f"Вы действительно хотите удалить категорию *{name} *"\
             "и оставить сохраненными все связанные с ней товары?"
 
     @staticmethod

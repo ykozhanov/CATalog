@@ -13,23 +13,23 @@ class KeyboardActionsByElement:
 
     @classmethod
     def answer_edit(cls) -> str:
-        return "Изменить"
+        return "Изменить 🔄"
 
     @classmethod
     def answer_delete(cls) -> str:
-        return "Удалить"
+        return "Удалить 🗑"
 
     @classmethod
     def answer_use(cls) -> str:
-        return "Использовать"
+        return "Использовать ✅"
 
     @classmethod
     def answer_list(cls) -> str:
-        return "Товары"
+        return "Товары 🍱"
 
     @classmethod
     def answer_back(cls) -> str:
-        return "<< Назад"
+        return "⏮️ Назад"
 
     @property
     def callback_answer_edit(self) -> str:
