@@ -1,8 +1,8 @@
-"""Initial migrations
+"""Initial migration
 
-Revision ID: b54f67efa18f
+Revision ID: b939adc1b75f
 Revises: 
-Create Date: 2025-03-09 18:31:29.312017
+Create Date: 2025-03-21 12:14:47.864113
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b54f67efa18f'
+revision: str = 'b939adc1b75f'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -53,9 +53,9 @@ def upgrade() -> None:
     sa.Column('exp_date', sa.Date(), nullable=True),
     sa.Column('note', sa.String(length=500), nullable=True),
     sa.Column('created_at', sa.Date(), nullable=False),
-    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('category_id', sa.Integer(), nullable=True),
     sa.Column('profile_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
+    sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['profile_id'], ['profiles.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
