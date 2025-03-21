@@ -1,3 +1,4 @@
+import json
 import requests
 from pydantic import ValidationError
 
@@ -27,17 +28,14 @@ class ProductsAPI:
 
     def get_by(self, exp_days: int = settings.exp_days) -> list[_element_in_schema]:
         params = {QUERY_STRING_SEARCH_BY_EXP_DAYS: exp_days}
-
         response = requests.get(self._url, auth=BearerAuth(self._access_token), params=params)
         try:
             if response.ok:
-                data_for_list = {
-                    self._attr_for_list_out_schema: [self._element_in_schema(**e) for e in response.json()],
-                }
-                return self._element_in_list_schema(**data_for_list).products
-            if response.status_code == 401:
+                data = self._element_in_list_schema.model_validate(response.json())
+                return getattr(data, self._attr_for_list_out_schema)
+            elif response.status_code == 401:
                 raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
             else:
-                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {response.text}")
+                raise self._main_exc(f"{self._main_message_error}. {MESSAGE_GET_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except (ValidationError, self._main_exc) as e:
             raise self._main_exc(str(e))

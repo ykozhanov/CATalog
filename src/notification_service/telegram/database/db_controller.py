@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 
 from .models import TelegramUser
 from .schemas import TelegramUserSchema
-from .crud_util import crud
+from .crud_util import crud, session as S
 
 from src.notification_service.telegram.settings import settings
 
@@ -34,8 +34,15 @@ class TelegramUserController:
 
     @staticmethod
     def delete_user(user_data: TelegramUserSchema) -> None:
-        if user := crud.read(TelegramUser, (user_data.telegram_user_id, user_data.telegram_chat_id)):
-            crud.delete(user)
+        session = S.session()
+        with session as s:
+            user = s.query(TelegramUser).filter(
+                TelegramUser.telegram_user_id == user_data.telegram_user_id,
+                TelegramUser.telegram_chat_id == user_data.telegram_chat_id,
+            ).first()
+            if user:
+                s.delete(user)
+                s.commit()
 
     @staticmethod
     def read_all() -> list[TelegramUser]:

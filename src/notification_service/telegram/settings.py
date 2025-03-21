@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     db_name_notification_service: str
     postgres_host: str
     postgres_port: str
-    backend_url: str
+    backend_url: str = "http://localhost:8000/api"
     exp_days: int
     token_crypt_key: bytes
     notification_hour_utc: str = "14"   # По умолчанию 19:00 по Екатеринбургу

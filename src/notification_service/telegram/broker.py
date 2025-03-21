@@ -1,4 +1,6 @@
 import json
+import logging
+
 from kafka import KafkaConsumer
 
 from src.notification_service.telegram.settings import kafka_settings
@@ -30,11 +32,13 @@ try:
     for message in consumer:
         try:
             if message.topic == kafka_settings.topic_name_new_telegram_user:
+                logging.debug(f"Создание нового пользователя: {message.value}")
                 TelegramUserController.create_or_update_user(message.value)
             elif message.topic == kafka_settings.topic_name_delete_telegram_user:
+                logging.debug(f"Удаление пользователя: {message.value}")
                 TelegramUserController.delete_user(message.value)
         except Exception as e:
-            print(str(e))
+            logging.error(e)
             continue
 finally:
     # Закрытие consumer при завершении работы

@@ -12,4 +12,4 @@ class TelegramUser(Base):
     refresh_jtw_token: Mapped[str] = mapped_column(String, nullable=False)
 
     def __str__(self) -> str:
-        return str(f"User {self.user_id}")
+        return str(f"User {self.telegram_user_id}")

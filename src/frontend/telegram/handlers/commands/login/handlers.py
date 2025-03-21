@@ -70,8 +70,8 @@ def handle_state_waiting_username(message: Message) -> None:
         sm.send_message(text, state=UsersStatesGroup.waiting_password)
 
 
-@exc_handler_decorator
 @telegram_bot.message_handler(state=UsersStatesGroup.waiting_password)
+@exc_handler_decorator
 def handle_state_waiting_password(message: Message) -> None:
     sm = SendMessage(message)
     with MainDataContextmanager(message) as md:
@@ -125,8 +125,8 @@ def handle_state_waiting_email(message: Message) -> None:
             sm.send_message(messages.invalid_email)
 
 
-@exc_handler_decorator
 @telegram_bot.callback_query_handler(state=UsersStatesGroup.register_check_data)
+@exc_handler_decorator
 def handle_callback_register_check_data(message: CallbackQuery) -> None:
     sm = SendMessage(message)
     sm.delete_message()

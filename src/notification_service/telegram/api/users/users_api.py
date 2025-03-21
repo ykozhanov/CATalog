@@ -1,4 +1,5 @@
 import requests
+import json
 from pydantic import ValidationError
 
 from src.notification_service.telegram.api.utils.bearer_util import BearerAuth
@@ -9,7 +10,7 @@ from .exceptions import AuthenticationError, MESSAGE_AUTHENTICATION_ERROR, GetTo
 
 
 class UsersAPI:
-    _api_prefix_token = "/users/token/"
+    _api_prefix_token = "/auth/token/"
 
     @classmethod
     def token(cls, refresh_jwt_token: str) -> UserInSchema:
@@ -21,8 +22,8 @@ class UsersAPI:
                 data = response.json()
                 return UserInSchema(**data)
             elif response.status_code == 401:
-                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {response.text}")
+                raise AuthenticationError(f"{MESSAGE_AUTHENTICATION_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
             else:
-                raise GetTokenError(f"{MESSAGE_GET_TOKEN_ERROR}: {response.text}")
+                raise GetTokenError(f"{MESSAGE_GET_TOKEN_ERROR}: {json.dumps(response.json(), ensure_ascii=False)}")
         except ValidationError as e:
             raise GetTokenError(str(e))

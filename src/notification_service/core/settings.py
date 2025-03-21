@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    debug: bool = False
     redis_hostname: str
     redis_port: int
     redis_db: int
