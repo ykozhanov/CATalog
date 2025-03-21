@@ -120,7 +120,7 @@ docker compose up
 
 ## Используемые инструменты
 - [Python](https://www.python.org/) как основной язык программирования;
-- [FastAPI](https://flask.palletsprojects.com//) как backend сервиса;
+- [FastAPI](https://flask.palletsprojects.com/) как backend сервиса;
 - [PostreSQL](https://www.postgresql.org/) как база данных;
 - [SQLAlchemy 2.0](https://www.sqlalchemy.org/) как ORM инструмент;
 - [Alembic](https://alembic.sqlalchemy.org/en/latest/) как инструмент миграций базы данных;
