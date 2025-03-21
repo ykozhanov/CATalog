@@ -46,12 +46,10 @@ def handle_ask_logout(message: CallbackQuery) -> None:
     if message.data == y_or_n.callback_answer_yes:
         with MainDataContextmanager(message) as md:
             md.user = None
-
         logging.debug(f"msg_data: user_id = {msg_data.user_id} | chat_id = {msg_data.chat_id}")
-
         UserController(telegram_user_id=msg_data.user_id).delete_user()
         UserSubject(user_id=msg_data.user_id, chat_id=msg_data.chat_id).delete_user()
-        sm.send_message(messages.callback_yes, finish_state=True)
+        sm.send_message(messages.callback_yes, finish_state=True, delete_reply_keyboard=True)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(messages.callback_no, finish_state=True)
     else:

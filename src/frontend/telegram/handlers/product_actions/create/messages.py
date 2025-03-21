@@ -9,6 +9,13 @@ MAX_LEN_NOTE = 500
 
 class ProductCreateActionMessages:
     @property
+    def not_categories(self) -> str:
+        return (
+            "У вас пока нет ни одной категории для создания товара.\n\n"
+            "Создайте новую категорию или выберите другое действие /help"
+                )
+
+    @property
     def input_name(self) -> str:
         return f"Введите название нового товара (не более {MAX_LEN_NAME} символов):"
 
@@ -89,7 +96,7 @@ class ProductCreateActionTemplates:
             f"\t\t\t*Единица измерения*: {unit}\n"\
             f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else VIEW_NONE}\n"\
             f"\t\t\t*Примечание*: {note if note else VIEW_NONE}\n"\
-            f"\t\t\t*Категория*: {category}\n\n"\
+            f"\t\t\t*Категория*: {category if category else VIEW_NONE}\n\n"\
             "Всё верно?"
 
     @staticmethod

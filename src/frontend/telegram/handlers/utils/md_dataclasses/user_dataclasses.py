@@ -17,6 +17,7 @@ class ProductDataclass:
     exp_date_month: int | None = None
     exp_date_day: int | None = None
     note: str | None = None
+    list_categories: list[tuple[str, str]] | None = None
     category_id: int | None = None
     category_name: str | None = None
 

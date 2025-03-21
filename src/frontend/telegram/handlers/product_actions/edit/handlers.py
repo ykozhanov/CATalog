@@ -295,27 +295,32 @@ def handle_product_update_ask_choice_category(message: CallbackQuery):
     sm = SendMessage(message)
     sm.delete_message()
     if message.data == y_or_n.callback_answer_yes:
+        text = messages.choice_category
+        state = ProductUpdateStatesGroup.waiting_choice_category
         inline_keyboard = get_inline_categories(message)
-        sm.send_message(
-            messages.choice_category,
-            state=ProductUpdateStatesGroup.waiting_choice_category,
-            inline_keyboard=inline_keyboard,
-        )
+        if not inline_keyboard:
+            text = messages.empty_category
+            state = ProductUpdateStatesGroup.ask_choice_category
+            inline_keyboard = [("Далее", y_or_n.callback_answer_no)]
+        sm.send_message(text, state=state, inline_keyboard=inline_keyboard)
     elif message.data == y_or_n.callback_answer_no:
         with MainDataContextmanager(message) as md:
             categories = md.categories
             category_id = md.old_product.category_id
-            if (category := get_category(categories, category_id)) is None:
-                return sm.send_message(main_m.something_went_wrong, finish_state=True)
-            md.product.category_id = category.id
-            md.product.category_name = category.name
+        category = get_category(categories, category_id)
+        with MainDataContextmanager(message) as md:
+            md.product.category_id = category.id if category else None
+            md.product.category_name = category.name if category else None
             text = templates.check_md(
                     name=escape_markdown(md.product.name),
                     unit=escape_markdown(md.product.unit),
                     quantity=md.product.quantity,
                     exp_date=md.product.exp_date,
                     note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
-                    category=escape_markdown(md.product.category_name),
+                    category=(
+                        escape_markdown(md.product.category_name) if md.product.category_name is not None
+                        else md.product.category_name
+                    ),
                 )
         sm.send_message(
             text,
@@ -342,7 +347,10 @@ def handle_product_update_waiting_category(message: CallbackQuery):
                     quantity=md.product.quantity,
                     exp_date=md.product.exp_date,
                     note=escape_markdown(md.product.note) if md.product.note is not None else md.product.note,
-                    category=escape_markdown(md.product.category_name),
+                    category=(
+                        escape_markdown(md.product.category_name) if md.product.category_name is not None
+                        else md.product.category_name
+                    ),
                 )
         sm.send_message(
             text,

@@ -20,4 +20,4 @@ def get_inline_paginator_list(
         add_create=add_create,
     )
     buttons = ph.get_buttons_for_page(attrs=attrs_for_template, template=template, page=page)
-    return ph.get_inline_keyboard(page_data=buttons)
+    return ph.get_inline_keyboard(page_data=buttons, page=page)

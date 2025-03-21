@@ -82,6 +82,10 @@ class ProductUpdateActionMessages:
         return "Выберите категорию:"
 
     @property
+    def empty_category(self) -> str:
+        return "У вас нет ни одной категории."
+
+    @property
     def try_again(self) -> str:
         return "Попробовать снова?"
 
@@ -106,7 +110,7 @@ class ProductUpdateActionTemplates:
             f"\t\t\t*Единица измерения*: {unit}\n"\
             f"\t\t\t*Срок годности (до)*: {exp_date.strftime(DISPLAY_DATE_FORMATE) if exp_date else VIEW_NONE}\n"\
             f"\t\t\t*Примечание*: {note if note else VIEW_NONE}\n"\
-            f"\t\t\t*Категория*: {category}\n\n"\
+            f"\t\t\t*Категория*: {category if category else VIEW_NONE}\n\n"\
             "Всё верно?"
 
     @staticmethod

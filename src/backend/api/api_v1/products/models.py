@@ -23,7 +23,7 @@ class Product(Base):
     exp_date: Mapped[date] = mapped_column(Date, nullable=True)
     note: Mapped[str] = mapped_column(String(length=500), nullable=True)
     created_at: Mapped[date] = mapped_column(Date, default=func.current_date())
-    category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
     profile_id: Mapped[int] = mapped_column(Integer, ForeignKey("profiles.id"))
 
     category: Mapped["Category"] = relationship("Category", back_populates="products", lazy="joined")

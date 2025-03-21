@@ -2,7 +2,7 @@ class KeyboardListActions:
 
     @property
     def action_get_all_products(self) -> str:
-        return "Список продуктов 🍱"
+        return "Список товаров 🍱"
 
     @property
     def action_get_all_categories(self) -> str:

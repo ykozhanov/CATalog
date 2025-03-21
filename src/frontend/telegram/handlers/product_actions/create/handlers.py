@@ -14,7 +14,7 @@ from src.frontend.telegram.handlers.utils import (
 )
 from src.frontend.telegram.handlers.utils.md_dataclasses import ProductDataclass
 from src.frontend.telegram.bot.keyboards import KeyboardYesOrNo
-from src.frontend.telegram.bot.states import ProductsStatesGroup
+from src.frontend.telegram.bot.states import ProductsStatesGroup, CategoriesStatesGroup
 from src.frontend.telegram.api import ProductsAPI
 from src.frontend.telegram.api.products.exceptions import ProductError
 from src.frontend.telegram.api.products.exceptions import MESSAGE_PRODUCT_ERROR
@@ -42,36 +42,75 @@ y_or_n = KeyboardYesOrNo()
     func=lambda m: m.data == PaginatorListHelper.CALLBACK_CREATE,
     state=ProductsStatesGroup.products,
 )
+@exc_handler_decorator
+@check_authentication_decorator
 def handle_paginator_create_new_product(message: CallbackQuery):
-    with MainDataContextmanager(message) as md:
-        md.product = ProductDataclass()
+    logging.info(f"Старт 'handle_paginator_create_new_product'")
     sm = SendMessage(message)
     sm.delete_message()
+    logging.debug(f"user_id: {sm.msg_data.user_id}, chat_id: {sm.msg_data.chat_id}")
+    categories = get_inline_categories(message)
+    with MainDataContextmanager(message) as md:
+        md.product = ProductDataclass()
+        md.product.list_categories = categories
+        logging.debug(f"md.product: {md.product}")
+    logging.debug(f"categories: {categories}")
+    if not categories:
+        create_category_btn = [(PaginatorListHelper.CREATE_TEXT, PaginatorListHelper.CALLBACK_CREATE)]
+        logging.info(f"Конец 'handle_paginator_create_new_product'")
+        return sm.send_message(
+            messages.not_categories,
+            state=CategoriesStatesGroup.categories,
+            inline_keyboard=create_category_btn,
+        )
     sm.send_message(messages.input_name, state=ProductCreateStatesGroup.waiting_input_name)
+    logging.info(f"Конец 'handle_paginator_create_new_product'")
 
 
 @telegram_bot.callback_query_handler(state=ProductCreateStatesGroup.ask_add_new)
+@exc_handler_decorator
+@check_authentication_decorator
 def handle_ask_add_new_product(message: CallbackQuery) -> None:
+    logging.info(f"Старт 'handle_ask_add_new_product'")
     sm = SendMessage(message)
     sm.delete_message()
+    logging.debug(f"user_id: {sm.msg_data.user_id}, chat_id: {sm.msg_data.chat_id}")
     if message.data == y_or_n.callback_answer_yes:
+        categories = get_inline_categories(message)
         with MainDataContextmanager(message) as md:
             md.product = ProductDataclass()
+            md.product.list_categories = categories
+            logging.debug(f"md.product: {md.product}")
+        logging.debug(f"categories: {categories}")
+        if not categories:
+            create_category_btn = [(PaginatorListHelper.CREATE_TEXT, PaginatorListHelper.CALLBACK_CREATE)]
+            logging.info(f"Конец 'handle_ask_add_new_product'")
+            return sm.send_message(
+                messages.not_categories,
+                state=CategoriesStatesGroup.categories,
+                inline_keyboard=create_category_btn,
+            )
         sm.send_message(messages.input_name, state=ProductCreateStatesGroup.waiting_input_name)
     elif message.data == y_or_n.callback_answer_no:
         sm.send_message(main_m.to_help, finish_state=True)
     else:
         sm.send_message(main_m.something_went_wrong, finish_state=True)
+    logging.info(f"Конец 'handle_ask_add_new_product'")
 
 
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_name)
 def handle_product_create_waiting_input_name(message: Message):
+    logging.info(f"Старт 'handle_product_create_waiting_input_name'")
     sm = SendMessage(message)
+    logging.debug(f"user_id: {sm.msg_data.user_id}, chat_id: {sm.msg_data.chat_id}")
     if len(message.text) > MAX_LEN_NAME:
+        logging.info(f"Конец 'handle_product_create_waiting_input_name'")
         return sm.send_message(templates.error_max_len(MAX_LEN_NAME))
     with MainDataContextmanager(message) as md:
         md.product.name = message.text
+        logging.debug(f"md.product: {md.product}")
     sm.send_message(messages.input_unit, state=ProductCreateStatesGroup.waiting_input_unit)
+    logging.info(f"Конец 'handle_product_create_waiting_input_name'")
 
 
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_unit)
@@ -88,7 +127,7 @@ def handle_product_create_waiting_input_unit(message: Message):
 def handle_product_create_waiting_input_quantity(message: Message):
     sm = SendMessage(message)
     try:
-        if (quantity := float(message.text.replace(",", "."))) < 0:
+        if (quantity := float(message.text.replace(",", "."))) <= 0:
             raise ValueError()
     except ValueError:
         return sm.send_message(messages.error_quantity)
@@ -144,7 +183,7 @@ def handle_product_create_waiting_input_month(message: Message):
 
 
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_year)
-# @exc_handler_decorator
+@exc_handler_decorator
 def handle_product_create_waiting_input_year(message: Message):
     logging.info(f"Старт 'handle_product_create_waiting_input_year'")
     sm = SendMessage(message)
@@ -155,6 +194,7 @@ def handle_product_create_waiting_input_year(message: Message):
         return sm.send_message(messages.error_year)
     else:
         with MainDataContextmanager(message) as md:
+            logging.debug(f"md.product: {md.product}")
             md.product.exp_date_year = year
             day = md.product.exp_date_day
             month = md.product.exp_date_month
@@ -176,12 +216,21 @@ def handle_product_create_waiting_input_year(message: Message):
 @exc_handler_decorator
 @check_authentication_decorator
 def handle_product_create_ask_input_note(message: CallbackQuery):
+    logging.info(f"Старт 'handle_product_create_ask_input_note'")
     sm = SendMessage(message)
     sm.delete_message()
+    with MainDataContextmanager(message) as md:
+        logging.debug(f"md.product: {md.product}")
+        categories = md.product.list_categories
+        logging.debug(f"md.product.list_categories: {md.product.list_categories}")
+    if categories is None:
+        logging.debug(f"categories: {categories}")
+        logging.info(f"Конец 'handle_product_create_ask_input_note'")
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
     if message.data == y_or_n.callback_answer_yes:
         sm.send_message(messages.input_note, state=ProductCreateStatesGroup.waiting_input_note)
     elif message.data == y_or_n.callback_answer_no:
-        inline_keyboard = get_inline_categories(message)
+        inline_keyboard = categories
         sm.send_message(
             text=messages.choice_category,
             state=ProductCreateStatesGroup.waiting_choice_category,
@@ -189,6 +238,7 @@ def handle_product_create_ask_input_note(message: CallbackQuery):
         )
     else:
         sm.send_message(text=main_m.something_went_wrong, finish_state=True)
+    logging.info(f"Конец 'handle_product_create_ask_input_note'")
 
 
 @telegram_bot.message_handler(state=ProductCreateStatesGroup.waiting_input_note)
@@ -202,7 +252,10 @@ def handle_product_create_waiting_input_note(message: Message):
         md.product.note = message.text
         category_id = md.product.category_id
         category_name = md.product.category_name
-    inline_keyboard = get_inline_categories(message)
+        categories = md.product.list_categories
+    if categories is None:
+        return sm.send_message(main_m.something_went_wrong, finish_state=True)
+    inline_keyboard = categories
     if category_id is None or category_name is None:
         sm.send_message(
             messages.choice_category,

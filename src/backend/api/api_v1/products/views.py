@@ -16,6 +16,7 @@ from src.backend.core.response.schemas import ErrorMessageSchema
 from src.backend.core.database.models import User, Base
 from src.backend.core.exceptions import ForbiddenError
 from src.backend.core.database import redis_cache
+from src.backend.settings import CACHE_TIME_SEC
 
 from .schemas import ProductInSchema, ProductOutSchema, ProductListOutSchema
 from .models import Product
@@ -65,7 +66,7 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
         pattern = rf"(?i).*{re.escape(name)}.*"
         filters = {"name": QUERY_STRING_SEARCH_BY_NAME, "profile_id": current_user.profile.id}
         data = crud.re(model=self.model, main_attr=QUERY_STRING_SEARCH_BY_NAME, filters=filters, pattern=pattern)
-        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
+        redis_cache.setex(cache_key, CACHE_TIME_SEC, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
         return [self.element_out_schema.model_validate(e) for e in data]
 
     def _get_products_by_category_id(self, category_id: int, current_user: User) -> list[element_out_schema]:
@@ -78,7 +79,7 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
                 self.model.category_id == category_id,
                 self.model.profile_id == current_user.profile.id,
             ).all()
-        redis_cache.set(cache_key, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
+        redis_cache.setex(cache_key, CACHE_TIME_SEC, self.get_json_list_for_cache(model=self.element_out_schema, data=data))
         return [self.element_out_schema.model_validate(e) for e in data]
 
     def _get_products_by_exp_days(self, exp_days: int, current_user: User) -> list[element_out_schema]:
@@ -123,13 +124,9 @@ class ProductsMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             new_element_model = self.model(profile_id=current_user.profile.id, **new_element_validated.model_dump())
             self.del_cache_by_name_or_category_id(
                 current_user,
-                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                category_id=new_element_model.category_id,
-            )
-            self.del_cache_by_name_or_category_id(
-                current_user,
-                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                prefix=self.attr_for_list_out_schema,
                 name=new_element_model.name,
+                category_id=new_element_model.category_id,
             )
             new_element = crud.create(new_element_model)
         except (ValidationError, IntegrityDBError) as e:
@@ -143,6 +140,7 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
     element_in_schema = ProductInSchema
     element_out_schema = ProductOutSchema
     element_list_out_schema = ProductListOutSchema
+    attr_for_list_out_schema = "products"
 
     @login_jwt_required_decorator
     def get(self, current_user: User, product_id: int) -> tuple[Response, int]:
@@ -175,13 +173,9 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             )
             self.del_cache_by_name_or_category_id(
                 current_user,
-                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                category_id=old_element.category_id,
-            )
-            self.del_cache_by_name_or_category_id(
-                current_user,
-                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                prefix=self.attr_for_list_out_schema,
                 name=old_element.name,
+                category_id=old_element.category_id,
             )
             if update_element:
                 result = jsonify(dict(self.element_out_schema.model_validate(update_element))), 200
@@ -207,13 +201,9 @@ class ProductsByIDMethodView(RedisCacheProductMixin, JWTMixin, MethodView):
             crud.delete(self.model, pk=old_element.id)
             self.del_cache_by_name_or_category_id(
                 current_user,
-                prefix=QUERY_STRING_SEARCH_BY_CATEGORY_ID,
-                category_id=old_element.category_id,
-            )
-            self.del_cache_by_name_or_category_id(
-                current_user,
-                prefix=QUERY_STRING_SEARCH_BY_NAME,
+                prefix=self.attr_for_list_out_schema,
                 name=old_element.name,
+                category_id=old_element.category_id,
             )
         except ForbiddenError as e:
             return jsonify(ErrorMessageSchema(message=str(e)).model_dump()), 403

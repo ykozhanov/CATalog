@@ -46,6 +46,7 @@ class FormatterTemplateDataAttrs:
 
 class PaginatorListHelper:
     CALLBACK_CREATE = "create"
+    CREATE_TEXT = "Создать 🆕"
     CALLBACK_PAGE = "page"
 
     def __init__(self, elements: list[T], prefix_element: str, items_per_page: int = 5, add_create: bool = True):
@@ -59,23 +60,25 @@ class PaginatorListHelper:
     def _get_paginator_keys(self, page: int) -> list[InlineKeyboardButton]:
         paginator_keys = []
         start = 1
-        end = self._page_count
+        page_count = self._page_count
+        end = page_count
 
-        if page > 1:
-            # Добавляем кнопку "В начало"
-            paginator_keys.append(InlineKeyboardButton(str(start), callback_data=f"{self.CALLBACK_PAGE}#{start}"))
-            # Добавляем кнопку "Предыдущая"
-            paginator_keys.append(InlineKeyboardButton(str(page - 1), callback_data=f"{self.CALLBACK_PAGE}#{page - 1}"))
+        if page_count > 1:
+            if page > 1:
+                # Добавляем кнопку "В начало"
+                paginator_keys.append(
+                    InlineKeyboardButton(f"<< {start}", callback_data=f"{self.CALLBACK_PAGE}#{start}"))
+                # Добавляем кнопку "Предыдущая"
+                paginator_keys.append(
+                    InlineKeyboardButton(f"< {page - 1}", callback_data=f"{self.CALLBACK_PAGE}#{page - 1}"))
             # Добавляем текущую страницу
-            paginator_keys.append(InlineKeyboardButton(str(page), callback_data=f"{self.CALLBACK_PAGE}#{page}"))
+            paginator_keys.append(InlineKeyboardButton(f"{page}", callback_data=f"{self.CALLBACK_PAGE}#{page}"))
 
-        # Добавляем кнопку "Следующая"
         if page < end:
-            paginator_keys.append(InlineKeyboardButton(str(page + 1), callback_data=f"{self.CALLBACK_PAGE}#{page + 1}"))
-
-        # Добавляем кнопку "В конец"
-        if page < end:
-            paginator_keys.append(InlineKeyboardButton(str(end), callback_data=f"{self.CALLBACK_PAGE}#{end}"))
+            # Добавляем кнопку "Следующая"
+            paginator_keys.append(InlineKeyboardButton(f"{page + 1} >", callback_data=f"{self.CALLBACK_PAGE}#{page + 1}"))
+            # Добавляем кнопку "В конец"
+            paginator_keys.append(InlineKeyboardButton(f"{end} >>", callback_data=f"{self.CALLBACK_PAGE}#{end}"))
 
         return paginator_keys
 
@@ -96,7 +99,7 @@ class PaginatorListHelper:
             data_for_template[attr] = formatted_attr_data
         return data_for_template
 
-    def get_buttons_for_page(self, attrs: list[str], template: str, page: int = 1) -> list[InlineKeyboardButton]:
+    def get_buttons_for_page(self, attrs: list[str], template: str, page: int) -> list[InlineKeyboardButton]:
         get_elements = self._get_list_elements_for_page(page)
         buttons = []
         for elem in get_elements:
@@ -107,11 +110,11 @@ class PaginatorListHelper:
         del for_template
         return buttons
 
-    def get_inline_keyboard(self, page_data: list[InlineKeyboardButton], page: int = 1) -> InlineKeyboardMarkup:
+    def get_inline_keyboard(self, page_data: list[InlineKeyboardButton], page: int) -> InlineKeyboardMarkup:
         keyboard = InlineKeyboardMarkup()
         for b in page_data:
             keyboard.row(b)
         keyboard.row(*self._get_paginator_keys(page))
         if self._add_create:
-            keyboard.row(InlineKeyboardButton(text="Создать 🆕", callback_data=self.CALLBACK_CREATE))
+            keyboard.row(InlineKeyboardButton(text=self.CREATE_TEXT, callback_data=self.CALLBACK_CREATE))
         return keyboard

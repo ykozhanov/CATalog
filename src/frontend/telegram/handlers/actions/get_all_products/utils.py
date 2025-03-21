@@ -5,8 +5,10 @@ TEMPLATE_BUTTON_PRODUCT = "🍱 {name}: {quantity} {unit} | Годен до: {ex
 ATTRS_FOR_TEMPLATE_PRODUCT = ["name", "quantity", "unit", "exp_date"]
 
 
-def get_category(categories: list[CategoryInSchema], category_id: int) -> CategoryInSchema | None:
+def get_category(categories: list[CategoryInSchema], category_id: int | None) -> CategoryInSchema | None:
     category = None
+    if category_id is None:
+        return None
     for c in categories:
         if c.id == category_id:
             category = c

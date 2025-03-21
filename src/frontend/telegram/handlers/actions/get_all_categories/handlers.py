@@ -72,6 +72,7 @@ def handle_action_get_all_categories(message: Message) -> None:
 )
 def handle_state_ask_add_new_category_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     sm.send_message(main_m.to_help, finish_state=True)
 
 

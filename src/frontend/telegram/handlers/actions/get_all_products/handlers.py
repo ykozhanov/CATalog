@@ -69,6 +69,7 @@ def handle_action_get_all_products(message: Message) -> None:
 )
 def handle_state_ask_add_new_product_no(message: CallbackQuery) -> None:
     sm = SendMessage(message)
+    sm.delete_message()
     sm.send_message(main_m.to_help, finish_state=True)
 
 
@@ -110,17 +111,14 @@ def handle_product_element(message: CallbackQuery):
     logging.debug(f"product_index: {product_index}")
     product = products[product_index]
     category = get_category(categories, product.category_id)
-    if category is not None:
-        text = templates.detail_md(
-            name=escape_markdown(product.name),
-            unit=escape_markdown(product.unit),
-            quantity=product.quantity,
-            exp_date=product.exp_date,
-            note=escape_markdown(product.note) if product.note is not None else product.note,
-            category=escape_markdown(category.name),
-        )
-        inline_keyboard = KeyboardActionsByElement(page, product_index).get_inline_keyboard_product()
-        sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")
-    else:
-        sm.send_message(main_m.something_went_wrong, finish_state=True)
+    text = templates.detail_md(
+        name=escape_markdown(product.name),
+        unit=escape_markdown(product.unit),
+        quantity=product.quantity,
+        exp_date=product.exp_date,
+        note=escape_markdown(product.note) if product.note is not None else product.note,
+        category=escape_markdown(category.name) if category else category,
+    )
+    inline_keyboard = KeyboardActionsByElement(page, product_index).get_inline_keyboard_product()
+    sm.send_message(text, inline_keyboard=inline_keyboard, parse_mode="Markdown")
     logging.info(f"Конец 'handle_product_element'")
