@@ -33,7 +33,7 @@ def push_notification_telegram_exp_products():
             if products := get_products(a_token):
                 bot.send_message(
                     chat_id=user.telegram_chat_id,
-                    text=f"""Список продуктов у которых скоро заканчивается срок годности:
-                    \t{"\n\t".join(p.name for p in products)}
-                    """
+                    text="Список продуктов у которых скоро заканчивается срок годности:\n\n{}"
+                    .format("\n\t\t\t".join(p.name for p in products))
                 )
+

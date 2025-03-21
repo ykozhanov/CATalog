@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     backend_url: str
     exp_days: int
     token_crypt_key: bytes
+    notification_hour_utc: str = "14"   # По умолчанию 19:00 по Екатеринбургу
+    notification_minutes_utc: str = "0"
 
     @field_validator("token_crypt_key", mode="before")
     def convert_to_bytes(cls, value: str) -> bytes:
