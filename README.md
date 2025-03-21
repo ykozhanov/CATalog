@@ -124,7 +124,9 @@ docker compose up
 - [PostreSQL](https://www.postgresql.org/) как база данных;
 - [SQLAlchemy 2.0](https://www.sqlalchemy.org/) как ORM инструмент;
 - [Alembic](https://alembic.sqlalchemy.org/en/latest/) как инструмент миграций базы данных;
-- [Celery](https://docs.celeryq.dev/) как инструмент выполнения фоновых задач (уведомлений о товарах у которых заканчивается срок годности).
+- [Celery](https://docs.celeryq.dev/) как инструмент выполнения фоновых задач (уведомлений о товарах у которых заканчивается срок годности);
+- [Redis](https://github.com/redis/redis) как брокер сообщений для фоновых задач;
+- [Docker](https://www.docker.com/) для контейнеризации приложения.
 
 
 ## Контакты
