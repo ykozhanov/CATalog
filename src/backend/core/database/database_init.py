@@ -8,9 +8,12 @@ from sqlalchemy.orm import sessionmaker, scoped_session, Session as SessionType
 
 from src.backend.core.exceptions import ENVError
 from src.backend.core.exceptions.messages import MESSAGE_ENV_ERROR
+from src.backend.settings import TESTING
 
 
 def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
+    if TESTING:
+        return "sqlite:///:memory:"
     return "postgresql://{username}:{password}@{host}:{port}/{dbname}".format(
         username=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
@@ -18,6 +21,7 @@ def get_db_path(host: str | None = None, port: str | int | None = None) -> str:
         port=port if port else os.getenv("POSTGRES_PORT"),
         dbname=os.getenv("DB_NAME_BACKEND"),
     )
+
 
 engine = create_engine(get_db_path())
 

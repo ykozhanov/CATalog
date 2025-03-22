@@ -35,7 +35,7 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
     def read(self, model: type[T], pk: int | str | tuple) -> T | None:
         with self._session_generator() as session:
             try:
-                return session.query(model).get(pk)
+                return session.get(model, pk)
             except Exception as e:
                 session.rollback()
                 raise e
@@ -43,14 +43,14 @@ class SQLAlchemySession(DBSessionCRUDInterface, DBSessionWhereInterface, DBSessi
     def update(self, model: type[T], obj_data: dict[str, Any], pk: int | str | tuple) -> T:
         with self._session_generator() as session:
             try:
-                obj = session.query(model).get(pk)
+                obj = session.get(model, pk)
                 if obj is None:
                     raise NotFoundInDBError()
                 for key, value in obj_data.items():
                     setattr(obj, key, value)
                 if self._autocommit:
                     session.commit()
-                return session.query(model).get(pk)
+                return session.get(model, pk)
             except Exception as e:
                 session.rollback()
                 raise e
