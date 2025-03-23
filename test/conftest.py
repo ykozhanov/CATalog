@@ -19,7 +19,7 @@ from src.backend.core.database.database_init import engine
 from src.backend.api.api_v1.models import Base
 from src.backend.core.decorators.base64_login import AUTH_HEADER
 
-from test.utils import login_credential_base64_encode, set_basic_token_prefix, APIPathsEnum
+from test.utils import login_credential_base64_encode, set_basic_token_prefix, APIPathsEnum, set_bearer_token_prefix
 from test.models import JWTTokens, test_user
 
 
@@ -54,3 +54,13 @@ def jwt_tokens(client) -> JWTTokens:
     )
 
     return response_tokens
+
+
+@pytest.fixture
+def bearer_access_token(jwt_tokens) -> str:
+    return set_bearer_token_prefix(jwt_tokens.access_token)
+
+
+@pytest.fixture
+def access_token_headers(bearer_access_token) -> dict[str, str]:
+    return {AUTH_HEADER: bearer_access_token}
