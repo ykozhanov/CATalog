@@ -1,0 +1,121 @@
+# Игнорировать материалы
+Материалы/
+
+# Игнорировать байт-код и оптимизированные файлы
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Игнорировать настройки IDE
+.idea/
+
+# Игнорировать C расширения
+*.so
+
+# Игнорировать файлы и каталоги, связанные с дистрибуцией и упаковкой
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Игнорировать файлы PyInstaller
+*.manifest
+*.spec
+
+# Игнорировать логи установщиков
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Игнорировать отчеты о тестах и покрытиях
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.unittests.xml
+
+# Игнорировать переводы
+*.mo
+*.pot
+
+# Игнорировать файлы Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Игнорировать файлы Flask
+instance/
+.webassets-cache/
+
+# Игнорировать файлы Scrapy
+.scrapy/
+
+# Игнорировать документацию Sphinx
+docs/_build/
+
+# Игнорировать файлы PyBuilder
+target/
+
+# Игнорировать Jupyter Notebook
+.ipynb_checkpoints/
+
+# Игнорировать настройки IPython
+profile_default/
+ipython_config.py
+
+# Игнорировать pyenv
+.python-version
+
+# Игнорировать pipenv
+#Pipfile.lock
+
+# Игнорировать PEP 582
+__pypackages__/
+
+# Игнорировать файлы Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Игнорировать файлы SageMath
+*.sage.py
+
+# Игнорировать окружения
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+cert/
+
+# Игнорировать настройки Spyder
+.spyderproject/
+.spyproject/
+
+# Игнорировать настройки Rope
+.ropeproject/
+
+#
+
